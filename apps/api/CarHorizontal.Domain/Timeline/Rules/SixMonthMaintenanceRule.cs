@@ -11,7 +11,8 @@ public sealed class SixMonthMaintenanceRule : IRule
     public const string RuleCode = "SixMonthMaintenance";
     public string Code => RuleCode;
 
-    public bool Applies(RuleContext context) => context.Vehicle is not null;
+    public bool Applies(RuleContext context) =>
+        context.Vehicle is not null && context.Program is null;
 
     public IEnumerable<TimelineEvent> Generate(RuleContext context)
     {

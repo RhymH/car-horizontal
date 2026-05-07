@@ -1,4 +1,5 @@
 using CarHorizontal.Domain.Common;
+using CarHorizontal.Domain.Entities.Catalog;
 
 namespace CarHorizontal.Domain.Entities.Timeline;
 
@@ -14,4 +15,6 @@ public class TimelineEvent : OrganizationEntityBase
     public string? GeneratedFromRule { get; set; }
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? ItemCode { get; set; }
+    public MaintenanceItemSeverity? Severity { get; set; }
 }

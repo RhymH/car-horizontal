@@ -30,6 +30,7 @@ public static class InfrastructureServiceCollectionExtensions
                 sp.GetRequiredService<SoftDeleteInterceptor>());
         });
 
+        services.AddScoped<IRule, ProgramExecutorRule>();
         services.AddScoped<IRule, SixMonthMaintenanceRule>();
         services.AddScoped<IRule, AnnualTechnicalInspectionRule>();
         services.AddScoped<IRule, TireSwapRule>();

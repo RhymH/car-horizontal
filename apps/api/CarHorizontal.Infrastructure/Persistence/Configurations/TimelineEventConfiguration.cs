@@ -13,9 +13,11 @@ public class TimelineEventConfiguration : IEntityTypeConfiguration<TimelineEvent
         builder.Property(t => t.Title).IsRequired().HasMaxLength(200);
         builder.Property(t => t.Description).HasMaxLength(2000);
         builder.Property(t => t.GeneratedFromRule).HasMaxLength(120);
+        builder.Property(t => t.ItemCode).HasMaxLength(60);
         builder.Property(t => t.Kind).HasConversion<int>();
         builder.Property(t => t.Status).HasConversion<int>();
         builder.Property(t => t.Source).HasConversion<int>();
+        builder.Property(t => t.Severity).HasConversion<int?>();
         builder.HasIndex(t => new { t.OrganizationId, t.VehicleId, t.DueAt });
         builder.HasIndex(t => new { t.OrganizationId, t.Status, t.DueAt });
     }

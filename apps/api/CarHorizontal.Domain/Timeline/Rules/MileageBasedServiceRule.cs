@@ -12,7 +12,8 @@ public sealed class MileageBasedServiceRule : IRule
     public const int Interval = 15_000;
     public string Code => RuleCode;
 
-    public bool Applies(RuleContext context) => context.Vehicle.CurrentMileage >= 0;
+    public bool Applies(RuleContext context) =>
+        context.Vehicle.CurrentMileage >= 0 && context.Program is null;
 
     public IEnumerable<TimelineEvent> Generate(RuleContext context)
     {
