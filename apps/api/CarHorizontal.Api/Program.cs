@@ -81,6 +81,12 @@ builder.Services.AddCarHorizontalCatalog();
 builder.Services.AddCarHorizontalMileageCheck();
 builder.Services.AddCarHorizontalDashboard();
 
+builder.Services.AddCarHorizontalHangfire(builder.Configuration);
+builder.Services.AddScoped<CarHorizontal.Api.Jobs.TimelineRegenerationJob>();
+builder.Services.AddScoped<CarHorizontal.Api.Jobs.EnsureRemindersJob>();
+builder.Services.AddScoped<CarHorizontal.Api.Jobs.DispatchDueRemindersJob>();
+builder.Services.AddScoped<CarHorizontal.Api.Jobs.LoyaltyRecomputeJob>();
+
 builder.Services.AddScoped<DevSeeder>();
 
 var app = builder.Build();
@@ -118,5 +124,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<CurrentOrganizationMiddleware>();
 app.MapControllers();
+
+app.UseCarHorizontalHangfire(builder.Configuration);
 
 app.Run();
