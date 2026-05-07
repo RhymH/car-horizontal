@@ -34,6 +34,10 @@ import {
   type MaintenanceTypeApi,
 } from "@/lib/api/maintenance";
 import {
+  defaultItemCodesForType,
+  maintenanceItemCatalog,
+} from "@/lib/api/maintenanceItemCodes";
+import {
   maintenanceFormSchema,
   type MaintenanceFormValues,
 } from "@/lib/schemas/maintenance";
@@ -60,15 +64,17 @@ function todayIso(): string {
 }
 
 function buildDefaults(currentMileage: number): MaintenanceFormValues {
+  const type: MaintenanceTypeApi = "FullService";
   return {
     performedAt: todayIso(),
-    type: "FullService",
+    type,
     description: "",
     mileageAtService: currentMileage,
     cost: undefined,
     mechanicName: "",
     nextDueAt: "",
     nextDueMileage: undefined,
+    itemCodes: [...defaultItemCodesForType[type]],
   };
 }
 
@@ -82,6 +88,7 @@ function toFormValues(r: MaintenanceRecord): MaintenanceFormValues {
     mechanicName: r.mechanicName ?? "",
     nextDueAt: r.nextDueAt ? r.nextDueAt.slice(0, 10) : "",
     nextDueMileage: r.nextDueMileage ?? undefined,
+    itemCodes: r.itemCodes ?? [],
   };
 }
 
@@ -153,6 +160,7 @@ function MaintenanceFormDialogBody({
           nextDueMileage,
           clearNextDueAt: !nextDueAt,
           clearNextDueMileage: nextDueMileage == null,
+          itemCodes: values.itemCodes,
         });
       }
 
@@ -165,6 +173,7 @@ function MaintenanceFormDialogBody({
         mechanicName,
         nextDueAt,
         nextDueMileage,
+        itemCodes: values.itemCodes,
       });
     },
     onSuccess: async (saved) => {
@@ -230,9 +239,16 @@ function MaintenanceFormDialogBody({
                 <Select
                   items={maintenanceTypeLabels}
                   value={field.value}
-                  onValueChange={(v) =>
-                    v && field.onChange(v as MaintenanceTypeApi)
-                  }
+                  onValueChange={(v) => {
+                    if (!v) return;
+                    const next = v as MaintenanceTypeApi;
+                    field.onChange(next);
+                    if (!isEdit) {
+                      form.setValue("itemCodes", [
+                        ...defaultItemCodesForType[next],
+                      ]);
+                    }
+                  }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -298,6 +314,17 @@ function MaintenanceFormDialogBody({
             />
           </Field>
         </div>
+
+        <Controller
+          control={form.control}
+          name="itemCodes"
+          render={({ field }) => (
+            <ItemCodesField
+              value={field.value ?? []}
+              onChange={field.onChange}
+            />
+          )}
+        />
 
         <div className="rounded-md border border-border bg-muted/30">
           <button
@@ -386,6 +413,81 @@ function Field({
       ) : hint ? (
         <span className="text-xs text-muted-foreground">{hint}</span>
       ) : null}
+    </div>
+  );
+}
+
+function ItemCodesField({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const groups = maintenanceItemCatalog.reduce<
+    Record<string, typeof maintenanceItemCatalog>
+  >((acc, item) => {
+    (acc[item.group] ??= []).push(item);
+    return acc;
+  }, {});
+
+  const groupLabels: Record<string, string> = {
+    Engine: "Moteur",
+    Filters: "Filtres",
+    Brakes: "Freinage",
+    Tires: "Pneumatiques",
+    Cooling: "Refroidissement / Clim",
+    Belts: "Courroies",
+    Other: "Autres",
+  };
+
+  const toggle = (code: string) => {
+    if (value.includes(code)) onChange(value.filter((c) => c !== code));
+    else onChange([...value, code]);
+  };
+
+  return (
+    <div className="rounded-md border border-border bg-muted/30 p-3">
+      <div className="flex items-center justify-between pb-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Postes touchés par cette intervention
+        </span>
+        <span className="text-xs text-muted-foreground">
+          {value.length} sélectionné{value.length > 1 ? "s" : ""}
+        </span>
+      </div>
+      <p className="pb-3 text-xs text-muted-foreground">
+        Cochez ce qui a été fait — la timeline se réajustera automatiquement
+        sur ces postes.
+      </p>
+      <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
+        {Object.entries(groups).map(([groupKey, items]) => (
+          <div key={groupKey} className="flex flex-col gap-1.5">
+            <div className="text-xs font-semibold text-muted-foreground">
+              {groupLabels[groupKey] ?? groupKey}
+            </div>
+            {items.map((item) => {
+              const checked = value.includes(item.code);
+              return (
+                <label
+                  key={item.code}
+                  className="flex cursor-pointer items-center gap-2 rounded-sm px-1 py-0.5 text-sm hover:bg-accent/50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggle(item.code)}
+                    className="size-4 rounded border-input text-primary focus:outline-none"
+                  />
+                  <span className={cn(checked && "font-medium")}>
+                    {item.label}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

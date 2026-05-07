@@ -30,6 +30,7 @@ export interface MaintenanceRecord {
   mechanicName: string | null;
   nextDueAt: string | null;
   nextDueMileage: number | null;
+  itemCodes: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -50,6 +51,7 @@ export interface CreateMaintenancePayload {
   mechanicName?: string;
   nextDueAt?: string;
   nextDueMileage?: number;
+  itemCodes?: string[];
 }
 
 export interface UpdateMaintenancePayload {
@@ -63,6 +65,7 @@ export interface UpdateMaintenancePayload {
   nextDueMileage?: number;
   clearNextDueAt?: boolean;
   clearNextDueMileage?: boolean;
+  itemCodes?: string[];
 }
 
 export interface MaintenanceListParams {

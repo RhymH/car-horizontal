@@ -23,6 +23,7 @@ export const maintenanceFormSchema = z
       .int()
       .positive({ error: "Doit être > 0." })
       .optional(),
+    itemCodes: z.array(z.string()),
   })
   .refine(
     (v) => {

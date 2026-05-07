@@ -162,7 +162,8 @@ public class VehicleService : IVehicleService
                 Cost = m.Cost,
                 MechanicName = m.MechanicName,
                 NextDueAt = m.NextDueAt,
-                NextDueMileage = m.NextDueMileage
+                NextDueMileage = m.NextDueMileage,
+                ItemCodes = m.ItemCodes
             })
             .ToListAsync(ct);
 

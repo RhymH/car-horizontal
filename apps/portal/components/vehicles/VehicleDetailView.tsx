@@ -117,6 +117,7 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
     mechanicName: m.mechanicName,
     nextDueAt: m.nextDueAt,
     nextDueMileage: m.nextDueMileage,
+    itemCodes: m.itemCodes ?? [],
     createdAt: m.performedAt,
     updatedAt: m.performedAt,
   });

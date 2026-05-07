@@ -38,6 +38,7 @@ public class VehicleMaintenanceDto
     public string? MechanicName { get; set; }
     public DateTime? NextDueAt { get; set; }
     public int? NextDueMileage { get; set; }
+    public IReadOnlyList<string> ItemCodes { get; set; } = Array.Empty<string>();
 }
 
 public class VehicleTimelineEventDto

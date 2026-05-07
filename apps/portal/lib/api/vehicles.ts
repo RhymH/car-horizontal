@@ -41,6 +41,7 @@ export interface VehicleMaintenance {
   mechanicName: string | null;
   nextDueAt: string | null;
   nextDueMileage: number | null;
+  itemCodes: string[];
 }
 
 export type TimelineEventStatusApi =
