@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { extractApiErrorMessage } from "@/lib/api/errors";
 import { queryKeys } from "@/lib/query/keys";
-import { timelineApi, type TimelineEvent } from "@/lib/api/timeline";
+import { timelineApi } from "@/lib/api/timeline";
 
 export interface SnoozeTimelineDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  event: TimelineEvent | null;
+  event: { id: string; title: string } | null;
 }
 
 export function SnoozeTimelineDialog({
@@ -36,9 +36,14 @@ export function SnoozeTimelineDialog({
     },
     onSuccess: async () => {
       toast.success(`Reporté de ${days} jour(s)`);
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.timeline.all(),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.timeline.all(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.vehicles.all(),
+        }),
+      ]);
       handleOpenChange(false);
     },
     onError: (err) => {

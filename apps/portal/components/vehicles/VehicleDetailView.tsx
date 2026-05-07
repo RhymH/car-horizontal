@@ -10,14 +10,17 @@ import { Button } from "@/components/ui/button";
 import {
   vehiclesApi,
   type VehicleMaintenance,
+  type VehicleTimelineEvent,
 } from "@/lib/api/vehicles";
 import {
   maintenanceApi,
   type MaintenanceRecord,
   type MaintenanceTypeApi,
 } from "@/lib/api/maintenance";
+import { timelineApi } from "@/lib/api/timeline";
 import { queryKeys } from "@/lib/query/keys";
 import { extractApiErrorMessage } from "@/lib/api/errors";
+import { SnoozeTimelineDialog } from "@/components/timeline/SnoozeTimelineDialog";
 import { VehicleHeader } from "@/components/vehicles/VehicleHeader";
 import { VehicleSummaryCard } from "@/components/vehicles/VehicleSummaryCard";
 import { VehicleTimelineSection } from "@/components/vehicles/VehicleTimelineSection";
@@ -39,6 +42,9 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
   >(null);
   const [maintenanceToDelete, setMaintenanceToDelete] =
     useState<MaintenanceRecord | null>(null);
+  const [snoozeTarget, setSnoozeTarget] = useState<VehicleTimelineEvent | null>(
+    null,
+  );
 
   const detail = useQuery({
     queryKey: queryKeys.vehicles.detail(vehicleId),
@@ -56,6 +62,20 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
     },
     onError: (e) =>
       toast.error(extractApiErrorMessage(e, "Suppression impossible.")),
+  });
+
+  const completeTimelineMutation = useMutation({
+    mutationFn: (id: string) => timelineApi.complete(id),
+    onSuccess: async () => {
+      toast.success("Événement marqué comme fait");
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.vehicles.detail(vehicleId),
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.timeline.all() }),
+      ]);
+    },
+    onError: (e) => toast.error(extractApiErrorMessage(e, "Action impossible.")),
   });
 
   const deleteMaintenanceMutation = useMutation({
@@ -132,14 +152,10 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
         <div className="lg:col-span-2 space-y-4">
           <VehicleTimelineSection
             events={vehicle.timelineEvents}
-            onMarkDone={() =>
-              toast.info("Disponible dès l'activation du module Timeline.")
-            }
-            onSnooze={() =>
-              toast.info("Disponible dès l'activation du module Timeline.")
-            }
+            onMarkDone={(e) => completeTimelineMutation.mutate(e.id)}
+            onSnooze={(e) => setSnoozeTarget(e)}
             onSendReminder={() =>
-              toast.info("Disponible dès l'activation du module Messaging.")
+              toast.info("L'envoi de rappel sera disponible avec la Phase 8.")
             }
           />
           <VehicleMaintenanceSection
@@ -192,6 +208,12 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
           mode={maintenanceDialog}
         />
       )}
+
+      <SnoozeTimelineDialog
+        open={snoozeTarget !== null}
+        onOpenChange={(o) => !o && setSnoozeTarget(null)}
+        event={snoozeTarget}
+      />
 
       <ConfirmDialog
         open={!!maintenanceToDelete}
