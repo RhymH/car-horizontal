@@ -26,6 +26,7 @@ import { VehicleHeader } from "@/components/vehicles/VehicleHeader";
 import { VehicleSummaryCard } from "@/components/vehicles/VehicleSummaryCard";
 import { VehicleTimelineSection } from "@/components/vehicles/VehicleTimelineSection";
 import { VehicleMaintenanceSection } from "@/components/vehicles/VehicleMaintenanceSection";
+import { MaintenanceProgramSection } from "@/components/vehicles/MaintenanceProgramSection";
 import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
 import { UpdateMileageDialog } from "@/components/vehicles/UpdateMileageDialog";
 import { MaintenanceFormDialog } from "@/components/maintenance/MaintenanceFormDialog";
@@ -164,6 +165,10 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
           <VehicleSummaryCard vehicle={vehicle} />
         </div>
         <div className="lg:col-span-2 space-y-4">
+          <MaintenanceProgramSection
+            vehicle={vehicle}
+            onMarkDone={() => setMaintenanceDialog({ kind: "create" })}
+          />
           <VehicleTimelineSection
             events={vehicle.timelineEvents}
             onMarkDone={(e) => completeTimelineMutation.mutate(e.id)}
