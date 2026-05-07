@@ -9,7 +9,7 @@ export default function AppLayout({
 }) {
   return (
     <SessionProvider>
-      <div className="flex min-h-svh w-full bg-background">
+      <div className="flex h-svh w-full overflow-hidden bg-background">
         <Sidebar className="hidden lg:flex" />
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar />

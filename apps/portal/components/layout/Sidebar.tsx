@@ -33,7 +33,7 @@ export function Sidebar({ className }: { className?: string }) {
   return (
     <nav
       className={cn(
-        "flex h-full w-64 flex-col gap-1 border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
+        "flex h-full min-h-svh w-64 shrink-0 flex-col gap-1 border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
         className,
       )}
     >
