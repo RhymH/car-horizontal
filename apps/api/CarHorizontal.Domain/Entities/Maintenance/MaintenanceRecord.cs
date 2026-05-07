@@ -13,4 +13,5 @@ public class MaintenanceRecord : OrganizationEntityBase
     public DateTime? NextDueAt { get; set; }
     public int? NextDueMileage { get; set; }
     public string? MechanicName { get; set; }
+    public string[] ItemCodes { get; set; } = Array.Empty<string>();
 }

@@ -19,5 +19,6 @@ public class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.Property(v => v.EngineType).HasConversion<int>();
         builder.HasIndex(v => new { v.OrganizationId, v.LicensePlate }).IsUnique();
         builder.HasIndex(v => new { v.OrganizationId, v.CustomerId });
+        builder.HasIndex(v => v.VehicleModelId);
     }
 }

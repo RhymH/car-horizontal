@@ -1,5 +1,6 @@
 using CarHorizontal.Domain.Common;
 using CarHorizontal.Domain.Entities.Appointments;
+using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Customers;
 using CarHorizontal.Domain.Entities.Files;
 using CarHorizontal.Domain.Entities.Identity;
@@ -33,6 +34,10 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerInteraction> CustomerInteractions => Set<CustomerInteraction>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<VehicleProgramOverride> VehicleProgramOverrides => Set<VehicleProgramOverride>();
+    public DbSet<VehicleModel> VehicleModels => Set<VehicleModel>();
+    public DbSet<MaintenanceProgram> MaintenancePrograms => Set<MaintenanceProgram>();
+    public DbSet<MaintenanceProgramItem> MaintenanceProgramItems => Set<MaintenanceProgramItem>();
     public DbSet<MaintenanceRecord> MaintenanceRecords => Set<MaintenanceRecord>();
     public DbSet<TimelineEvent> TimelineEvents => Set<TimelineEvent>();
     public DbSet<OrganizationTimelineRule> OrganizationTimelineRules => Set<OrganizationTimelineRule>();

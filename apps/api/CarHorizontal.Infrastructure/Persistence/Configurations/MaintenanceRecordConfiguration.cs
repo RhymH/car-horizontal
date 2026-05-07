@@ -14,6 +14,7 @@ public class MaintenanceRecordConfiguration : IEntityTypeConfiguration<Maintenan
         builder.Property(m => m.MechanicName).HasMaxLength(120);
         builder.Property(m => m.Type).HasConversion<int>();
         builder.Property(m => m.Cost).HasColumnType("numeric(12,2)");
+        builder.Property(m => m.ItemCodes).HasColumnType("text[]");
         builder.HasIndex(m => new { m.OrganizationId, m.VehicleId, m.PerformedAt });
     }
 }
