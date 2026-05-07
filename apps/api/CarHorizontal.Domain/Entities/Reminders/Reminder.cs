@@ -1,4 +1,5 @@
 using CarHorizontal.Domain.Common;
+using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Messaging;
 
 namespace CarHorizontal.Domain.Entities.Reminders;
@@ -16,4 +17,6 @@ public class Reminder : OrganizationEntityBase
     public string? ResolvedSubject { get; set; }
     public string? ResolvedBody { get; set; }
     public string? FailureReason { get; set; }
+    public string? ItemCode { get; set; }
+    public MaintenanceItemSeverity? Severity { get; set; }
 }

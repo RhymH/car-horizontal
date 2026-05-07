@@ -15,6 +15,8 @@ public class ReminderConfiguration : IEntityTypeConfiguration<Reminder>
         builder.Property(r => r.ResolvedSubject).HasMaxLength(200);
         builder.Property(r => r.ResolvedBody).HasMaxLength(4000);
         builder.Property(r => r.FailureReason).HasMaxLength(1000);
+        builder.Property(r => r.ItemCode).HasMaxLength(60);
+        builder.Property(r => r.Severity).HasConversion<int?>();
         builder.HasIndex(r => new { r.OrganizationId, r.Status, r.ScheduledAt });
     }
 }

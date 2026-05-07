@@ -1,15 +1,19 @@
+using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Timeline;
 
 namespace CarHorizontal.Infrastructure.Reminders;
 
-/// <summary>
-/// Number of days before <see cref="TimelineEvent.DueAt"/> a Reminder should be
-/// scheduled. Defaults are organization-agnostic for now; per-organization
-/// overrides land with the messaging settings page (T093).
-/// </summary>
 public static class ReminderLeadTimes
 {
     public const int LookaheadDays = 30;
+
+    public static int ForEvent(TimelineEvent ev)
+    {
+        // Critical safety items get a longer lead time (21j) so the customer
+        // has time to schedule the work.
+        if (ev.Severity == MaintenanceItemSeverity.Critical) return 21;
+        return ForKind(ev.Kind);
+    }
 
     public static int ForKind(TimelineEventKind kind) => kind switch
     {

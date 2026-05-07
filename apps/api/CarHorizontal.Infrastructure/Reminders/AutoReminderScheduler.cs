@@ -71,8 +71,12 @@ public class AutoReminderScheduler : IAutoReminderScheduler
 
         var alreadySet = alreadyLinked.ToHashSet();
 
+        var ordered = candidates
+            .OrderBy(c => c.Severity ?? Domain.Entities.Catalog.MaintenanceItemSeverity.Optional)
+            .ThenBy(c => c.DueAt);
+
         var created = 0;
-        foreach (var ev in candidates)
+        foreach (var ev in ordered)
         {
             if (alreadySet.Contains(ev.Id)) continue;
             if (!ev.DueAt.HasValue) continue;
@@ -81,7 +85,7 @@ public class AutoReminderScheduler : IAutoReminderScheduler
                 ? ev.DueAt.Value
                 : DateTime.SpecifyKind(ev.DueAt.Value, DateTimeKind.Utc);
 
-            var lead = ReminderLeadTimes.ForKind(ev.Kind);
+            var lead = ReminderLeadTimes.ForEvent(ev);
             var scheduledAt = dueAt.AddDays(-lead);
             if (scheduledAt < now) scheduledAt = now;
 
@@ -93,7 +97,9 @@ public class AutoReminderScheduler : IAutoReminderScheduler
                 VehicleId = ev.VehicleId,
                 Channel = MessageChannel.Email,
                 ScheduledAt = scheduledAt,
-                Status = ReminderStatus.Scheduled
+                Status = ReminderStatus.Scheduled,
+                ItemCode = ev.ItemCode,
+                Severity = ev.Severity
             });
             created++;
         }

@@ -83,6 +83,8 @@ public class RemindersService : IRemindersService
                 r.ResolvedSubject,
                 r.ResolvedBody,
                 r.FailureReason,
+                r.ItemCode,
+                r.Severity,
                 r.CreatedAt,
                 r.UpdatedAt,
                 CustomerFullName = _db.Customers
@@ -118,6 +120,8 @@ public class RemindersService : IRemindersService
             ResolvedSubject = x.ResolvedSubject,
             ResolvedBody = x.ResolvedBody,
             FailureReason = x.FailureReason,
+            ItemCode = x.ItemCode,
+            Severity = x.Severity?.ToString(),
             CreatedAt = x.CreatedAt,
             UpdatedAt = x.UpdatedAt
         }).ToList();
@@ -275,7 +279,7 @@ public class RemindersService : IRemindersService
 
         var scheduledAt = request.ScheduledAt.HasValue
             ? DateTime.SpecifyKind(request.ScheduledAt.Value, DateTimeKind.Utc)
-            : ComputeDefaultScheduledAt(timelineEvent.DueAt);
+            : ComputeDefaultScheduledAt(timelineEvent);
 
         var existing = await _db.Reminders
             .Where(r => r.TimelineEventId == timelineEventId
@@ -294,7 +298,9 @@ public class RemindersService : IRemindersService
             Channel = channel,
             ScheduledAt = scheduledAt,
             Status = ReminderStatus.Scheduled,
-            TemplateId = request.TemplateId
+            TemplateId = request.TemplateId,
+            ItemCode = timelineEvent.ItemCode,
+            Severity = timelineEvent.Severity
         };
 
         _db.Reminders.Add(entity);
@@ -318,13 +324,14 @@ public class RemindersService : IRemindersService
             throw new InvalidOperationException($"Cannot {action} a cancelled reminder.");
     }
 
-    private static DateTime ComputeDefaultScheduledAt(DateTime? dueAt)
+    private static DateTime ComputeDefaultScheduledAt(Domain.Entities.Timeline.TimelineEvent ev)
     {
-        if (!dueAt.HasValue) return DateTime.UtcNow;
-        var due = dueAt.Value.Kind == DateTimeKind.Utc
-            ? dueAt.Value
-            : DateTime.SpecifyKind(dueAt.Value, DateTimeKind.Utc);
-        var candidate = due.AddDays(-14);
+        if (!ev.DueAt.HasValue) return DateTime.UtcNow;
+        var due = ev.DueAt.Value.Kind == DateTimeKind.Utc
+            ? ev.DueAt.Value
+            : DateTime.SpecifyKind(ev.DueAt.Value, DateTimeKind.Utc);
+        var lead = ReminderLeadTimes.ForEvent(ev);
+        var candidate = due.AddDays(-lead);
         return candidate < DateTime.UtcNow ? DateTime.UtcNow : candidate;
     }
 
@@ -352,6 +359,8 @@ public class RemindersService : IRemindersService
                 r.ResolvedSubject,
                 r.ResolvedBody,
                 r.FailureReason,
+                r.ItemCode,
+                r.Severity,
                 r.CreatedAt,
                 r.UpdatedAt,
                 CustomerFullName = _db.Customers
@@ -388,6 +397,8 @@ public class RemindersService : IRemindersService
             ResolvedSubject = raw.ResolvedSubject,
             ResolvedBody = raw.ResolvedBody,
             FailureReason = raw.FailureReason,
+            ItemCode = raw.ItemCode,
+            Severity = raw.Severity?.ToString(),
             CreatedAt = raw.CreatedAt,
             UpdatedAt = raw.UpdatedAt
         };

@@ -18,6 +18,8 @@ public class ReminderDto
     public string? ResolvedSubject { get; set; }
     public string? ResolvedBody { get; set; }
     public string? FailureReason { get; set; }
+    public string? ItemCode { get; set; }
+    public string? Severity { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
