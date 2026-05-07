@@ -18,6 +18,7 @@ import {
 import { searchApi } from "@/lib/api/search";
 import { queryKeys } from "@/lib/query/keys";
 import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
+import { formatPhone } from "@/lib/format";
 
 export function GlobalSearch() {
   const router = useRouter();
@@ -113,7 +114,7 @@ export function GlobalSearch() {
                       <div className="flex flex-col">
                         <span className="font-medium">{c.fullName}</span>
                         <span className="text-xs text-muted-foreground">
-                          {c.email ?? c.phone ?? "—"}
+                          {c.email ?? (c.phone ? formatPhone(c.phone) : "—")}
                         </span>
                       </div>
                     </CommandItem>

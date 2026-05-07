@@ -1,3 +1,4 @@
+using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Customers.Dtos;
 using CarHorizontal.Domain.Entities.Customers;
 using CarHorizontal.Infrastructure.Persistence;
@@ -31,10 +32,15 @@ public class CustomerService : ICustomerService
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var s = request.Search.Trim();
+            var pattern = $"%{s}%";
+            var phoneSuffix = PhoneSearch.ExtractDigitSuffix(s);
+            var phonePattern = phoneSuffix is null ? null : $"%{phoneSuffix}%";
+
             query = query.Where(c =>
-                EF.Functions.ILike(c.FullName, $"%{s}%")
-                || (c.Email != null && EF.Functions.ILike(c.Email, $"%{s}%"))
-                || (c.Phone != null && EF.Functions.ILike(c.Phone, $"%{s}%")));
+                EF.Functions.ILike(c.FullName, pattern)
+                || (c.Email != null && EF.Functions.ILike(c.Email, pattern))
+                || (c.Phone != null && EF.Functions.ILike(c.Phone, pattern))
+                || (phonePattern != null && c.Phone != null && EF.Functions.ILike(c.Phone, phonePattern)));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Status)

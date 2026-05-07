@@ -1,3 +1,4 @@
+using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Search.Dtos;
 using CarHorizontal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
@@ -31,13 +32,16 @@ public class SearchController : ControllerBase
         }
 
         var pattern = $"%{trimmed}%";
+        var phoneSuffix = PhoneSearch.ExtractDigitSuffix(trimmed);
+        var phonePattern = phoneSuffix is null ? null : $"%{phoneSuffix}%";
 
         var customers = await _db.Customers
             .AsNoTracking()
             .Where(c =>
                 EF.Functions.ILike(c.FullName, pattern)
                 || (c.Email != null && EF.Functions.ILike(c.Email, pattern))
-                || (c.Phone != null && EF.Functions.ILike(c.Phone, pattern)))
+                || (c.Phone != null && EF.Functions.ILike(c.Phone, pattern))
+                || (phonePattern != null && c.Phone != null && EF.Functions.ILike(c.Phone, phonePattern)))
             .OrderBy(c => c.FullName)
             .Take(MaxResultsPerCategory)
             .Select(c => new SearchCustomerDto

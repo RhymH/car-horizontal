@@ -17,6 +17,7 @@ import {
 import { customersApi } from "@/lib/api/customers";
 import { queryKeys } from "@/lib/query/keys";
 import { extractApiErrorMessage } from "@/lib/api/errors";
+import { formatPhone } from "@/lib/format";
 import { CustomerDetailHeader } from "@/components/customers/CustomerDetailHeader";
 import { CustomerVehiclesSection } from "@/components/customers/CustomerVehiclesSection";
 import { CustomerInteractionsSection } from "@/components/customers/CustomerInteractionsSection";
@@ -116,7 +117,7 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
                 />
                 <InfoRow
                   label="Téléphone"
-                  value={customer.phone}
+                  value={customer.phone ? formatPhone(customer.phone) : null}
                   icon={<Phone className="size-3.5" />}
                   onCopy={() => copy(customer.phone, "Téléphone")}
                 />

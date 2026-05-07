@@ -19,6 +19,7 @@ import {
   customerStatusLabels,
   type CustomerStatus,
 } from "@/lib/schemas/customer";
+import { formatPhone } from "@/lib/format";
 import type { CustomerListItem } from "@/lib/api/customers";
 
 const STATUS_TONE: Record<
@@ -148,8 +149,8 @@ export function CustomersTable({
                     <TableCell className="hidden md:table-cell text-muted-foreground">
                       {row.email ?? "—"}
                     </TableCell>
-                    <TableCell className="hidden lg:table-cell text-muted-foreground">
-                      {row.phone ?? "—"}
+                    <TableCell className="hidden lg:table-cell text-muted-foreground tabular-nums">
+                      {row.phone ? formatPhone(row.phone) : "—"}
                     </TableCell>
                     <TableCell className="hidden sm:table-cell text-center tabular-nums">
                       {row.vehicleCount}
