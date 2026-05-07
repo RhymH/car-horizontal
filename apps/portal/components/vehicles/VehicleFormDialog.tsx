@@ -50,6 +50,9 @@ function buildDefaults(defaultCustomerId?: string): VehicleFormValues {
     transmissionType: undefined,
     purchasedAt: "",
     currentMileage: 0,
+    vehicleModelId: null,
+    selectedProgramId: null,
+    vehicleModelLabel: null,
   };
 }
 
@@ -66,6 +69,9 @@ function toFormValues(v: VehicleDetail): VehicleFormValues {
     transmissionType: v.transmissionType ?? undefined,
     purchasedAt: v.purchasedAt ? v.purchasedAt.slice(0, 10) : "",
     currentMileage: v.currentMileage,
+    vehicleModelId: v.vehicleModelId,
+    selectedProgramId: v.selectedProgramId,
+    vehicleModelLabel: v.vehicleModelDisplayName,
   };
 }
 
@@ -109,6 +115,7 @@ export function VehicleFormDialog({
         : undefined;
 
       if (isEdit) {
+        const previousModelId = mode.vehicle.vehicleModelId;
         return vehiclesApi.update(mode.vehicle.id, {
           customerId: values.customerId,
           make: values.make.trim(),
@@ -120,6 +127,9 @@ export function VehicleFormDialog({
           engineType: values.engineType,
           transmissionType: emptyToUndefined(values.transmissionType),
           purchasedAt,
+          vehicleModelId: values.vehicleModelId ?? undefined,
+          selectedProgramId: values.selectedProgramId ?? undefined,
+          clearVehicleModel: !values.vehicleModelId && !!previousModelId,
         });
       }
       return vehiclesApi.create({
@@ -134,6 +144,8 @@ export function VehicleFormDialog({
         transmissionType: emptyToUndefined(values.transmissionType),
         purchasedAt,
         currentMileage: values.currentMileage,
+        vehicleModelId: values.vehicleModelId ?? undefined,
+        selectedProgramId: values.selectedProgramId ?? undefined,
       });
     },
     onSuccess: async (saved) => {
@@ -188,6 +200,8 @@ export function VehicleFormDialog({
           <VehicleForm
             register={form.register}
             control={form.control}
+            watch={form.watch}
+            setValue={form.setValue}
             errors={form.formState.errors}
             customerLocked={lockCustomer}
             initialCustomerLabel={

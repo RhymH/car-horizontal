@@ -77,10 +77,48 @@ export interface VehicleDetail {
   purchasedAt: string | null;
   color: string | null;
   photoFileId: string | null;
+  vehicleModelId: string | null;
+  selectedProgramId: string | null;
+  vehicleModelDisplayName: string | null;
+  selectedProgramName: string | null;
   createdAt: string;
   updatedAt: string;
   maintenanceRecords: VehicleMaintenance[];
   timelineEvents: VehicleTimelineEvent[];
+}
+
+export type VehicleProgramItemStatus =
+  | "Done"
+  | "UpcomingSoon"
+  | "Upcoming"
+  | "Overdue"
+  | "Future"
+  | "Disabled";
+
+export interface VehicleProgramItemProjection {
+  code: string;
+  title: string;
+  severity: "Critical" | "Recommended" | "Optional";
+  lastDoneAt: string | null;
+  lastDoneKm: number | null;
+  nextDueAt: string | null;
+  nextDueKm: number | null;
+  status: VehicleProgramItemStatus;
+  kmRemaining: number | null;
+  daysRemaining: number | null;
+  estimatedCostMin: number | null;
+  estimatedCostMax: number | null;
+  hasOverride: boolean;
+  disabled: boolean;
+}
+
+export interface VehicleProgramProjection {
+  vehicleId: string;
+  vehicleModelId: string | null;
+  vehicleModelDisplayName: string | null;
+  programId: string | null;
+  programName: string | null;
+  items: VehicleProgramItemProjection[];
 }
 
 export interface VehiclesListParams {
@@ -108,9 +146,13 @@ export interface CreateVehiclePayload {
   purchasedAt?: string;
   color?: string;
   photoFileId?: string;
+  vehicleModelId?: string;
+  selectedProgramId?: string;
 }
 
-export type UpdateVehiclePayload = Partial<Omit<CreateVehiclePayload, "currentMileage">>;
+export type UpdateVehiclePayload = Partial<Omit<CreateVehiclePayload, "currentMileage">> & {
+  clearVehicleModel?: boolean;
+};
 
 export interface UpdateMileagePayload {
   mileage: number;
@@ -169,6 +211,17 @@ export const vehiclesApi = {
     const { data } = await apiClient.post<VehicleDetail>(
       `/api/vehicles/${id}/mileage`,
       payload,
+    );
+    return data;
+  },
+
+  async getProgramProjection(
+    id: string,
+    signal?: AbortSignal,
+  ): Promise<VehicleProgramProjection> {
+    const { data } = await apiClient.get<VehicleProgramProjection>(
+      `/api/vehicles/${id}/program-projection`,
+      { signal },
     );
     return data;
   },

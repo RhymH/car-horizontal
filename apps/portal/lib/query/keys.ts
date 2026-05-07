@@ -16,6 +16,14 @@ export const queryKeys = {
     detail: (id: string) => ["vehicles", "detail", id] as const,
     byCustomer: (customerId: string) =>
       ["vehicles", "by-customer", customerId] as const,
+    programProjection: (id: string) =>
+      ["vehicles", "program-projection", id] as const,
+  },
+  catalog: {
+    all: () => ["catalog"] as const,
+    vehicleModels: (filters?: Record<string, unknown>) =>
+      ["catalog", "vehicle-models", filters ?? {}] as const,
+    vehicleModel: (id: string) => ["catalog", "vehicle-model", id] as const,
   },
   history: {
     byVehicle: (vehicleId: string) =>

@@ -52,6 +52,9 @@ export const vehicleFormSchema = z.object({
     .int()
     .min(0, { error: "Doit être ≥ 0." }),
   photoFileId: z.string().optional(),
+  vehicleModelId: z.string().nullish(),
+  selectedProgramId: z.string().nullish(),
+  vehicleModelLabel: z.string().nullish(),
 });
 
 export type VehicleFormValues = z.infer<typeof vehicleFormSchema>;
