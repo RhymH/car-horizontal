@@ -35,6 +35,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<MaintenanceRecord> MaintenanceRecords => Set<MaintenanceRecord>();
     public DbSet<TimelineEvent> TimelineEvents => Set<TimelineEvent>();
+    public DbSet<OrganizationTimelineRule> OrganizationTimelineRules => Set<OrganizationTimelineRule>();
     public DbSet<Reminder> Reminders => Set<Reminder>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<MessageLog> MessageLogs => Set<MessageLog>();

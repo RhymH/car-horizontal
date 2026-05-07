@@ -2,6 +2,7 @@ using CarHorizontal.Api.Modules.Maintenance.Dtos;
 using CarHorizontal.Domain.Entities.Maintenance;
 using CarHorizontal.Domain.Entities.Timeline;
 using CarHorizontal.Infrastructure.Persistence;
+using CarHorizontal.Infrastructure.Timeline;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarHorizontal.Api.Modules.Maintenance;
@@ -10,11 +11,13 @@ public class MaintenanceService : IMaintenanceService
 {
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly ITimelineEngine _timelineEngine;
 
-    public MaintenanceService(AppDbContext db, ICurrentUserService currentUser)
+    public MaintenanceService(AppDbContext db, ICurrentUserService currentUser, ITimelineEngine timelineEngine)
     {
         _db = db;
         _currentUser = currentUser;
+        _timelineEngine = timelineEngine;
     }
 
     public async Task<MaintenanceListResponseDto> ListByVehicleAsync(
@@ -100,6 +103,7 @@ public class MaintenanceService : IMaintenanceService
         await _db.SaveChangesAsync(ct);
 
         await SyncTimelineEventAsync(orgId, vehicle.CustomerId, record, ct);
+        await _timelineEngine.RunForVehicleAsync(vehicle.Id, ct);
 
         return MapToDto(record);
     }
@@ -142,6 +146,7 @@ public class MaintenanceService : IMaintenanceService
         await _db.SaveChangesAsync(ct);
 
         await SyncTimelineEventAsync(orgId, vehicle.CustomerId, record, ct);
+        await _timelineEngine.RunForVehicleAsync(vehicle.Id, ct);
 
         return MapToDto(record);
     }

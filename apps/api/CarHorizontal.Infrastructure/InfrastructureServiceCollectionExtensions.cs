@@ -1,5 +1,7 @@
+using CarHorizontal.Domain.Timeline.Rules;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Persistence.Interceptors;
+using CarHorizontal.Infrastructure.Timeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +27,14 @@ public static class InfrastructureServiceCollectionExtensions
                 sp.GetRequiredService<AuditInterceptor>(),
                 sp.GetRequiredService<SoftDeleteInterceptor>());
         });
+
+        services.AddScoped<IRule, SixMonthMaintenanceRule>();
+        services.AddScoped<IRule, AnnualTechnicalInspectionRule>();
+        services.AddScoped<IRule, TireSwapRule>();
+        services.AddScoped<IRule, MileageBasedServiceRule>();
+        services.AddScoped<IRule, TradeInOpportunityRule>();
+        services.AddScoped<IRule, WarrantyExpiryRule>();
+        services.AddScoped<ITimelineEngine, TimelineEngine>();
 
         return services;
     }

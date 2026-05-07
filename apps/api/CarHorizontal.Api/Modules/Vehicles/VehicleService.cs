@@ -3,6 +3,7 @@ using CarHorizontal.Api.Modules.Vehicles.Dtos;
 using CarHorizontal.Domain.Entities.Customers;
 using CarHorizontal.Domain.Entities.Vehicles;
 using CarHorizontal.Infrastructure.Persistence;
+using CarHorizontal.Infrastructure.Timeline;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarHorizontal.Api.Modules.Vehicles;
@@ -11,11 +12,13 @@ public class VehicleService : IVehicleService
 {
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly ITimelineEngine _timelineEngine;
 
-    public VehicleService(AppDbContext db, ICurrentUserService currentUser)
+    public VehicleService(AppDbContext db, ICurrentUserService currentUser, ITimelineEngine timelineEngine)
     {
         _db = db;
         _currentUser = currentUser;
+        _timelineEngine = timelineEngine;
     }
 
     public async Task<VehiclesListResponseDto> ListAsync(VehiclesListRequestDto request, CancellationToken ct = default)
@@ -213,6 +216,8 @@ public class VehicleService : IVehicleService
         _db.Vehicles.Add(vehicle);
         await _db.SaveChangesAsync(ct);
 
+        await _timelineEngine.RunForVehicleAsync(vehicle.Id, ct);
+
         return await GetAsync(vehicle.Id, ct);
     }
 
@@ -254,6 +259,9 @@ public class VehicleService : IVehicleService
         if (request.PhotoFileId.HasValue) vehicle.PhotoFileId = request.PhotoFileId.Value;
 
         await _db.SaveChangesAsync(ct);
+
+        await _timelineEngine.RunForVehicleAsync(vehicle.Id, ct);
+
         return await GetAsync(vehicle.Id, ct);
     }
 
