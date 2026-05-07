@@ -92,6 +92,14 @@ public class RemindersController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("ensure")]
+    [Authorize(Roles = "Owner,Admin")]
+    public async Task<ActionResult<EnsureRemindersResponseDto>> Ensure(CancellationToken ct)
+    {
+        var inserted = await _service.EnsureRemindersForCurrentOrgAsync(ct);
+        return Ok(new EnsureRemindersResponseDto { Inserted = inserted });
+    }
+
     [HttpPost("from-timeline/{timelineEventId:guid}")]
     public async Task<ActionResult<ReminderDto>> CreateFromTimeline(
         Guid timelineEventId,

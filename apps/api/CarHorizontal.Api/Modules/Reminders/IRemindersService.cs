@@ -12,4 +12,5 @@ public interface IRemindersService
     Task<ReminderDto> SendNowAsync(Guid id, CancellationToken ct = default);
     Task<ReminderDto> SnoozeAsync(Guid id, SnoozeReminderRequestDto request, CancellationToken ct = default);
     Task<ReminderDto> CreateFromTimelineEventAsync(Guid timelineEventId, CreateFromTimelineRequestDto request, CancellationToken ct = default);
+    Task<int> EnsureRemindersForCurrentOrgAsync(CancellationToken ct = default);
 }

@@ -2,6 +2,7 @@ using CarHorizontal.Api.Modules.Reminders.Dtos;
 using CarHorizontal.Domain.Entities.Messaging;
 using CarHorizontal.Domain.Entities.Reminders;
 using CarHorizontal.Infrastructure.Persistence;
+using CarHorizontal.Infrastructure.Reminders;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarHorizontal.Api.Modules.Reminders;
@@ -10,11 +11,13 @@ public class RemindersService : IRemindersService
 {
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAutoReminderScheduler _scheduler;
 
-    public RemindersService(AppDbContext db, ICurrentUserService currentUser)
+    public RemindersService(AppDbContext db, ICurrentUserService currentUser, IAutoReminderScheduler scheduler)
     {
         _db = db;
         _currentUser = currentUser;
+        _scheduler = scheduler;
     }
 
     public async Task<ReminderListResponseDto> ListAsync(ReminderListRequestDto request, CancellationToken ct = default)
@@ -298,6 +301,13 @@ public class RemindersService : IRemindersService
         await _db.SaveChangesAsync(ct);
 
         return await GetDtoAsync(entity.Id, ct);
+    }
+
+    public Task<int> EnsureRemindersForCurrentOrgAsync(CancellationToken ct = default)
+    {
+        var orgId = _currentUser.OrganizationId
+            ?? throw new UnauthorizedAccessException("Active organization is required.");
+        return _scheduler.EnsureRemindersForOrganizationAsync(orgId, ct);
     }
 
     private static void EnsureMutable(Reminder entity, string action)

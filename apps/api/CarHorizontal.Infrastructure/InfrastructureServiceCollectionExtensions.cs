@@ -1,6 +1,7 @@
 using CarHorizontal.Domain.Timeline.Rules;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Persistence.Interceptors;
+using CarHorizontal.Infrastructure.Reminders;
 using CarHorizontal.Infrastructure.Timeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IRule, TradeInOpportunityRule>();
         services.AddScoped<IRule, WarrantyExpiryRule>();
         services.AddScoped<ITimelineEngine, TimelineEngine>();
+
+        services.AddScoped<IAutoReminderScheduler, AutoReminderScheduler>();
 
         return services;
     }
