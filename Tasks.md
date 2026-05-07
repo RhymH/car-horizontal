@@ -12,6 +12,48 @@ d'acceptation**, **dépendances**.
 
 ---
 
+## ⚠️ Règle anti-oubli (cross-module wiring)
+
+**Problème observé** : quand une tâche d'une phase amont (ex. T043 fiche client) référence
+un composant d'une phase aval (ex. T052 `VehicleFormDialog`), la tendance est de stubber
+la CTA avec un toast "*disponible en Phase X*" — et d'**oublier** de revenir le câbler
+quand la phase aval est livrée.
+
+**Conséquence** : des CTAs qui semblent fonctionner mais ne font rien, des sections
+qui affichent du texte mort, des relations entité qui ne se déclenchent pas.
+
+### Règle absolue
+
+> **Quand on stubbe une CTA cross-module, on crée un commentaire `// TODO(T0XX): wire
+> with <ce-qui-manque>` à l'endroit du stub, et on liste l'item dans la section
+> "Cross-module backfill" de la phase qui livre la dépendance.**
+
+### Audit obligatoire à chaque fin de phase
+
+```powershell
+# 1. Détecter les placeholders textuels
+rg -i "Phase \d|disponible en Phase|coming soon|sera disponible|à venir|TODO.*Phase|planned in Phase|not yet available" `
+    --glob "!Tasks.md" --glob "!ProductDetails.md" --glob "!*.lock*"
+
+# 2. Détecter les TODO de wiring oubliés
+rg -i "TODO\(T\d+\)|FIXME.*wire|stub.*until" --glob "!Tasks.md"
+
+# 3. Détecter les toasts "info" suspects (souvent des stubs)
+rg "toast\.info\(" apps/portal --glob "*.tsx"
+```
+
+Tout résultat non-attendu = à traiter avant de fermer la phase.
+
+### Checklist par phase livrée
+
+- [ ] Toutes les CTA listées dans la phase ouvrent réellement leur dialog/drawer cible
+- [ ] Toutes les sections listées affichent réellement leurs données (pas de texte mort)
+- [ ] Tous les `// TODO(TXXX)` qui pointaient sur cette phase ont été résolus
+- [ ] Audit grep ci-dessus passe sans surprise
+- [ ] Section "Cross-module backfill" de la phase n'a aucun item ouvert
+
+---
+
 ## 📁 Structure cible du monorepo
 
 ```
@@ -517,7 +559,117 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 
 ---
 
+## PHASE 7.1 — Audit & backfill cross-modules (Phases 0 → 7)
+
+**But** : reprendre toutes les CTAs / sections / déclencheurs qui ont été stubbés
+dans les phases précédentes parce que leur dépendance n'existait pas encore. À faire
+**avant** de commencer Phase 8.
+
+### Audit confirmé (gaps trouvés au scan code, mai 2026)
+
+État au moment de l'audit :
+
+| ID | Fichier | Symptôme | Cause |
+|----|---------|----------|-------|
+| **G1** | `apps/portal/components/customers/CustomerDetailView.tsx:99` | Bouton "+ Véhicule" du header → `toast.info("disponible en Phase 5")` | Stub jamais retiré après T052 |
+| **G2** | `apps/portal/components/customers/CustomerDetailView.tsx:171` | Bouton "+ Véhicule" de la section véhicules → même toast | Idem |
+| **G3** | `apps/portal/components/customers/CustomerDetailView.tsx:185` | Tab "Timeline" affiche "*activé en Phase 6*" (texte erroné, c'est Phase 7) | Stub à câbler maintenant |
+| **G4** | `apps/api/CarHorizontal.Api/Modules/Vehicles/VehiclesController.cs:88-92` | `POST /api/vehicles/{id}/photo` renvoie 501 "*not yet available, planned in Phase 14*" | Backend non-impl, à traiter en T130/T131 (cross-ref ajouté ci-dessous) |
+
+**Statut OK confirmé au scan** (pas d'action) :
+- ✅ `MaintenanceService.SyncTimelineEventAsync` + `_timelineEngine.RunForVehicleAsync` câblés (T060 ↔ T070)
+- ✅ `SearchController` indexe Customers + Vehicles (T044)
+- ✅ `GlobalSearch.tsx` route vers `/clients/[id]` et `/vehicles/[id]`
+
+### T7.1-A — Brancher "+ Véhicule" depuis la fiche client (G1, G2)
+
+- **Goal** : ouvrir le `VehicleFormDialog` (T052) avec `customerId` pré-rempli, en réutilisant le composant existant.
+- **Files** : `apps/portal/components/customers/CustomerDetailView.tsx`, `apps/portal/components/customers/CustomerVehiclesSection.tsx`.
+- **Implémentation** :
+  - Importer `VehicleFormDialog` depuis `@/components/vehicles/VehicleFormDialog`.
+  - Ajouter un state `addVehicleOpen` dans `CustomerDetailView`.
+  - Remplacer les 2 `toast.info(...)` (lignes ~99 et ~171) par `setAddVehicleOpen(true)`.
+  - Monter `<VehicleFormDialog open={addVehicleOpen} onOpenChange={setAddVehicleOpen} mode={{ kind: "create", presetCustomerId: customer.id }} />`.
+  - Vérifier que `VehicleFormDialog` accepte bien un `presetCustomerId` qui désactive ou présélectionne le `CustomerCombobox`. Si non, l'ajouter (props facultatif, fallback sur le comportement existant).
+- **UI** :
+  - Quand le dialog s'ouvre depuis la fiche client : combobox Client préremplie + en lecture seule (chip avec X pour le déverrouiller, mais pas obligatoire MVP).
+  - Au succès : invalider `queryKeys.customers.detail(customer.id)` ET `queryKeys.vehicles.byCustomer(customer.id)` ET `queryKeys.vehicles.list()`.
+  - Toast vert "Véhicule ajouté".
+- **Acceptance** : créer un véhicule depuis fiche client → la section véhicules de la fiche se rafraîchit immédiatement, la liste globale `/vehicles` aussi.
+- **Depends on** : T052
+
+### T7.1-B — Brancher la section "Vehicles" de la fiche client sur la vraie liste
+
+- **Goal** : la section véhicules de `CustomerDetailView` doit afficher tous les véhicules du client (pas seulement ceux retournés par le BFF detail s'il en limite).
+- **Files** : `apps/portal/components/customers/CustomerVehiclesSection.tsx`, `apps/portal/lib/api/vehicles.ts`.
+- **Implémentation** :
+  - Le BFF `GET /api/customers/{id}` doit retourner la liste **complète** des véhicules non supprimés du client (vérifier `CustomerDetailDto.Vehicles`). Sinon ajouter un appel parallèle `vehiclesApi.listByCustomer(customerId)` côté front.
+  - Chaque carte véhicule doit être cliquable et naviguer vers `/vehicles/[id]`.
+  - EmptyState avec CTA "Ajouter le premier véhicule" si liste vide.
+- **Acceptance** : ajouter 3 véhicules à un client → tous visibles sur la fiche client + tous cliquables.
+- **Depends on** : T7.1-A, T053
+
+### T7.1-C — Brancher la tab "Timeline" de la fiche client (G3)
+
+- **Goal** : la tab Timeline de `CustomerDetailView` affiche les `TimelineEvent` du client.
+- **Files** : `apps/portal/components/customers/CustomerDetailView.tsx`, nouveau `apps/portal/components/timeline/TimelineList.tsx` réutilisable (sera utilisé aussi par T072 et T053).
+- **Implémentation** :
+  - Appel `GET /api/timeline?customerId={id}&from=now-365d&to=now+365d`.
+  - Composant `TimelineList` partagé (Phase 7) : chaque carte = 1 événement avec actions inline.
+  - Filtre statut au-dessus (Tous / À venir / En retard / Faits).
+  - Si Phase 8 livrée, l'action "Envoyer rappel" est active ; sinon, désactivée avec tooltip "Disponible quand les rappels seront activés" — **et entrée ajoutée dans la section Backfill de Phase 8**.
+- **Acceptance** : un client avec véhicule + maintenance → événements générés visibles sur sa fiche.
+- **Depends on** : T070, T071
+
+### T7.1-D — Audit page détail Véhicule (`/vehicles/[id]`)
+
+- **Goal** : vérifier que toutes les sections décrites dans T053 sont câblées (pas seulement listées).
+- **Checklist** :
+  - [ ] Bouton "✏ Modifier" → ouvre `VehicleFormDialog` mode edit avec données pré-remplies.
+  - [ ] Bouton "🗑 Supprimer" → `ConfirmDialog` → soft delete → redirige vers `/vehicles`.
+  - [ ] Bouton "📏 Mettre à jour kilométrage" → `UpdateMileageDialog` → POST `/api/vehicles/{id}/mileage` → invalide queries véhicule + timeline.
+  - [ ] Bouton "+ Entretien" → `MaintenanceFormDialog` (T061) avec `vehicleId` pré-rempli.
+  - [ ] Section "Historique entretien" affiche la liste réelle de `MaintenanceRecord` triée DESC, avec actions ✏/🗑 par ligne.
+  - [ ] Section "Timeline" affiche les `TimelineEvent` du véhicule avec actions inline (Marquer fait, Reporter, Envoyer rappel — cette dernière conditionnelle Phase 8).
+  - [ ] Pas de placeholder "Phase X" dans les composants `apps/portal/components/vehicles/`.
+- **Goal** : si une case n'est pas cochée, créer un sous-ticket dans cette phase et corriger.
+- **Depends on** : T053, T061, T071
+
+### T7.1-E — Audit "+ Interaction" sur fiche client
+
+- **Goal** : vérifier que `AddInteractionDialog` (T043) appelle bien `POST /api/customers/{id}/interactions` et que la liste se rafraîchit.
+- **Implémentation** : tester end-to-end. Si bouton "Copier" tel/email : tester. Si filtre par type d'interaction : tester. Si pagination "Charger plus" : tester (sinon créer ticket).
+- **Acceptance** : ajouter une interaction → apparaît immédiatement.
+- **Depends on** : T043
+
+### T7.1-F — Audit `dotnet ef` migrations à jour
+
+- **Goal** : depuis Phase 1 (T014 `Initial`), des entités peuvent avoir été ajoutées (TimelineEvent rules config, MessageTemplate, etc.). Vérifier qu'aucune entité du domaine n'est sans configuration EF / sans table.
+- **Implémentation** :
+  - `dotnet ef migrations list -p CarHorizontal.Infrastructure -s CarHorizontal.Api`
+  - `dotnet ef migrations has-pending-model-changes` (ou snapshot diff manuel) — si des changements sont pending, créer migration `Phase7Backfill`.
+- **Acceptance** : `dotnet ef database update` ne fait rien (DB à jour avec le modèle).
+- **Depends on** : T014
+
+### T7.1-G — Sweep grep automatique
+
+- **Goal** : zéro placeholder textuel dans le code applicatif.
+- **Implémentation** : exécuter les 3 grep de la "Règle anti-oubli" en tête de ce document. Pour chaque résultat, soit le justifier (doc légitime, libellé d'UI, message d'erreur réel) soit créer un ticket de fix.
+- **Livrable** : un commit "chore(7.1): audit complete" qui ajoute un fichier `docs/audits/2026-XX-XX-phase7.md` avec les résultats du sweep et les actions prises.
+- **Acceptance** : second run du sweep ⇒ 0 résultat non-justifié.
+
+---
+
 ## PHASE 8 — Rappels Automatiques
+
+### 🔁 Cross-module backfill (à faire pendant cette phase)
+
+Quand cette phase est livrée, **rouvrir** ces écrans des phases amont et activer ce qui était désactivé :
+- **T7.1-C (fiche client → tab Timeline)** : action inline "Envoyer rappel" qui était désactivée → activer en branchant `POST /api/reminders/from-timeline/{id}`.
+- **T053 (fiche véhicule → section Timeline)** : action "Envoyer rappel" : idem.
+- **T072 (page Timeline globale)** : actions "Envoyer rappel maintenant" + bouton card "📣" : brancher.
+- **Notification toast** d'envoi : "Rappel programmé / envoyé immédiatement".
+- **Audit grep** : `rg -i "rappel.*phase|reminder.*not yet|TODO.*reminder"` doit revenir vide.
 
 ### T080 — API Reminders
 - **Files** : `Api/Modules/Reminders/RemindersController.cs`, service, DTOs.
@@ -556,6 +708,13 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 ---
 
 ## PHASE 9 — Messaging (SMS / Email)
+
+### 🔁 Cross-module backfill
+
+- **T021 (register)** : email de bienvenue non envoyé jusqu'ici → brancher template `lifecycle.welcome.email` au moment de la création du compte.
+- **T142 (invitations membres)** : remplacer le stub d'invitation par un envoi réel d'email avec token.
+- **Audit grep** : `rg -i "email.*phase|sms.*phase|messaging.*not yet"` vide.
+- Vérifier que les anciens `MessageLog` créés pendant Phase 8 (avec NoOp) sont bien lisibles en base.
 
 ### T090 — Abstraction `IEmailSender` et `ISmsSender`
 - **Files** :
@@ -611,6 +770,12 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 
 ## PHASE 10 — Hangfire & jobs en arrière-plan
 
+### 🔁 Cross-module backfill
+
+- **T070 timeline regenerate** : si Phase 7 a appelé l'engine en synchrone seulement, ajouter aussi le job récurrent `daily-timeline-regeneration`.
+- **T081 ensure-reminders** : doit tourner désormais en cron, pas seulement à la demande.
+- **Test bout-en-bout** : créer un véhicule + maintenance avec NextDueAt = J+30, attendre la fenêtre de dispatch (ou trigger le job manuellement) → MessageLog créé avec NoOp → Reminder.Status = Sent.
+
 ### T100 — Configuration Hangfire
 - **Files** : `Api/Extensions/HangfireConfig.cs`, `Api/Jobs/*.cs`.
 - **Implémentation** :
@@ -632,6 +797,13 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 ---
 
 ## PHASE 11 — Dashboard (BFF + UI)
+
+### 🔁 Cross-module backfill
+
+- **Page d'accueil par défaut** : jusqu'ici probablement un stub `PageStub` à `/dashboard` → remplacer par la vraie page.
+- **QuickActions dropdown** : doit ouvrir directement les 4 dialogs déjà existants (`CustomerFormDialog`, `VehicleFormDialog`, `ReminderFormDialog`, `AppointmentFormDialog`). Aucun nouveau dialog à créer ; juste réutiliser les composants des phases 4/5/8/12.
+- **KpiCard "lien voir tous"** : chacun doit naviguer vers la page liste filtrée correspondante (ex. "clients à relancer" → `/clients?status=at-risk`).
+- **Note sur la dépendance circulaire** : T110 dépend de T120 (loyalty trend). **Ordre d'exécution** : faire **T120 (calcul loyalty)** AVANT T110/T111, sinon le BFF ne peut pas alimenter le `LoyaltyTrend`. La tâche T120 est dans Phase 13 — soit on la sort plus tôt, soit on stubbe le champ dans le BFF en attendant (et on l'ajoute à la backfill de Phase 13).
 
 ### T110 — Endpoint BFF Dashboard
 - **Files** : `Api/Modules/Dashboard/DashboardController.cs`, `DashboardService.cs`, `Dtos/DashboardOverviewResponseDto.cs`.
@@ -666,6 +838,14 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 
 ## PHASE 12 — Rendez-vous (légère)
 
+### 🔁 Cross-module backfill
+
+- **Sidebar/Topbar** : item "Rendez-vous" stoppe d'afficher `PageStub` → vraie page calendrier/liste.
+- **Fiche client** : ajouter une section "Rendez-vous à venir" + CTA "+ RDV" qui ouvre `AppointmentFormDialog` avec `customerId` pré-rempli. Mettre à jour T043 (`CustomerDetailView`).
+- **Fiche véhicule** : idem si pertinent (RDV liés au véhicule).
+- **Dashboard QuickActions** (T111) : "+ RDV" qui était stubbé → activer.
+- **Auto-création reminder de confirmation** (T115 Auto) : vérifier que le Reminder créé apparaît dans `/reminders`.
+
 ### T115 — API Appointments
 - **Files** : `Api/Modules/Appointments/AppointmentsController.cs`, service, DTOs.
 - **Endpoints** :
@@ -693,6 +873,14 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 ---
 
 ## PHASE 13 — Suivi Fidélisation
+
+### 🔁 Cross-module backfill
+
+- **Sidebar item "Fidélisation"** : remplacer `PageStub` par la vraie page.
+- **Dashboard BFF (T110)** : si `LoyaltyTrend` était stubbé en attendant T120, le brancher pour de bon → mettre à jour `DashboardService`.
+- **KPI dashboard "Clients à relancer"** : si comptait du Phase 4 simple (>180j sans contact), le remplacer par la définition exacte de "at-risk" du `LoyaltyMetricsService`.
+- **T040 (CustomersListView)** : ajouter le filtre `status=at-risk` qui s'appuie désormais sur le service loyalty.
+- **Fiche client** : ajouter un badge "À risque" / "Perdu" calculé côté serveur si applicable.
 
 ### T120 — Service de calcul Fidélisation
 - **Files** : `Domain/Loyalty/LoyaltyMetricsService.cs`, `Api/Modules/Loyalty/LoyaltyController.cs`.
@@ -725,6 +913,15 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 
 ## PHASE 14 — Stockage de fichiers
 
+### 🔁 Cross-module backfill (gap **G4** identifié en Phase 7.1)
+
+- **`VehiclesController.cs:88-92`** : retirer le 501 stub "*not yet available*", brancher l'upload sur `IFileStorage`. Mettre à jour le DTO `VehicleDto.PhotoUrl` pour exposer une URL résolue (`GET /api/files/{id}`).
+- **`VehicleFormDialog`** : remplacer le bloc photo "rudimentaire" par `<ImageUploader>` (T131).
+- **Fiche véhicule** : afficher la photo en header.
+- **Onglet Settings → Organisation** (T141) : champ Logo doit utiliser `<ImageUploader>` (auparavant lui aussi stubbé).
+- **Avatar utilisateur** (Topbar UserMenu, Settings préférences T144) : pareil.
+- **Audit grep** : `rg -i "photo.*phase|file.*not yet|upload.*planned"` doit revenir vide.
+
 ### T130 — API Files
 - **Files** : `Api/Modules/Files/FilesController.cs`, service, `Infrastructure/Files/DbFileStorage.cs` (impl `IFileStorage`), `Infrastructure/Files/CloudflareR2FileStorage.cs` (placeholder à activer plus tard via config).
 - **Endpoints** :
@@ -745,6 +942,14 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 ---
 
 ## PHASE 15 — Paramètres & Profil
+
+### 🔁 Cross-module backfill
+
+- **Sidebar item "Paramètres"** : remplacer `PageStub` par layout réel.
+- **UserMenu Topbar** : items "Profil", "Paramètres", "Déconnexion" doivent tous fonctionner (les 2 premiers naviguaient peut-être vers stub).
+- **T024 register-bootstrap** : la création auto d'org "Garage de X" doit exposer Slug/Logo modifiables ici.
+- **T143 règles timeline** : si Phase 7 a hardcodé une liste de règles globale, exposer maintenant la table `OrganizationTimelineRule` (T070) pour les rendre éditables par org.
+- **Audit grep** : `rg -i "settings.*phase|profil.*phase"` vide.
 
 ### T140 — Page Paramètres (layout + onglets)
 - **Files** : `app/(app)/settings/layout.tsx`, `app/(app)/settings/page.tsx` (redirige vers `/settings/organization`).
@@ -784,6 +989,13 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 
 ## PHASE 16 — Notifications in-app
 
+### 🔁 Cross-module backfill
+
+- **Topbar** : ajouter l'icône cloche (auparavant absente). Compteur réagit au polling/SignalR.
+- **DispatchDueRemindersJob (T101)** : à chaque envoi (succès ou échec) → émettre une `UserNotification` pour les Owner/Admin de l'org.
+- **AppointmentService** : émettre une notification 1h avant un RDV.
+- **Liens deep** : chaque notification doit avoir un `targetUrl` (ex. `/reminders/{id}`) qui ouvre la bonne page.
+
 ### T150 — Centre de notifications
 - **Files** : `Api/Modules/Notifications/NotificationsController.cs`, entité `UserNotification`, hub SignalR optionnel ou polling.
 - **Front** : icône cloche dans Topbar avec badge, popover liste des notifications, marquer lu, lien vers entité concernée.
@@ -794,6 +1006,12 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 ---
 
 ## PHASE 17 — Observabilité & santé
+
+### 🔁 Cross-module backfill
+
+- **Health check Hangfire** : nécessite que Phase 10 soit livrée avec workers actifs.
+- **Health check email/SMS providers** : pinger les vrais providers Resend/Twilio via les options de Phase 9. Si NoOp en dev → renvoie healthy direct.
+- **Compteurs Prometheus** : ajouter dans `MessageDispatchService` (Phase 9) et `DispatchDueRemindersJob` (Phase 10) — auparavant juste loggés.
 
 ### T160 — Health checks + Prometheus
 - **Files** : `Api/HealthChecks/*.cs`, configuration `/health/live`, `/health/ready`, `/metrics` (Prometheus).
@@ -809,6 +1027,13 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 ---
 
 ## PHASE 18 — Infrastructure de déploiement (mirror Aries/QSE)
+
+### 🔁 Cross-module backfill
+
+- **`docker-build-publish.ps1`** : retirer le TODO sur `$Registry` (vu en T005 placeholder) et fixer la valeur réelle du registry GitLab/GitHub.
+- **`appsettings.Production.json`** : créer le fichier (auparavant absent), valeurs sensibles en variables d'environnement.
+- **CORS** : passer la liste `Cors:AllowedOrigins` à la vraie URL prod du portal.
+- **Migration auto** : vérifier `Database:RunMigrationsOnStartup = true` en prod, sinon doc dans RUNBOOK comment migrer manuellement.
 
 ### T170 — Dockerfiles
 - **Files** : `apps/api/Dockerfile` (multi-stage SDK→runtime), `apps/portal/Dockerfile` (multi-stage node→standalone).
@@ -853,6 +1078,18 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 ---
 
 ## PHASE 19 — Polish, qualité, accessibilité
+
+### 🔁 Cross-module backfill — sweep final
+
+C'est le moment de faire **un dernier audit complet** :
+
+- **Run tous les grep de la "Règle anti-oubli"** une dernière fois — résultat attendu : 0 placeholder de phase.
+- **Cliquer chaque CTA** de chaque page (script Playwright minimal "click everything") — chaque clic doit produire un effet (modale, navigation, toast légitime). Aucun `toast.info("disponible en…")` ne doit subsister.
+- **Aucun composant `PageStub`** ne doit subsister dans l'arbre `app/(app)/*` — sauf une route délibérément future-only documentée dans `RUNBOOK.md`.
+- **Aucun `@ts-ignore`/`as any`** introduit comme contournement temporaire ne doit subsister sans commentaire justificatif.
+- **Tous les `// TODO(TXXX)`** doivent référencer une tâche encore ouverte ou être retirés.
+- **Tous les endpoints API** doivent renvoyer du JSON (pas de 501 stub) — `rg "StatusCode\(\s*501"` revient vide.
+- **Sidebar** : aucun item ne mène à une page vide.
 
 ### T180 — Empty states & loading skeletons partout
 - **Goal** : passer toutes les pages en revue, vérifier qu'aucune liste vide n'affiche un blanc, qu'aucun chargement ne montre un état figé.
