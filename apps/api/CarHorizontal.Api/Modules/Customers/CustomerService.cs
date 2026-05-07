@@ -1,0 +1,257 @@
+using CarHorizontal.Api.Modules.Customers.Dtos;
+using CarHorizontal.Domain.Entities.Customers;
+using CarHorizontal.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
+namespace CarHorizontal.Api.Modules.Customers;
+
+public class CustomerService : ICustomerService
+{
+    private readonly AppDbContext _db;
+    private readonly ICurrentUserService _currentUser;
+
+    public CustomerService(AppDbContext db, ICurrentUserService currentUser)
+    {
+        _db = db;
+        _currentUser = currentUser;
+    }
+
+    public async Task<CustomersListResponseDto> ListAsync(CustomersListRequestDto request, CancellationToken ct = default)
+    {
+        var page = request.Page < 1 ? 1 : request.Page;
+        var pageSize = request.PageSize switch
+        {
+            <= 0 => 25,
+            > 100 => 100,
+            _ => request.PageSize
+        };
+
+        var query = _db.Customers.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var s = request.Search.Trim();
+            query = query.Where(c =>
+                EF.Functions.ILike(c.FullName, $"%{s}%")
+                || (c.Email != null && EF.Functions.ILike(c.Email, $"%{s}%"))
+                || (c.Phone != null && EF.Functions.ILike(c.Phone, $"%{s}%")));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Status)
+            && Enum.TryParse<CustomerStatus>(request.Status, ignoreCase: true, out var statusEnum))
+        {
+            query = query.Where(c => c.Status == statusEnum);
+        }
+
+        var total = await query.CountAsync(ct);
+
+        var sortDir = string.Equals(request.SortDir, "desc", StringComparison.OrdinalIgnoreCase) ? "desc" : "asc";
+        query = (request.SortBy?.ToLowerInvariant()) switch
+        {
+            "fullname" => sortDir == "desc" ? query.OrderByDescending(c => c.FullName) : query.OrderBy(c => c.FullName),
+            "acquiredat" => sortDir == "desc" ? query.OrderByDescending(c => c.AcquiredAt) : query.OrderBy(c => c.AcquiredAt),
+            "createdat" => sortDir == "desc" ? query.OrderByDescending(c => c.CreatedAt) : query.OrderBy(c => c.CreatedAt),
+            "status" => sortDir == "desc" ? query.OrderByDescending(c => c.Status) : query.OrderBy(c => c.Status),
+            _ => query.OrderBy(c => c.FullName)
+        };
+
+        var pageItems = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => new
+            {
+                c.Id,
+                c.FullName,
+                c.Email,
+                c.Phone,
+                c.City,
+                c.Status,
+                c.AcquiredAt,
+                c.Tags,
+                VehicleCount = _db.Vehicles.Count(v => v.CustomerId == c.Id)
+            })
+            .ToListAsync(ct);
+
+        return new CustomersListResponseDto
+        {
+            Total = total,
+            Page = page,
+            PageSize = pageSize,
+            Items = pageItems.Select(x => new CustomerListItemDto
+            {
+                Id = x.Id,
+                FullName = x.FullName,
+                Email = x.Email,
+                Phone = x.Phone,
+                City = x.City,
+                Status = x.Status.ToString(),
+                AcquiredAt = x.AcquiredAt,
+                Tags = x.Tags,
+                VehicleCount = x.VehicleCount
+            }).ToList()
+        };
+    }
+
+    public async Task<CustomerDetailDto> GetAsync(Guid id, CancellationToken ct = default)
+    {
+        var customer = await _db.Customers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id, ct)
+            ?? throw new KeyNotFoundException($"Customer {id} not found.");
+
+        var vehicles = await _db.Vehicles
+            .AsNoTracking()
+            .Where(v => v.CustomerId == id)
+            .OrderBy(v => v.Make).ThenBy(v => v.Model)
+            .Select(v => new CustomerVehicleDto
+            {
+                Id = v.Id,
+                Make = v.Make,
+                Model = v.Model,
+                Year = v.Year,
+                LicensePlate = v.LicensePlate,
+                CurrentMileage = v.CurrentMileage,
+                EngineType = v.EngineType.ToString(),
+                PhotoFileId = v.PhotoFileId
+            })
+            .ToListAsync(ct);
+
+        var interactions = await _db.CustomerInteractions
+            .AsNoTracking()
+            .Where(i => i.CustomerId == id)
+            .OrderByDescending(i => i.OccurredAt)
+            .Take(5)
+            .Select(i => new CustomerInteractionDto
+            {
+                Id = i.Id,
+                CustomerId = i.CustomerId,
+                Type = i.Type.ToString(),
+                OccurredAt = i.OccurredAt,
+                Summary = i.Summary,
+                AuthorUserId = i.AuthorUserId
+            })
+            .ToListAsync(ct);
+
+        return new CustomerDetailDto
+        {
+            Id = customer.Id,
+            FullName = customer.FullName,
+            Email = customer.Email,
+            Phone = customer.Phone,
+            Address = customer.Address,
+            City = customer.City,
+            PostalCode = customer.PostalCode,
+            Notes = customer.Notes,
+            AcquiredAt = customer.AcquiredAt,
+            Status = customer.Status.ToString(),
+            Tags = customer.Tags,
+            CreatedAt = customer.CreatedAt,
+            UpdatedAt = customer.UpdatedAt,
+            Vehicles = vehicles,
+            RecentInteractions = interactions
+        };
+    }
+
+    public async Task<CustomerDetailDto> CreateAsync(CreateCustomerRequestDto request, CancellationToken ct = default)
+    {
+        var orgId = _currentUser.OrganizationId
+            ?? throw new UnauthorizedAccessException("Active organization is required.");
+
+        var customer = new Customer
+        {
+            OrganizationId = orgId,
+            FullName = request.FullName.Trim(),
+            Email = NormalizeOptional(request.Email),
+            Phone = NormalizeOptional(request.Phone),
+            Address = NormalizeOptional(request.Address),
+            City = NormalizeOptional(request.City),
+            PostalCode = NormalizeOptional(request.PostalCode),
+            Notes = NormalizeOptional(request.Notes),
+            AcquiredAt = request.AcquiredAt == default ? DateTime.UtcNow : request.AcquiredAt,
+            Status = ParseStatus(request.Status),
+            Tags = request.Tags ?? Array.Empty<string>()
+        };
+
+        _db.Customers.Add(customer);
+        await _db.SaveChangesAsync(ct);
+
+        return await GetAsync(customer.Id, ct);
+    }
+
+    public async Task<CustomerDetailDto> UpdateAsync(Guid id, UpdateCustomerRequestDto request, CancellationToken ct = default)
+    {
+        var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == id, ct)
+            ?? throw new KeyNotFoundException($"Customer {id} not found.");
+
+        if (request.FullName is not null) customer.FullName = request.FullName.Trim();
+        if (request.Email is not null) customer.Email = NormalizeOptional(request.Email);
+        if (request.Phone is not null) customer.Phone = NormalizeOptional(request.Phone);
+        if (request.Address is not null) customer.Address = NormalizeOptional(request.Address);
+        if (request.City is not null) customer.City = NormalizeOptional(request.City);
+        if (request.PostalCode is not null) customer.PostalCode = NormalizeOptional(request.PostalCode);
+        if (request.Notes is not null) customer.Notes = NormalizeOptional(request.Notes);
+        if (request.AcquiredAt.HasValue) customer.AcquiredAt = request.AcquiredAt.Value;
+        if (request.Status is not null) customer.Status = ParseStatus(request.Status);
+        if (request.Tags is not null) customer.Tags = request.Tags;
+
+        await _db.SaveChangesAsync(ct);
+        return await GetAsync(customer.Id, ct);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == id, ct)
+            ?? throw new KeyNotFoundException($"Customer {id} not found.");
+
+        // Soft delete via interceptor: setting DeletedAt is handled there, but we also call Remove
+        // so the interceptor (SoftDeleteInterceptor) catches it. We do NOT cascade to vehicles.
+        _db.Customers.Remove(customer);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<CustomerInteractionDto> AddInteractionAsync(Guid customerId, AddInteractionRequestDto request, CancellationToken ct = default)
+    {
+        var orgId = _currentUser.OrganizationId
+            ?? throw new UnauthorizedAccessException("Active organization is required.");
+        var userId = _currentUser.UserId
+            ?? throw new UnauthorizedAccessException("Active user is required.");
+
+        var exists = await _db.Customers.AnyAsync(c => c.Id == customerId, ct);
+        if (!exists) throw new KeyNotFoundException($"Customer {customerId} not found.");
+
+        var interaction = new CustomerInteraction
+        {
+            OrganizationId = orgId,
+            CustomerId = customerId,
+            Type = Enum.Parse<CustomerInteractionType>(request.Type, ignoreCase: true),
+            OccurredAt = request.OccurredAt == default ? DateTime.UtcNow : request.OccurredAt,
+            Summary = request.Summary.Trim(),
+            AuthorUserId = userId
+        };
+
+        _db.CustomerInteractions.Add(interaction);
+        await _db.SaveChangesAsync(ct);
+
+        return new CustomerInteractionDto
+        {
+            Id = interaction.Id,
+            CustomerId = interaction.CustomerId,
+            Type = interaction.Type.ToString(),
+            OccurredAt = interaction.OccurredAt,
+            Summary = interaction.Summary,
+            AuthorUserId = interaction.AuthorUserId
+        };
+    }
+
+    private static string? NormalizeOptional(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        return value.Trim();
+    }
+
+    private static CustomerStatus ParseStatus(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return CustomerStatus.Active;
+        return Enum.Parse<CustomerStatus>(raw, ignoreCase: true);
+    }
+}
