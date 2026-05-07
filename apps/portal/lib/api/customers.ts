@@ -26,10 +26,10 @@ export interface CustomerVehicle {
   id: string;
   make: string;
   model: string;
-  year: number;
-  licensePlate: string;
+  year: number | null;
+  licensePlate: string | null;
   currentMileage: number;
-  engineType: string;
+  engineType: string | null;
   photoFileId: string | null;
 }
 

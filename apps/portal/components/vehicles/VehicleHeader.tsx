@@ -62,15 +62,23 @@ export function VehicleHeader({
               <h1 className="text-2xl font-semibold tracking-tight">
                 {vehicle.make} {vehicle.model}
               </h1>
-              <StatusBadge tone={ENGINE_TONE[vehicle.engineType]}>
-                {engineTypeLabels[vehicle.engineType]}
-              </StatusBadge>
+              {vehicle.engineType && (
+                <StatusBadge tone={ENGINE_TONE[vehicle.engineType]}>
+                  {engineTypeLabels[vehicle.engineType]}
+                </StatusBadge>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              <span className="rounded bg-muted px-1.5 py-0.5 font-mono uppercase">
-                {vehicle.licensePlate}
-              </span>
-              <span>{vehicle.year}</span>
+              {vehicle.licensePlate ? (
+                <span className="rounded bg-muted px-1.5 py-0.5 font-mono uppercase">
+                  {vehicle.licensePlate}
+                </span>
+              ) : (
+                <span className="italic text-muted-foreground/70">
+                  Sans immatriculation
+                </span>
+              )}
+              {vehicle.year !== null && <span>{vehicle.year}</span>}
               <span className="inline-flex items-center gap-1">
                 <Car className="size-3.5" />
                 <Link

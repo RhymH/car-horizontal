@@ -42,12 +42,14 @@ export function VehicleSummaryCard({ vehicle }: { vehicle: VehicleDetail }) {
             {vehicle.customerFullName || "Inconnu"}
           </Link>
         </Row>
-        <Row label="Année">{vehicle.year}</Row>
+        <Row label="Année">{vehicle.year ?? "—"}</Row>
         <Row label="VIN">
           <span className="font-mono text-xs">{vehicle.vin || "—"}</span>
         </Row>
         <Row label="Couleur">{vehicle.color || "—"}</Row>
-        <Row label="Type de moteur">{engineTypeLabels[vehicle.engineType]}</Row>
+        <Row label="Type de moteur">
+          {vehicle.engineType ? engineTypeLabels[vehicle.engineType] : "—"}
+        </Row>
         <Row label="Boîte de vitesses">
           {transmissionLabel(vehicle.transmissionType) || "—"}
         </Row>

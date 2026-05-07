@@ -35,18 +35,16 @@ export interface VehicleFormDialogProps {
   onSaved?: (vehicle: VehicleDetail) => void;
 }
 
-const CURRENT_YEAR = new Date().getFullYear();
-
 function buildDefaults(defaultCustomerId?: string): VehicleFormValues {
   return {
     customerId: defaultCustomerId ?? "",
     make: "",
     model: "",
-    year: CURRENT_YEAR,
+    year: null,
     licensePlate: "",
     vin: "",
     color: "",
-    engineType: "Gasoline",
+    engineType: null,
     transmissionType: undefined,
     purchasedAt: "",
     currentMileage: 0,
@@ -61,8 +59,8 @@ function toFormValues(v: VehicleDetail): VehicleFormValues {
     customerId: v.customerId,
     make: v.make,
     model: v.model,
-    year: v.year,
-    licensePlate: v.licensePlate,
+    year: v.year ?? null,
+    licensePlate: v.licensePlate ?? "",
     vin: v.vin ?? "",
     color: v.color ?? "",
     engineType: v.engineType,
@@ -114,17 +112,19 @@ export function VehicleFormDialog({
         ? new Date(values.purchasedAt).toISOString()
         : undefined;
 
+      const plate = emptyToUndefined(values.licensePlate)?.toUpperCase() ?? null;
+
       if (isEdit) {
         const previousModelId = mode.vehicle.vehicleModelId;
         return vehiclesApi.update(mode.vehicle.id, {
           customerId: values.customerId,
           make: values.make.trim(),
           model: values.model.trim(),
-          year: values.year,
-          licensePlate: values.licensePlate.trim().toUpperCase(),
+          year: values.year ?? null,
+          licensePlate: plate,
           vin: emptyToUndefined(values.vin),
           color: emptyToUndefined(values.color),
-          engineType: values.engineType,
+          engineType: values.engineType ?? null,
           transmissionType: emptyToUndefined(values.transmissionType),
           purchasedAt,
           vehicleModelId: values.vehicleModelId ?? undefined,
@@ -136,11 +136,11 @@ export function VehicleFormDialog({
         customerId: values.customerId,
         make: values.make.trim(),
         model: values.model.trim(),
-        year: values.year,
-        licensePlate: values.licensePlate.trim().toUpperCase(),
+        year: values.year ?? null,
+        licensePlate: plate,
         vin: emptyToUndefined(values.vin),
         color: emptyToUndefined(values.color),
-        engineType: values.engineType,
+        engineType: values.engineType ?? null,
         transmissionType: emptyToUndefined(values.transmissionType),
         purchasedAt,
         currentMileage: values.currentMileage,

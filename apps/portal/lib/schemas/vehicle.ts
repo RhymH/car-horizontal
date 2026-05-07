@@ -34,17 +34,19 @@ export const vehicleFormSchema = z.object({
     .min(1, { error: "Modèle requis." })
     .max(80, { error: "80 caractères maximum." }),
   year: z
-    .number({ error: "Année requise." })
+    .number()
     .int()
     .min(MIN_YEAR, { error: `Année ≥ ${MIN_YEAR}.` })
-    .max(MAX_YEAR, { error: `Année ≤ ${MAX_YEAR}.` }),
+    .max(MAX_YEAR, { error: `Année ≤ ${MAX_YEAR}.` })
+    .nullable()
+    .optional(),
   licensePlate: z
     .string()
-    .min(1, { error: "Immatriculation requise." })
-    .max(20, { error: "20 caractères maximum." }),
+    .max(20, { error: "20 caractères maximum." })
+    .optional(),
   vin: z.string().max(40).optional(),
   color: z.string().max(40).optional(),
-  engineType: z.enum(engineTypes),
+  engineType: z.enum(engineTypes).nullable().optional(),
   transmissionType: z.string().max(40).optional(),
   purchasedAt: z.string().optional(),
   currentMileage: z

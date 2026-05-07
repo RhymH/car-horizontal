@@ -16,11 +16,11 @@ export interface VehicleListItem {
   customerFullName: string;
   make: string;
   model: string;
-  year: number;
-  licensePlate: string;
+  year: number | null;
+  licensePlate: string | null;
   currentMileage: number;
   mileageUpdatedAt: string;
-  engineType: EngineTypeApi;
+  engineType: EngineTypeApi | null;
   photoFileId: string | null;
 }
 
@@ -68,12 +68,12 @@ export interface VehicleDetail {
   customerFullName: string;
   make: string;
   model: string;
-  year: number;
+  year: number | null;
   vin: string | null;
-  licensePlate: string;
+  licensePlate: string | null;
   currentMileage: number;
   mileageUpdatedAt: string;
-  engineType: EngineTypeApi;
+  engineType: EngineTypeApi | null;
   transmissionType: string | null;
   purchasedAt: string | null;
   color: string | null;
@@ -138,11 +138,11 @@ export interface CreateVehiclePayload {
   customerId: string;
   make: string;
   model: string;
-  year: number;
+  year?: number | null;
   vin?: string;
-  licensePlate: string;
+  licensePlate?: string | null;
   currentMileage: number;
-  engineType: EngineTypeApi;
+  engineType?: EngineTypeApi | null;
   transmissionType?: string;
   purchasedAt?: string;
   color?: string;

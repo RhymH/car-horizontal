@@ -149,10 +149,14 @@ export function VehiclesTable({
                       {row.make} {row.model}
                     </TableCell>
                     <TableCell className="hidden sm:table-cell text-center tabular-nums text-muted-foreground">
-                      {row.year}
+                      {row.year ?? "—"}
                     </TableCell>
                     <TableCell className="font-mono text-sm uppercase">
-                      {row.licensePlate}
+                      {row.licensePlate ?? (
+                        <span className="font-sans text-xs italic normal-case text-muted-foreground">
+                          —
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell
                       className="hidden md:table-cell text-muted-foreground"
@@ -169,9 +173,15 @@ export function VehiclesTable({
                       {numberFormatter.format(row.currentMileage)} km
                     </TableCell>
                     <TableCell className="hidden xl:table-cell">
-                      <StatusBadge tone={ENGINE_TONE[row.engineType]}>
-                        {engineTypeLabels[row.engineType]}
-                      </StatusBadge>
+                      {row.engineType ? (
+                        <StatusBadge tone={ENGINE_TONE[row.engineType]}>
+                          {engineTypeLabels[row.engineType]}
+                        </StatusBadge>
+                      ) : (
+                        <span className="text-xs italic text-muted-foreground">
+                          —
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <RowActions

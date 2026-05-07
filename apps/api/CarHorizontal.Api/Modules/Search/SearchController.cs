@@ -58,7 +58,7 @@ public class SearchController : ControllerBase
         var vehicles = await _db.Vehicles
             .AsNoTracking()
             .Where(v =>
-                (plateRegex != null && Regex.IsMatch(v.LicensePlate, plateRegex, RegexOptions.IgnoreCase))
+                (plateRegex != null && v.LicensePlate != null && Regex.IsMatch(v.LicensePlate, plateRegex, RegexOptions.IgnoreCase))
                 || EF.Functions.ILike(v.Make, pattern)
                 || EF.Functions.ILike(v.Model, pattern))
             .OrderBy(v => v.LicensePlate)

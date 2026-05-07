@@ -117,7 +117,7 @@ public class CustomerService : ICustomerService
                 Year = v.Year,
                 LicensePlate = v.LicensePlate,
                 CurrentMileage = v.CurrentMileage,
-                EngineType = v.EngineType.ToString(),
+                EngineType = v.EngineType.HasValue ? v.EngineType.Value.ToString() : null,
                 PhotoFileId = v.PhotoFileId
             })
             .ToListAsync(ct);

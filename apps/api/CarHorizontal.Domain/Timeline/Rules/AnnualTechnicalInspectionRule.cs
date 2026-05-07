@@ -13,22 +13,26 @@ public sealed class AnnualTechnicalInspectionRule : IRule
 
     public bool Applies(RuleContext context)
     {
-        var ageYears = context.Now.Year - context.Vehicle.Year;
+        // Without a year of registration we can't infer technical-inspection age.
+        if (!context.Vehicle.Year.HasValue) return false;
+        var ageYears = context.Now.Year - context.Vehicle.Year.Value;
         return ageYears >= 4;
     }
 
     public IEnumerable<TimelineEvent> Generate(RuleContext context)
     {
         var vehicle = context.Vehicle;
+        if (!vehicle.Year.HasValue) yield break;
+        var year = vehicle.Year.Value;
 
         var anchor = vehicle.PurchasedAt
-            ?? new DateTime(vehicle.Year, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+            ?? new DateTime(year, 6, 1, 0, 0, 0, DateTimeKind.Utc);
         if (anchor.Kind != DateTimeKind.Utc)
         {
             anchor = DateTime.SpecifyKind(anchor, DateTimeKind.Utc);
         }
 
-        var ageYears = context.Now.Year - vehicle.Year;
+        var ageYears = context.Now.Year - year;
         DateTime nextInspection;
 
         if (ageYears < 4)

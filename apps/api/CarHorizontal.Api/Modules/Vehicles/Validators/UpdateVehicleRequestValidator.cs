@@ -9,7 +9,9 @@ public class UpdateVehicleRequestValidator : AbstractValidator<UpdateVehicleRequ
     {
         RuleFor(x => x.Make).MaximumLength(80).When(x => x.Make is not null);
         RuleFor(x => x.Model).MaximumLength(80).When(x => x.Model is not null);
-        RuleFor(x => x.LicensePlate).NotEmpty().MaximumLength(20).When(x => x.LicensePlate is not null);
+        RuleFor(x => x.LicensePlate)
+            .MaximumLength(20)
+            .When(x => !string.IsNullOrWhiteSpace(x.LicensePlate));
         RuleFor(x => x.Vin).MaximumLength(40);
         RuleFor(x => x.TransmissionType).MaximumLength(40);
         RuleFor(x => x.Color).MaximumLength(40);

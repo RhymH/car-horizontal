@@ -24,9 +24,9 @@ public class CustomerVehicleDto
     public Guid Id { get; set; }
     public string Make { get; set; } = string.Empty;
     public string Model { get; set; } = string.Empty;
-    public int Year { get; set; }
-    public string LicensePlate { get; set; } = string.Empty;
+    public int? Year { get; set; }
+    public string? LicensePlate { get; set; }
     public int CurrentMileage { get; set; }
-    public string EngineType { get; set; } = string.Empty;
+    public string? EngineType { get; set; }
     public Guid? PhotoFileId { get; set; }
 }

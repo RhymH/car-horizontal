@@ -173,19 +173,23 @@ export function VehicleForm({
         />
       </Field>
 
-      <Field label="Année *" error={errors.year?.message}>
+      <Field label="Année" error={errors.year?.message}>
         <Input
           type="number"
-          {...register("year", { valueAsNumber: true })}
+          {...register("year", {
+            setValueAs: (v) =>
+              v === "" || v === null || v === undefined ? null : Number(v),
+          })}
           min={1950}
+          placeholder="Optionnel"
         />
       </Field>
 
-      <Field label="Immatriculation *" error={errors.licensePlate?.message}>
+      <Field label="Immatriculation" error={errors.licensePlate?.message}>
         <Input
           {...register("licensePlate")}
           className="uppercase"
-          placeholder="AB-123-CD"
+          placeholder="AB-123-CD (optionnel)"
         />
       </Field>
 
@@ -197,20 +201,23 @@ export function VehicleForm({
         <Input {...register("color")} placeholder="Gris foncé" />
       </Field>
 
-      <Field label="Type de moteur *" error={errors.engineType?.message}>
+      <Field label="Type de moteur" error={errors.engineType?.message}>
         <Controller
           control={control}
           name="engineType"
           render={({ field }) => (
             <Select
-              items={engineTypeLabels}
-              value={field.value}
-              onValueChange={(v) => v && field.onChange(v as EngineType)}
+              items={{ __none: "—", ...engineTypeLabels }}
+              value={field.value ?? "__none"}
+              onValueChange={(v) =>
+                field.onChange(v === "__none" ? null : (v as EngineType))
+              }
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue placeholder="—" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="__none">—</SelectItem>
                 {engineTypes.map((e) => (
                   <SelectItem key={e} value={e}>
                     {engineTypeLabels[e]}

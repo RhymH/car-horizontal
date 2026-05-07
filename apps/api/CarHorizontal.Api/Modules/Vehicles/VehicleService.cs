@@ -48,7 +48,7 @@ public class VehicleService : IVehicleService
             var pattern = $"%{s}%";
             var plateRegex = PlateSearch.BuildLikeRegex(s);
             query = query.Where(v =>
-                (plateRegex != null && Regex.IsMatch(v.LicensePlate, plateRegex, RegexOptions.IgnoreCase))
+                (plateRegex != null && v.LicensePlate != null && Regex.IsMatch(v.LicensePlate, plateRegex, RegexOptions.IgnoreCase))
                 || EF.Functions.ILike(v.Make, pattern)
                 || EF.Functions.ILike(v.Model, pattern)
                 || (v.Vin != null && EF.Functions.ILike(v.Vin, pattern)));
@@ -115,7 +115,7 @@ public class VehicleService : IVehicleService
                 LicensePlate = x.LicensePlate,
                 CurrentMileage = x.CurrentMileage,
                 MileageUpdatedAt = x.MileageUpdatedAt,
-                EngineType = x.EngineType.ToString(),
+                EngineType = x.EngineType?.ToString(),
                 PhotoFileId = x.PhotoFileId
             }).ToList()
         };
@@ -204,7 +204,7 @@ public class VehicleService : IVehicleService
             LicensePlate = vehicle.LicensePlate,
             CurrentMileage = vehicle.CurrentMileage,
             MileageUpdatedAt = vehicle.MileageUpdatedAt,
-            EngineType = vehicle.EngineType.ToString(),
+            EngineType = vehicle.EngineType?.ToString(),
             TransmissionType = vehicle.TransmissionType,
             PurchasedAt = vehicle.PurchasedAt,
             Color = vehicle.Color,
@@ -229,7 +229,12 @@ public class VehicleService : IVehicleService
         if (!customerExists) throw new KeyNotFoundException($"Customer {request.CustomerId} not found.");
 
         var plate = NormalizePlate(request.LicensePlate);
-        await EnsurePlateUniqueAsync(orgId, plate, excludingId: null, ct);
+        if (plate is not null)
+            await EnsurePlateUniqueAsync(orgId, plate, excludingId: null, ct);
+
+        EngineType? engineType = null;
+        if (!string.IsNullOrWhiteSpace(request.EngineType))
+            engineType = Enum.Parse<EngineType>(request.EngineType, ignoreCase: true);
 
         var vehicle = new Vehicle
         {
@@ -242,7 +247,7 @@ public class VehicleService : IVehicleService
             LicensePlate = plate,
             CurrentMileage = request.CurrentMileage,
             MileageUpdatedAt = DateTime.UtcNow,
-            EngineType = Enum.Parse<EngineType>(request.EngineType, ignoreCase: true),
+            EngineType = engineType,
             TransmissionType = NormalizeOptional(request.TransmissionType),
             PurchasedAt = request.PurchasedAt,
             Color = NormalizeOptional(request.Color),
@@ -303,13 +308,18 @@ public class VehicleService : IVehicleService
             var plate = NormalizePlate(request.LicensePlate);
             if (!string.Equals(plate, vehicle.LicensePlate, StringComparison.Ordinal))
             {
-                await EnsurePlateUniqueAsync(orgId, plate, excludingId: vehicle.Id, ct);
+                if (plate is not null)
+                    await EnsurePlateUniqueAsync(orgId, plate, excludingId: vehicle.Id, ct);
                 vehicle.LicensePlate = plate;
             }
         }
 
         if (request.EngineType is not null)
-            vehicle.EngineType = Enum.Parse<EngineType>(request.EngineType, ignoreCase: true);
+        {
+            vehicle.EngineType = string.IsNullOrWhiteSpace(request.EngineType)
+                ? null
+                : Enum.Parse<EngineType>(request.EngineType, ignoreCase: true);
+        }
         if (request.TransmissionType is not null) vehicle.TransmissionType = NormalizeOptional(request.TransmissionType);
         if (request.PurchasedAt.HasValue) vehicle.PurchasedAt = request.PurchasedAt.Value;
         if (request.Color is not null) vehicle.Color = NormalizeOptional(request.Color);
@@ -586,7 +596,8 @@ public class VehicleService : IVehicleService
         // Denormalise text fields from catalog so legacy lookups still work.
         vehicle.Make = model.Make;
         vehicle.Model = model.Model;
-        if (vehicle.Year == 0) vehicle.Year = model.ProductionStartYear;
+        if (!vehicle.Year.HasValue || vehicle.Year.Value == 0)
+            vehicle.Year = model.ProductionStartYear;
         vehicle.EngineType = model.EngineType;
 
         if (selectedProgramId.HasValue
@@ -616,7 +627,11 @@ public class VehicleService : IVehicleService
         }
     }
 
-    private static string NormalizePlate(string raw) => raw.Trim().ToUpperInvariant();
+    private static string? NormalizePlate(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        return raw.Trim().ToUpperInvariant();
+    }
 
     private static string? NormalizeOptional(string? value)
     {

@@ -10,10 +10,13 @@ public class CreateVehicleRequestValidator : AbstractValidator<CreateVehicleRequ
         RuleFor(x => x.CustomerId).NotEmpty();
         RuleFor(x => x.Make).NotEmpty().MaximumLength(80);
         RuleFor(x => x.Model).NotEmpty().MaximumLength(80);
-        RuleFor(x => x.LicensePlate).NotEmpty().MaximumLength(20);
+        RuleFor(x => x.LicensePlate)
+            .MaximumLength(20)
+            .When(x => !string.IsNullOrWhiteSpace(x.LicensePlate));
 
-        RuleFor(x => x.Year)
+        RuleFor(x => x.Year!.Value)
             .InclusiveBetween(VehicleValidationRules.MinYear, VehicleValidationRules.MaxYear)
+            .When(x => x.Year.HasValue)
             .WithMessage($"Year must be between {VehicleValidationRules.MinYear} and {VehicleValidationRules.MaxYear}.");
 
         RuleFor(x => x.CurrentMileage).GreaterThanOrEqualTo(0);
@@ -23,7 +26,8 @@ public class CreateVehicleRequestValidator : AbstractValidator<CreateVehicleRequ
         RuleFor(x => x.Color).MaximumLength(40);
 
         RuleFor(x => x.EngineType)
-            .Must(VehicleValidationRules.IsValidEngineType)
+            .Must(VehicleValidationRules.IsValidEngineType!)
+            .When(x => !string.IsNullOrWhiteSpace(x.EngineType))
             .WithMessage("EngineType must be one of: Gasoline, Diesel, Hybrid, Electric, LPG.");
     }
 }

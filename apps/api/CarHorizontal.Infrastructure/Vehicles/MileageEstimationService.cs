@@ -149,13 +149,13 @@ public class MileageEstimationService : IMileageEstimationService
         return rate;
     }
 
-    private static double PriorDailyRate(EngineType engineType) => engineType switch
+    private static double PriorDailyRate(EngineType? engineType) => engineType switch
     {
         EngineType.Diesel => 47,
         EngineType.Hybrid => 38,
         EngineType.Electric => 36,
         EngineType.LPG => 47,
-        _ => 33 // Gasoline / default
+        _ => 33 // Gasoline / unknown / default
     };
 
     private static DateTime EnsureUtc(DateTime value)

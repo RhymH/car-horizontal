@@ -10,10 +10,10 @@ export interface SearchCustomer {
 export interface SearchVehicle {
   id: string;
   customerId: string;
-  licensePlate: string;
+  licensePlate: string | null;
   make: string;
   model: string;
-  year: number;
+  year: number | null;
 }
 
 export interface SearchResults {
