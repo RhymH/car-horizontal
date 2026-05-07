@@ -39,4 +39,7 @@ export const queryKeys = {
   loyalty: {
     leaderboard: () => ["loyalty", "leaderboard"] as const,
   },
+  search: {
+    global: (q: string) => ["search", "global", q] as const,
+  },
 } as const;

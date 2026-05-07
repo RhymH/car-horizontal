@@ -1,18 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { Car, Loader2, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
+import { searchApi } from "@/lib/api/search";
+import { queryKeys } from "@/lib/query/keys";
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 
 export function GlobalSearch() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const debounced = useDebouncedValue(value, 250);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -24,6 +35,28 @@ export function GlobalSearch() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (!next) setValue("");
+  };
+
+  const enabled = open && debounced.trim().length >= 2;
+  const query = useQuery({
+    queryKey: queryKeys.search.global(debounced.trim()),
+    queryFn: ({ signal }) => searchApi.search(debounced.trim(), signal),
+    enabled,
+    staleTime: 5_000,
+  });
+
+  const customers = query.data?.customers ?? [];
+  const vehicles = query.data?.vehicles ?? [];
+  const showHint = debounced.trim().length < 2;
+
+  const navigate = (path: string) => {
+    setOpen(false);
+    router.push(path);
+  };
 
   return (
     <>
@@ -39,20 +72,83 @@ export function GlobalSearch() {
           ⌘K
         </kbd>
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Rechercher</DialogTitle>
-          </DialogHeader>
-          <Input
+      <CommandDialog
+        open={open}
+        onOpenChange={handleOpenChange}
+        title="Recherche globale"
+        description="Trouvez un client ou un véhicule"
+        className="sm:max-w-xl"
+      >
+        <Command shouldFilter={false}>
+          <CommandInput
             placeholder="Client, véhicule, immatriculation…"
+            value={value}
+            onValueChange={setValue}
             autoFocus
           />
-          <p className="text-xs text-muted-foreground">
-            La recherche globale sera connectée dans une prochaine itération.
-          </p>
-        </DialogContent>
-      </Dialog>
+          <CommandList>
+          {showHint ? (
+            <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+              Tapez au moins 2 caractères.
+            </div>
+          ) : query.isFetching ? (
+            <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" />
+              Recherche…
+            </div>
+          ) : (
+            <>
+              {customers.length === 0 && vehicles.length === 0 ? (
+                <CommandEmpty>Aucun résultat.</CommandEmpty>
+              ) : null}
+              {customers.length > 0 && (
+                <CommandGroup heading="Clients">
+                  {customers.map((c) => (
+                    <CommandItem
+                      key={`c-${c.id}`}
+                      value={`client ${c.fullName} ${c.email ?? ""} ${c.phone ?? ""}`}
+                      onSelect={() => navigate(`/clients/${c.id}`)}
+                    >
+                      <User className="text-muted-foreground" />
+                      <div className="flex flex-col">
+                        <span className="font-medium">{c.fullName}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {c.email ?? c.phone ?? "—"}
+                        </span>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+              {customers.length > 0 && vehicles.length > 0 && (
+                <CommandSeparator />
+              )}
+              {vehicles.length > 0 && (
+                <CommandGroup heading="Véhicules">
+                  {vehicles.map((v) => (
+                    <CommandItem
+                      key={`v-${v.id}`}
+                      value={`vehicule ${v.licensePlate} ${v.make} ${v.model}`}
+                      onSelect={() => navigate(`/vehicles/${v.id}`)}
+                    >
+                      <Car className="text-muted-foreground" />
+                      <div className="flex flex-col">
+                        <span className="font-medium font-mono uppercase">
+                          {v.licensePlate}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {v.make} {v.model} · {v.year}
+                        </span>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+            </>
+          )}
+          </CommandList>
+        </Command>
+      </CommandDialog>
     </>
   );
 }
