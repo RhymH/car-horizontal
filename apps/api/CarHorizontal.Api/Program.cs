@@ -1,9 +1,8 @@
 using CarHorizontal.Api.Common;
-using CarHorizontal.Domain.Entities.Identity;
+using CarHorizontal.Api.Modules.Auth;
 using CarHorizontal.Infrastructure;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Persistence.Seed;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,20 +14,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddCarHorizontalInfrastructure(builder.Configuration);
-
-builder.Services
-    .AddIdentityCore<AppUser>(options =>
-    {
-        options.Password.RequiredLength = 10;
-        options.Password.RequireDigit = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireNonAlphanumeric = true;
-        options.User.RequireUniqueEmail = true;
-    })
-    .AddRoles<IdentityRole<Guid>>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddCarHorizontalAuth(builder.Configuration);
 
 builder.Services.AddScoped<DevSeeder>();
 
@@ -54,6 +40,7 @@ if (builder.Configuration.GetValue<bool>("Database:RunMigrationsOnStartup"))
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
