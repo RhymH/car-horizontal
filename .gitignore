@@ -1,0 +1,131 @@
+# =========================================================
+#  CarHorizontal — combined .gitignore (.NET + Node + IDE)
+# =========================================================
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---------- IDE / Editors ----------
+.vscode/
+.vs/
+.idea/
+*.swp
+*.swo
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.code-workspace
+
+# ---------- Logs ----------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- Environment / secrets ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+appsettings.Development.local.json
+appsettings.Local.json
+appsettings.*.local.json
+
+# =========================================================
+#  .NET / C#
+# =========================================================
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+build/
+bld/
+[Ll]og/
+[Ll]ogs/
+.dotnet/
+
+# Build results
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Visual Studio cache/options
+*.cache
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+
+# Rider
+.idea/
+*.sln.iml
+
+# =========================================================
+#  Node.js / Next.js
+# =========================================================
+node_modules/
+.pnp
+.pnp.js
+.pnp.cjs
+.yarn/install-state.gz
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Build / cache
+.cache/
+.turbo/
+.parcel-cache/
+.swc/
+.eslintcache
+.stylelintcache
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.tsbuildinfo
+
+# =========================================================
+#  Docker
+# =========================================================
+*.pid
+
+# =========================================================
+#  Tooling outputs
+# =========================================================
+.docker-build/
