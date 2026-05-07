@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { ToastDemoButton } from "@/components/landing/toast-demo-button";
 
 export default function HomePage() {
   return (
@@ -14,8 +13,8 @@ export default function HomePage() {
             Le CRM des garages, pensé pour la mécanique.
           </h1>
           <p className="text-lg text-muted-foreground">
-            Fiches clients, historique d&apos;entretien, rappels automatiques
-            et rendez-vous — tout au même endroit.
+            Fiches clients, historique d&apos;entretien, rappels automatiques et
+            rendez-vous — tout au même endroit.
           </p>
         </div>
 
@@ -29,7 +28,6 @@ export default function HomePage() {
           >
             Créer un compte
           </Link>
-          <ToastDemoButton />
         </div>
       </main>
     </div>

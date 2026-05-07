@@ -953,6 +953,126 @@ Et **projeter ces règles** sur l'historique réel de chaque véhicule pour gén
 - **Acceptance** : un garage qui n'a rien configuré reçoit déjà des messages **utiles et précis**.
 - **Depends on** : T091, T7.5-D
 
+### T7.5-M — Estimation kilométrique : domaine + service 🚨 BLOQUANT pour ProgramExecutorRule
+
+> **Pourquoi c'est critique** : sans estimation, le système ne peut envoyer un rappel
+> "filtre carburant @ 60 000 km" qu'au moment où le garage *saisit* manuellement les
+> 60 000 km — donc *après* l'échéance. La promesse "le logiciel anticipe" ne tient pas.
+
+- **Files** :
+  - `Domain/Entities/Vehicles/VehicleMileageReading.cs` (table d'historique)
+  - `Domain/Vehicles/MileageEstimate.cs` (record `EstimatedKm, Confidence, BasedOnReadings, DailyRate, AsOf`)
+  - `Domain/Vehicles/MileageConfidence.cs` enum (`High|Medium|Low`)
+  - `Domain/Vehicles/MileageReadingSource.cs` enum (`Manual|MaintenanceRecord|CustomerSelfReport|TechnicalInspection|Estimate|VinDecoder`)
+  - `Domain/Vehicles/IMileageEstimationService.cs` interface
+  - `Infrastructure/Vehicles/MileageEstimationService.cs` impl
+- **Champs `VehicleMileageReading`** : `Id, VehicleId, Mileage (int), ObservedAt (UtcNow par défaut), Source, RecordedAt, RecordedBy?, Notes?`
+- **Backfill au moment de la migration** :
+  - À la création de la table : insérer un `VehicleMileageReading` par véhicule existant à partir de `Vehicle.CurrentMileage` + `MileageUpdatedAt` (source `Manual`)
+  - Insérer un `VehicleMileageReading` par `MaintenanceRecord` existant (source `MaintenanceRecord`)
+- **Hooks d'écriture** (à brancher dans les services existants) :
+  - `VehicleService.UpdateMileageAsync` → crée un reading `Manual`
+  - `MaintenanceService.CreateAsync` → crée un reading `MaintenanceRecord`
+  - `Vehicle` création avec `CurrentMileage > 0` → crée un reading `Manual`
+- **Algorithme `EstimateAtAsync(vehicleId, asOf)`** :
+  ```
+  readings = GetReadings(vehicleId).OrderBy(ObservedAt).ToList()
+  
+  if (readings.Count == 0):
+      // Prior par défaut basé sur fuel/usage
+      anchorDate = vehicle.PurchasedAt ?? vehicle.CreatedAt
+      anchorKm = 0
+      dailyRate = PriorDailyRate(vehicle.EngineType, vehicle.IsCommercial)
+      confidence = Low
+  
+  elif (readings.Count == 1):
+      anchorDate = readings[0].ObservedAt
+      anchorKm = readings[0].Mileage
+      dailyRate = PriorDailyRate(vehicle.EngineType, vehicle.IsCommercial)
+      confidence = (asOf - anchorDate).Days < 30 ? High : (Days < 180 ? Medium : Low)
+  
+  else:
+      // Régression pondérée : poids = exp(-(now - observed).days / 365)
+      // dailyRate = sum(weight * delta_km) / sum(weight * delta_days)
+      // ancrer sur le reading le plus récent
+      mostRecent = readings.Last()
+      anchorDate = mostRecent.ObservedAt
+      anchorKm = mostRecent.Mileage
+      dailyRate = WeightedRate(readings)  // entre 5 et 200 km/j, clamp
+      ageOfMostRecent = (asOf - mostRecent.ObservedAt).Days
+      confidence = ageOfMostRecent < 30 ? High : (ageOfMostRecent < 180 ? Medium : Low)
+  
+  estimated = anchorKm + (asOf - anchorDate).TotalDays * dailyRate
+  // Cap : ne JAMAIS estimer en-dessous du dernier reading observé
+  estimated = Max(estimated, readings.LastOrDefault()?.Mileage ?? 0)
+  // Et un cap haut raisonnable : max 1 000 000 km (anti-divergence)
+  estimated = Min(estimated, 1_000_000)
+  
+  return new MileageEstimate(estimated, confidence, readings.Count, dailyRate, asOf)
+  ```
+- **Constantes `PriorDailyRate`** :
+  - Petrol particulier : 33 km/j (~12 000 km/an)
+  - Diesel particulier : 47 km/j (~17 000 km/an)
+  - Utility/Commercial : 70 km/j (~25 000 km/an)
+  - Hybrid : 38 km/j
+  - Electric : 36 km/j
+  - LPG : 47 km/j
+  - **Override par organisation** possible plus tard (T7.5-O), mais pas MVP.
+- **Acceptance** :
+  - Test : véhicule sans aucun reading → estimation linéaire à partir du `PurchasedAt` avec prior
+  - Test : véhicule avec 2 readings (50 000 km @ J-180, 56 000 km @ J-30) → daily rate ~22 km/j, estimation à J+0 ≈ 56 660 km, confidence Medium
+  - Test : véhicule électrique sans aucun reading → ne diverge pas
+  - Test : appel `EstimateAtAsync` 1000x sur 10 000 véhicules < 5s (perf — utiliser un cache mémoire avec invalidation)
+- **Depends on** : T7.5-A
+
+### T7.5-N — Brancher l'estimation dans `ProgramExecutorRule` + politique de buffer
+
+- **Files** : `Domain/Timeline/Rules/ProgramExecutorRule.cs`, `Infrastructure/Timeline/TimelineEngine.cs`.
+- **Implémentation** :
+  - Injecter `IMileageEstimationService`.
+  - Pour chaque item km-based, calculer `currentEstimate = await _mileage.EstimateAtAsync(vehicle.Id, context.Now)`.
+  - **Buffer de sécurité** par confidence (déclencher le `TimelineEvent` "à venir bientôt" un peu en avance) :
+    - `High` confidence : buffer = **1 500 km** ou **30 jours** avant l'échéance
+    - `Medium` : buffer = **3 000 km** ou **45 jours**
+    - `Low` : buffer = **5 000 km** ou **60 jours**
+  - Calculer également `estimatedDueAt` (date à laquelle, au rythme actuel, la voiture atteindra `dueKm`) — utile pour ordonner la timeline et pour le contenu des messages.
+  - Stocker dans `TimelineEvent` : `EstimatedDueAt (DateTime?)`, `EstimatedKmRemaining (int?)`, `MileageConfidenceAtGeneration (string?)` — pour l'UI puisse l'afficher.
+- **Idempotence** : si une nouvelle estimation décale `estimatedDueAt` de plus de 30 jours par rapport à l'event existant, mettre à jour l'event au lieu d'en créer un nouveau.
+- **Job auto-refresh** (T100) : `daily-timeline-regeneration` recalcule **toutes les estimations** chaque nuit pour les véhicules actifs → invalidation propagée aux events existants.
+- **Acceptance** :
+  - Sur la Clio dCi de l'exemple (47 000 km @ J-90, ~58 km/j, filtre @ 60 000 km) → un `TimelineEvent` "Filtre carburant à venir" est généré dès aujourd'hui (estimation ~52 220 km, soit dans ~134 jours / ~7 800 km — déclenchement à `60 000 - 3 000 = 57 000` km soit dans ~83 jours).
+  - Test : pour un véhicule avec confidence Low, le rappel se déclenche encore plus tôt (buffer 5 000 km).
+- **Depends on** : T7.5-D, T7.5-M
+
+### T7.5-O — Auto-refresh kilométrage : message client + UI fraîcheur
+
+- **Files** :
+  - `Api/Modules/Vehicles/MileageCheckController.cs` (endpoints publics signed-link)
+  - `apps/portal/app/mileage-check/[token]/page.tsx` (page publique non-authentifiée)
+  - `apps/portal/components/vehicles/MileageEstimateCard.tsx` (composant fiche véhicule)
+  - `Api/Jobs/EnsureMileageFreshnessJob.cs` (Hangfire)
+- **Mécaniques** :
+  1. **Hangfire job hebdo** : balaye les véhicules actifs avec `confidence Low` (lecture > 180 jours) → planifie un `Reminder` SMS/email "Bonjour {firstName}, pour bien suivre votre {modelDisplayName}, pourriez-vous nous indiquer votre kilométrage actuel ? [Cliquer ici]" avec un signed-token URL valide 30 jours.
+  2. **Page publique** `/mileage-check/[token]` : un seul champ "Mon kilométrage actuel" + bouton "Envoyer". Pas d'auth. Le token résout vehicleId + organizationId, vérifie expiration. POST → crée un `VehicleMileageReading` source `CustomerSelfReport`, recalcule la timeline, montre un message de confirmation chaleureux ("Merci ! Nous reviendrons vers vous au bon moment.").
+  3. **Throttling** : un seul mileage-check par véhicule par 90 jours, et jamais si dernière lecture < 60 jours.
+  4. **Préférence org** : switch dans Settings → "Demander automatiquement le kilométrage aux clients silencieux" (par défaut ON).
+- **UI fiche véhicule** : composant `MileageEstimateCard` au-dessus du bouton "Mettre à jour kilométrage" :
+  ```
+  ┌─────────────────────────────────────────────────────┐
+  │ Kilométrage estimé aujourd'hui                      │
+  │ ~52 800 km   (confiance moyenne)                    │
+  │                                                     │
+  │ Vu à 47 000 km il y a 3 mois — ~58 km/jour          │
+  │ [Mettre à jour] [Demander au client]                │
+  └─────────────────────────────────────────────────────┘
+  ```
+  - "Demander au client" déclenche manuellement un mileage-check.
+  - Badge couleur selon confidence : vert (High), jaune (Medium), orange (Low).
+- **Acceptance** :
+  - Un véhicule sans nouvelles depuis 7 mois → message envoyé auto, lien fonctionne, mise à jour propage aux events.
+  - Pas de spam : un client ne reçoit pas plus d'1 mileage-check par 90 jours.
+- **Depends on** : T7.5-M, T080 (reminders pour le canal d'envoi), T091 (template `lifecycle.mileage_check.sms/email`)
+
 ### T7.5-L — Dashboard : widget "Charge mentale évitée"
 
 - **Goal** : montrer la valeur perçue.
@@ -1498,7 +1618,14 @@ Pour la navigation :
 6. **Deuxième vertical** (Véhicules) : T050 → T053
 7. **Maintenance** : T060 → T061
 8. **Squelette Timeline** : T070 → T072
-9. **🚨 Catalogue & programmes constructeur (CŒUR PRODUIT)** : T7.5-A → T7.5-G + T7.5-I (préférences renommées). T7.5-H (onboarding wizard) peut attendre la fin de Phase 8.
+9. **🚨 Catalogue & programmes constructeur (CŒUR PRODUIT)** dans cet ordre :
+   1. T7.5-A (entités catalogue) + T7.5-M (estimation kilométrique) en parallèle
+   2. T7.5-B (lien Vehicle ↔ catalogue) + T7.5-C (seed)
+   3. T7.5-E (codes sur MaintenanceRecord)
+   4. T7.5-D (refactor TimelineEngine) + T7.5-N (intégration estimation dans le rule)
+   5. T7.5-F + T7.5-G (UI sélecteur + section programme + carte estimation)
+   6. T7.5-I (renommer "Préférences d'entretien")
+   - T7.5-H (onboarding wizard), T7.5-O (auto-refresh km), T7.5-K (templates par item), T7.5-L (widget dashboard) peuvent venir après Phase 8.
 10. **Reminders intelligents** : T080 → T082 + backfill T7.5-J
 11. **Messaging contextuel** : T090 → T093 + backfill T7.5-K (templates par item)
 12. **Jobs Hangfire** : T100 → T101
