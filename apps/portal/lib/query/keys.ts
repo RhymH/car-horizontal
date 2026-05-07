@@ -32,6 +32,11 @@ export const queryKeys = {
       ["reminders", "list", filters ?? {}] as const,
     today: () => ["reminders", "today"] as const,
   },
+  timeline: {
+    all: () => ["timeline"] as const,
+    list: (filters?: Record<string, unknown>) =>
+      ["timeline", "list", filters ?? {}] as const,
+  },
   appointments: {
     all: () => ["appointments"] as const,
     list: (filters?: Record<string, unknown>) =>

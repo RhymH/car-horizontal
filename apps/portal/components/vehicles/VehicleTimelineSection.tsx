@@ -21,18 +21,16 @@ const STATUS_TONE: Record<
   "success" | "neutral" | "info" | "warning" | "danger"
 > = {
   Pending: "info",
-  Sent: "warning",
+  Triggered: "warning",
   Done: "success",
-  Snoozed: "neutral",
-  Cancelled: "neutral",
+  Skipped: "neutral",
 };
 
 const STATUS_LABEL: Record<TimelineEventStatusApi, string> = {
   Pending: "À faire",
-  Sent: "Rappel envoyé",
+  Triggered: "Déclenché",
   Done: "Fait",
-  Snoozed: "Reporté",
-  Cancelled: "Annulé",
+  Skipped: "Ignoré",
 };
 
 const numberFormatter = new Intl.NumberFormat("fr-FR");
@@ -107,7 +105,7 @@ export function VehicleTimelineSection({
                   variant="ghost"
                   size="sm"
                   onClick={() => onSnooze(event)}
-                  disabled={event.status === "Done" || event.status === "Cancelled"}
+                  disabled={event.status === "Done" || event.status === "Skipped"}
                 >
                   Reporter
                 </Button>
@@ -115,7 +113,7 @@ export function VehicleTimelineSection({
                   variant="ghost"
                   size="sm"
                   onClick={() => onSendReminder(event)}
-                  disabled={event.status === "Done" || event.status === "Cancelled"}
+                  disabled={event.status === "Done" || event.status === "Skipped"}
                 >
                   <Bell />
                   Rappel

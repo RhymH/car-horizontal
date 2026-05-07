@@ -45,10 +45,9 @@ export interface VehicleMaintenance {
 
 export type TimelineEventStatusApi =
   | "Pending"
-  | "Sent"
+  | "Triggered"
   | "Done"
-  | "Snoozed"
-  | "Cancelled";
+  | "Skipped";
 
 export interface VehicleTimelineEvent {
   id: string;
