@@ -23,6 +23,7 @@ import { CustomerVehiclesSection } from "@/components/customers/CustomerVehicles
 import { CustomerInteractionsSection } from "@/components/customers/CustomerInteractionsSection";
 import { CustomerFormDialog } from "@/components/customers/CustomerFormDialog";
 import { AddInteractionDialog } from "@/components/customers/AddInteractionDialog";
+import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "2-digit",
@@ -36,6 +37,7 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [interactionOpen, setInteractionOpen] = useState(false);
+  const [addVehicleOpen, setAddVehicleOpen] = useState(false);
 
   const detail = useQuery({
     queryKey: queryKeys.customers.detail(customerId),
@@ -95,9 +97,7 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
         onEdit={() => setEditOpen(true)}
         onDelete={() => setDeleteOpen(true)}
         onAddInteraction={() => setInteractionOpen(true)}
-        onAddVehicle={() =>
-          toast.info("Ajout de véhicule disponible en Phase 5 (T052).")
-        }
+        onAddVehicle={() => setAddVehicleOpen(true)}
       />
 
       <Tabs defaultValue="overview">
@@ -167,9 +167,7 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
             <div className="lg:col-span-2 space-y-4">
               <CustomerVehiclesSection
                 vehicles={customer.vehicles}
-                onAddVehicle={() =>
-                  toast.info("Ajout de véhicule disponible en Phase 5 (T052).")
-                }
+                onAddVehicle={() => setAddVehicleOpen(true)}
               />
               <CustomerInteractionsSection
                 interactions={customer.recentInteractions}
@@ -198,6 +196,16 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
         open={interactionOpen}
         onOpenChange={setInteractionOpen}
         customerId={customer.id}
+      />
+
+      <VehicleFormDialog
+        open={addVehicleOpen}
+        onOpenChange={setAddVehicleOpen}
+        mode={{
+          kind: "create",
+          defaultCustomerId: customer.id,
+          defaultCustomerLabel: customer.fullName,
+        }}
       />
 
       <ConfirmDialog
