@@ -1,12 +1,5 @@
-import { Users } from "lucide-react";
-import { PageStub } from "@/components/layout/PageStub";
+import { CustomersListView } from "@/components/customers/CustomersListView";
 
 export default function ClientsPage() {
-  return (
-    <PageStub
-      icon={Users}
-      title="Clients"
-      description="Liste, fiche et historique de vos clients."
-    />
-  );
+  return <CustomersListView />;
 }
