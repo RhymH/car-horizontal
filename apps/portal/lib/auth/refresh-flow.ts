@@ -10,7 +10,7 @@ let inflight: Promise<RefreshSuccess | null> | null = null;
 
 async function callRefreshEndpoint(): Promise<RefreshSuccess | null> {
   try {
-    const res = await fetch("/api/_auth/refresh", {
+    const res = await fetch("/api/auth/refresh", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

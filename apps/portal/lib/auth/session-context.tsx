@@ -54,7 +54,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     const token = tokenStore.getAccessToken();
-    await fetch("/api/_auth/logout", {
+    await fetch("/api/auth/logout", {
       method: "POST",
       credentials: "include",
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,

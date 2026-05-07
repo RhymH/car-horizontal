@@ -29,7 +29,7 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async (values) => {
     setSubmitting(true);
     try {
-      const res = await fetch("/api/_auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),

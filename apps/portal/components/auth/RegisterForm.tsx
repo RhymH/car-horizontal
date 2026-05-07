@@ -33,7 +33,7 @@ export function RegisterForm() {
   const onSubmit = handleSubmit(async (values) => {
     setSubmitting(true);
     try {
-      const res = await fetch("/api/_auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
