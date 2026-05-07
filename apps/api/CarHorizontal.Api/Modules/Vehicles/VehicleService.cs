@@ -4,6 +4,7 @@ using CarHorizontal.Api.Modules.Vehicles.Dtos;
 using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Customers;
 using CarHorizontal.Domain.Entities.Vehicles;
+using CarHorizontal.Domain.Vehicles;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Timeline;
 using Microsoft.EntityFrameworkCore;
@@ -15,12 +16,18 @@ public class VehicleService : IVehicleService
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
     private readonly ITimelineEngine _timelineEngine;
+    private readonly IMileageEstimationService _mileageEstimation;
 
-    public VehicleService(AppDbContext db, ICurrentUserService currentUser, ITimelineEngine timelineEngine)
+    public VehicleService(
+        AppDbContext db,
+        ICurrentUserService currentUser,
+        ITimelineEngine timelineEngine,
+        IMileageEstimationService mileageEstimation)
     {
         _db = db;
         _currentUser = currentUser;
         _timelineEngine = timelineEngine;
+        _mileageEstimation = mileageEstimation;
     }
 
     public async Task<VehiclesListResponseDto> ListAsync(VehiclesListRequestDto request, CancellationToken ct = default)
@@ -248,7 +255,23 @@ public class VehicleService : IVehicleService
         }
 
         _db.Vehicles.Add(vehicle);
+
+        if (vehicle.CurrentMileage > 0)
+        {
+            _db.VehicleMileageReadings.Add(new VehicleMileageReading
+            {
+                OrganizationId = orgId,
+                VehicleId = vehicle.Id,
+                Mileage = vehicle.CurrentMileage,
+                ObservedAt = vehicle.MileageUpdatedAt,
+                Source = MileageReadingSource.Manual,
+                RecordedAt = DateTime.UtcNow,
+                RecordedBy = _currentUser.UserId
+            });
+        }
+
         await _db.SaveChangesAsync(ct);
+        _mileageEstimation.InvalidateCache(vehicle.Id);
 
         await _timelineEngine.RunForVehicleAsync(vehicle.Id, ct);
 
@@ -339,8 +362,9 @@ public class VehicleService : IVehicleService
         }
 
         var previous = vehicle.CurrentMileage;
+        var observedAt = DateTime.UtcNow;
         vehicle.CurrentMileage = request.Mileage;
-        vehicle.MileageUpdatedAt = DateTime.UtcNow;
+        vehicle.MileageUpdatedAt = observedAt;
 
         var summary = string.IsNullOrWhiteSpace(request.Note)
             ? $"Kilométrage mis à jour : {previous} → {request.Mileage} km"
@@ -351,12 +375,25 @@ public class VehicleService : IVehicleService
             OrganizationId = orgId,
             CustomerId = vehicle.CustomerId,
             Type = CustomerInteractionType.Note,
-            OccurredAt = DateTime.UtcNow,
+            OccurredAt = observedAt,
             Summary = summary,
             AuthorUserId = userId
         });
 
+        _db.VehicleMileageReadings.Add(new VehicleMileageReading
+        {
+            OrganizationId = orgId,
+            VehicleId = vehicle.Id,
+            Mileage = request.Mileage,
+            ObservedAt = observedAt,
+            Source = MileageReadingSource.Manual,
+            RecordedAt = observedAt,
+            RecordedBy = userId,
+            Notes = NormalizeOptional(request.Note)
+        });
+
         await _db.SaveChangesAsync(ct);
+        _mileageEstimation.InvalidateCache(vehicle.Id);
         return await GetAsync(vehicle.Id, ct);
     }
 

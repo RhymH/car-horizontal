@@ -34,6 +34,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerInteraction> CustomerInteractions => Set<CustomerInteraction>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<VehicleMileageReading> VehicleMileageReadings => Set<VehicleMileageReading>();
     public DbSet<VehicleProgramOverride> VehicleProgramOverrides => Set<VehicleProgramOverride>();
     public DbSet<VehicleModel> VehicleModels => Set<VehicleModel>();
     public DbSet<MaintenanceProgram> MaintenancePrograms => Set<MaintenanceProgram>();

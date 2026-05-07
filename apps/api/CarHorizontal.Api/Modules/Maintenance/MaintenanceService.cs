@@ -2,6 +2,8 @@ using CarHorizontal.Api.Modules.Maintenance.Dtos;
 using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Maintenance;
 using CarHorizontal.Domain.Entities.Timeline;
+using CarHorizontal.Domain.Entities.Vehicles;
+using CarHorizontal.Domain.Vehicles;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Timeline;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +15,18 @@ public class MaintenanceService : IMaintenanceService
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
     private readonly ITimelineEngine _timelineEngine;
+    private readonly IMileageEstimationService _mileageEstimation;
 
-    public MaintenanceService(AppDbContext db, ICurrentUserService currentUser, ITimelineEngine timelineEngine)
+    public MaintenanceService(
+        AppDbContext db,
+        ICurrentUserService currentUser,
+        ITimelineEngine timelineEngine,
+        IMileageEstimationService mileageEstimation)
     {
         _db = db;
         _currentUser = currentUser;
         _timelineEngine = timelineEngine;
+        _mileageEstimation = mileageEstimation;
     }
 
     public async Task<MaintenanceListResponseDto> ListByVehicleAsync(
@@ -103,7 +111,23 @@ public class MaintenanceService : IMaintenanceService
         };
 
         _db.MaintenanceRecords.Add(record);
+
+        if (record.MileageAtService > 0)
+        {
+            _db.VehicleMileageReadings.Add(new VehicleMileageReading
+            {
+                OrganizationId = orgId,
+                VehicleId = vehicle.Id,
+                Mileage = record.MileageAtService,
+                ObservedAt = record.PerformedAt,
+                Source = MileageReadingSource.MaintenanceRecord,
+                RecordedAt = DateTime.UtcNow,
+                RecordedBy = _currentUser.UserId
+            });
+        }
+
         await _db.SaveChangesAsync(ct);
+        _mileageEstimation.InvalidateCache(vehicle.Id);
 
         await SyncTimelineEventAsync(orgId, vehicle.CustomerId, record, ct);
         await _timelineEngine.RunForVehicleAsync(vehicle.Id, ct);
