@@ -7,6 +7,7 @@ internal class DesignTimeCurrentUserService : ICurrentUserService
 {
     public Guid? UserId => null;
     public Guid? OrganizationId => null;
+    public string? Role => null;
     public bool IsAuthenticated => false;
 }
 

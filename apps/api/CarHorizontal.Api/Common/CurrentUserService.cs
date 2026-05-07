@@ -1,4 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using CarHorizontal.Api.Middleware;
 using CarHorizontal.Infrastructure.Persistence;
 
 namespace CarHorizontal.Api.Common;
@@ -16,8 +18,8 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var raw = _accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier)
-                ?? _accessor.HttpContext?.User?.FindFirstValue("sub");
+            var raw = _accessor.HttpContext?.User?.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                ?? _accessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
             return Guid.TryParse(raw, out var id) ? id : null;
         }
     }
@@ -26,8 +28,30 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var raw = _accessor.HttpContext?.User?.FindFirstValue("org_id");
-            return Guid.TryParse(raw, out var id) ? id : null;
+            var ctx = _accessor.HttpContext;
+            if (ctx is null) return null;
+
+            if (ctx.Items.TryGetValue(CurrentOrganizationMiddleware.ValidatedOrgIdItemKey, out var validated)
+                && validated is Guid validatedGuid)
+            {
+                return validatedGuid;
+            }
+
+            return null;
+        }
+    }
+
+    public string? Role
+    {
+        get
+        {
+            var ctx = _accessor.HttpContext;
+            if (ctx is null) return null;
+            if (ctx.Items.TryGetValue(CurrentOrganizationMiddleware.ValidatedRoleItemKey, out var role) && role is string s)
+            {
+                return s;
+            }
+            return ctx.User?.FindFirstValue(ClaimTypes.Role);
         }
     }
 

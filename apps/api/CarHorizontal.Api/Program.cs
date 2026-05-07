@@ -1,4 +1,5 @@
 using CarHorizontal.Api.Common;
+using CarHorizontal.Api.Middleware;
 using CarHorizontal.Api.Modules.Auth;
 using CarHorizontal.Infrastructure;
 using CarHorizontal.Infrastructure.Persistence;
@@ -40,8 +41,10 @@ if (builder.Configuration.GetValue<bool>("Database:RunMigrationsOnStartup"))
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<CurrentOrganizationMiddleware>();
 app.MapControllers();
 
 app.Run();
