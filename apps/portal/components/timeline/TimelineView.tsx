@@ -38,6 +38,7 @@ import {
   type TimelineListParams,
 } from "@/lib/api/timeline";
 import type { TimelineEventStatusApi } from "@/lib/api/vehicles";
+import { remindersApi } from "@/lib/api/reminders";
 import { cn } from "@/lib/utils";
 
 type RangePreset = "week" | "month" | "3months" | "6months" | "all";
@@ -166,6 +167,18 @@ export function TimelineView() {
     },
     onError: (err) =>
       toast.error(extractApiErrorMessage(err, "Suppression impossible.")),
+  });
+
+  const sendReminderMut = useMutation({
+    mutationFn: (id: string) => remindersApi.createFromTimeline(id),
+    onSuccess: async () => {
+      toast.success("Rappel programmé");
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.reminders.all(),
+      });
+    },
+    onError: (err) =>
+      toast.error(extractApiErrorMessage(err, "Création du rappel impossible.")),
   });
 
   const regenerateMut = useMutation({
@@ -336,9 +349,7 @@ export function TimelineView() {
           loading={list.isLoading}
           onComplete={(e) => completeMut.mutate(e.id)}
           onSnooze={(e) => setSnoozeTarget(e)}
-          onSendReminder={() =>
-            toast.info("L'envoi de rappel sera disponible avec la Phase 8.")
-          }
+          onSendReminder={(e) => sendReminderMut.mutate(e.id)}
           onEdit={(e) => setEditTarget(e)}
           onDelete={(e) => setDeleteTarget(e)}
           onSkip={(e) => skipMut.mutate(e.id)}

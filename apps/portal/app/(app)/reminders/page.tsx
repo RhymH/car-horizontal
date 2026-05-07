@@ -1,12 +1,5 @@
-import { Bell } from "lucide-react";
-import { PageStub } from "@/components/layout/PageStub";
+import { RemindersView } from "@/components/reminders/RemindersView";
 
 export default function RemindersPage() {
-  return (
-    <PageStub
-      icon={Bell}
-      title="Rappels"
-      description="Rappels SMS et email automatiques liés aux véhicules de vos clients."
-    />
-  );
+  return <RemindersView />;
 }

@@ -18,6 +18,7 @@ import {
   type MaintenanceTypeApi,
 } from "@/lib/api/maintenance";
 import { timelineApi } from "@/lib/api/timeline";
+import { remindersApi } from "@/lib/api/reminders";
 import { queryKeys } from "@/lib/query/keys";
 import { extractApiErrorMessage } from "@/lib/api/errors";
 import { SnoozeTimelineDialog } from "@/components/timeline/SnoozeTimelineDialog";
@@ -76,6 +77,18 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
       ]);
     },
     onError: (e) => toast.error(extractApiErrorMessage(e, "Action impossible.")),
+  });
+
+  const sendReminderMutation = useMutation({
+    mutationFn: (id: string) => remindersApi.createFromTimeline(id),
+    onSuccess: async () => {
+      toast.success("Rappel programmé");
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.reminders.all(),
+      });
+    },
+    onError: (e) =>
+      toast.error(extractApiErrorMessage(e, "Création du rappel impossible.")),
   });
 
   const deleteMaintenanceMutation = useMutation({
@@ -154,9 +167,7 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
             events={vehicle.timelineEvents}
             onMarkDone={(e) => completeTimelineMutation.mutate(e.id)}
             onSnooze={(e) => setSnoozeTarget(e)}
-            onSendReminder={() =>
-              toast.info("L'envoi de rappel sera disponible avec la Phase 8.")
-            }
+            onSendReminder={(e) => sendReminderMutation.mutate(e.id)}
           />
           <VehicleMaintenanceSection
             records={vehicle.maintenanceRecords}
