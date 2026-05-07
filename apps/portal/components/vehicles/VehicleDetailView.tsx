@@ -7,7 +7,15 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Button } from "@/components/ui/button";
-import { vehiclesApi } from "@/lib/api/vehicles";
+import {
+  vehiclesApi,
+  type VehicleMaintenance,
+} from "@/lib/api/vehicles";
+import {
+  maintenanceApi,
+  type MaintenanceRecord,
+  type MaintenanceTypeApi,
+} from "@/lib/api/maintenance";
 import { queryKeys } from "@/lib/query/keys";
 import { extractApiErrorMessage } from "@/lib/api/errors";
 import { VehicleHeader } from "@/components/vehicles/VehicleHeader";
@@ -16,6 +24,7 @@ import { VehicleTimelineSection } from "@/components/vehicles/VehicleTimelineSec
 import { VehicleMaintenanceSection } from "@/components/vehicles/VehicleMaintenanceSection";
 import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
 import { UpdateMileageDialog } from "@/components/vehicles/UpdateMileageDialog";
+import { MaintenanceFormDialog } from "@/components/maintenance/MaintenanceFormDialog";
 
 export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
   const router = useRouter();
@@ -23,6 +32,13 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [mileageOpen, setMileageOpen] = useState(false);
+  const [maintenanceDialog, setMaintenanceDialog] = useState<
+    | { kind: "create" }
+    | { kind: "edit"; record: MaintenanceRecord }
+    | null
+  >(null);
+  const [maintenanceToDelete, setMaintenanceToDelete] =
+    useState<MaintenanceRecord | null>(null);
 
   const detail = useQuery({
     queryKey: queryKeys.vehicles.detail(vehicleId),
@@ -40,6 +56,36 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
     },
     onError: (e) =>
       toast.error(extractApiErrorMessage(e, "Suppression impossible.")),
+  });
+
+  const deleteMaintenanceMutation = useMutation({
+    mutationFn: (id: string) => maintenanceApi.remove(id),
+    onSuccess: async () => {
+      toast.success("Entretien supprimé");
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.vehicles.detail(vehicleId),
+      });
+      setMaintenanceToDelete(null);
+    },
+    onError: (e) =>
+      toast.error(extractApiErrorMessage(e, "Suppression impossible.")),
+  });
+
+  const toMaintenanceRecord = (
+    m: VehicleMaintenance,
+  ): MaintenanceRecord => ({
+    id: m.id,
+    vehicleId,
+    performedAt: m.performedAt,
+    type: m.type as MaintenanceTypeApi,
+    description: m.description,
+    mileageAtService: m.mileageAtService,
+    cost: m.cost,
+    mechanicName: m.mechanicName,
+    nextDueAt: m.nextDueAt,
+    nextDueMileage: m.nextDueMileage,
+    createdAt: m.performedAt,
+    updatedAt: m.performedAt,
   });
 
   if (detail.isLoading) {
@@ -76,11 +122,7 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
         onEdit={() => setEditOpen(true)}
         onDelete={() => setDeleteOpen(true)}
         onUpdateMileage={() => setMileageOpen(true)}
-        onAddMaintenance={() =>
-          toast.info(
-            "Création d'entretien disponible dans la Phase 6 (T061).",
-          )
-        }
+        onAddMaintenance={() => setMaintenanceDialog({ kind: "create" })}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -102,19 +144,14 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
           />
           <VehicleMaintenanceSection
             records={vehicle.maintenanceRecords}
-            onAdd={() =>
-              toast.info(
-                "Création d'entretien disponible dans la Phase 6 (T061).",
-              )
+            onAdd={() => setMaintenanceDialog({ kind: "create" })}
+            onEdit={(r) =>
+              setMaintenanceDialog({
+                kind: "edit",
+                record: toMaintenanceRecord(r),
+              })
             }
-            onEdit={() =>
-              toast.info("Édition d'entretien disponible dans la Phase 6.")
-            }
-            onDelete={() =>
-              toast.info(
-                "Suppression d'entretien disponible dans la Phase 6.",
-              )
-            }
+            onDelete={(r) => setMaintenanceToDelete(toMaintenanceRecord(r))}
           />
         </div>
       </div>
@@ -140,6 +177,37 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
         variant="destructive"
         onConfirm={async () => {
           await deleteMutation.mutateAsync();
+        }}
+      />
+
+      {maintenanceDialog && (
+        <MaintenanceFormDialog
+          open={!!maintenanceDialog}
+          onOpenChange={(o) => {
+            if (!o) setMaintenanceDialog(null);
+          }}
+          vehicleId={vehicle.id}
+          vehicleCustomerId={vehicle.customerId}
+          vehicleCurrentMileage={vehicle.currentMileage}
+          mode={maintenanceDialog}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!maintenanceToDelete}
+        onOpenChange={(o) => {
+          if (!o) setMaintenanceToDelete(null);
+        }}
+        title="Supprimer cet entretien ?"
+        description="L'intervention et l'éventuel événement timeline associé seront supprimés."
+        confirmLabel="Supprimer"
+        variant="destructive"
+        onConfirm={async () => {
+          if (maintenanceToDelete) {
+            await deleteMaintenanceMutation.mutateAsync(
+              maintenanceToDelete.id,
+            );
+          }
         }}
       />
     </div>

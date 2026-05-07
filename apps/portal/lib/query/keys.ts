@@ -21,6 +21,11 @@ export const queryKeys = {
     byVehicle: (vehicleId: string) =>
       ["history", "by-vehicle", vehicleId] as const,
   },
+  maintenance: {
+    all: () => ["maintenance"] as const,
+    byVehicle: (vehicleId: string, filters?: Record<string, unknown>) =>
+      ["maintenance", "by-vehicle", vehicleId, filters ?? {}] as const,
+  },
   reminders: {
     all: () => ["reminders"] as const,
     list: (filters?: Record<string, unknown>) =>

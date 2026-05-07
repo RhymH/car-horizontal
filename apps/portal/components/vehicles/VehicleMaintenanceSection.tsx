@@ -14,6 +14,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { VehicleMaintenance } from "@/lib/api/vehicles";
+import {
+  maintenanceTypeLabels,
+  type MaintenanceTypeApi,
+} from "@/lib/api/maintenance";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "2-digit",
@@ -27,17 +31,10 @@ const currencyFormatter = new Intl.NumberFormat("fr-FR", {
   currency: "EUR",
 });
 
-const TYPE_LABEL: Record<string, string> = {
-  OilChange: "Vidange",
-  Tires: "Pneus",
-  Brakes: "Freins",
-  FullService: "Révision complète",
-  TechnicalInspection: "Contrôle technique",
-  Other: "Autre",
-};
-
 function typeLabel(value: string) {
-  return TYPE_LABEL[value] ?? value;
+  return (
+    maintenanceTypeLabels[value as MaintenanceTypeApi] ?? value
+  );
 }
 
 export interface VehicleMaintenanceSectionProps {
