@@ -16,6 +16,11 @@ public class TimelineEventDto
     public string Status { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
     public string? GeneratedFromRule { get; set; }
+    public string? ItemCode { get; set; }
+    public string? Severity { get; set; }
+    public DateTime? EstimatedDueAt { get; set; }
+    public int? EstimatedKmRemaining { get; set; }
+    public string? MileageConfidenceAtGeneration { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

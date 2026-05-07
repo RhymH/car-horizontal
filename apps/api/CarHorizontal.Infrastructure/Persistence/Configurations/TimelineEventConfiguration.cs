@@ -18,6 +18,7 @@ public class TimelineEventConfiguration : IEntityTypeConfiguration<TimelineEvent
         builder.Property(t => t.Status).HasConversion<int>();
         builder.Property(t => t.Source).HasConversion<int>();
         builder.Property(t => t.Severity).HasConversion<int?>();
+        builder.Property(t => t.MileageConfidenceAtGeneration).HasMaxLength(20);
         builder.HasIndex(t => new { t.OrganizationId, t.VehicleId, t.DueAt });
         builder.HasIndex(t => new { t.OrganizationId, t.Status, t.DueAt });
     }

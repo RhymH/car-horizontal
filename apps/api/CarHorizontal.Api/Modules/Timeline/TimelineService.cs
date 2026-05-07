@@ -81,6 +81,11 @@ public class TimelineService : ITimelineService
                 t.Status,
                 t.Source,
                 t.GeneratedFromRule,
+                t.ItemCode,
+                t.Severity,
+                t.EstimatedDueAt,
+                t.EstimatedKmRemaining,
+                t.MileageConfidenceAtGeneration,
                 t.CreatedAt,
                 t.UpdatedAt,
                 Vehicle = _db.Vehicles
@@ -112,6 +117,11 @@ public class TimelineService : ITimelineService
             Status = x.Status.ToString(),
             Source = x.Source.ToString(),
             GeneratedFromRule = x.GeneratedFromRule,
+            ItemCode = x.ItemCode,
+            Severity = x.Severity?.ToString(),
+            EstimatedDueAt = x.EstimatedDueAt,
+            EstimatedKmRemaining = x.EstimatedKmRemaining,
+            MileageConfidenceAtGeneration = x.MileageConfidenceAtGeneration,
             CreatedAt = x.CreatedAt,
             UpdatedAt = x.UpdatedAt
         }).ToList();
@@ -262,6 +272,11 @@ public class TimelineService : ITimelineService
                 t.Status,
                 t.Source,
                 t.GeneratedFromRule,
+                t.ItemCode,
+                t.Severity,
+                t.EstimatedDueAt,
+                t.EstimatedKmRemaining,
+                t.MileageConfidenceAtGeneration,
                 t.CreatedAt,
                 t.UpdatedAt,
                 Vehicle = _db.Vehicles
@@ -294,6 +309,11 @@ public class TimelineService : ITimelineService
             Status = raw.Status.ToString(),
             Source = raw.Source.ToString(),
             GeneratedFromRule = raw.GeneratedFromRule,
+            ItemCode = raw.ItemCode,
+            Severity = raw.Severity?.ToString(),
+            EstimatedDueAt = raw.EstimatedDueAt,
+            EstimatedKmRemaining = raw.EstimatedKmRemaining,
+            MileageConfidenceAtGeneration = raw.MileageConfidenceAtGeneration,
             CreatedAt = raw.CreatedAt,
             UpdatedAt = raw.UpdatedAt
         };

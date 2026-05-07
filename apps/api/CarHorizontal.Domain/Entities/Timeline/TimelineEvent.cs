@@ -17,4 +17,7 @@ public class TimelineEvent : OrganizationEntityBase
     public string? Description { get; set; }
     public string? ItemCode { get; set; }
     public MaintenanceItemSeverity? Severity { get; set; }
+    public DateTime? EstimatedDueAt { get; set; }
+    public int? EstimatedKmRemaining { get; set; }
+    public string? MileageConfidenceAtGeneration { get; set; }
 }

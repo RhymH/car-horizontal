@@ -3,6 +3,7 @@ using CarHorizontal.Domain.Entities.Maintenance;
 using CarHorizontal.Domain.Entities.Timeline;
 using CarHorizontal.Domain.Entities.Vehicles;
 using CarHorizontal.Domain.Timeline.Rules;
+using CarHorizontal.Domain.Vehicles;
 using CarHorizontal.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,16 +12,23 @@ namespace CarHorizontal.Infrastructure.Timeline;
 public class TimelineEngine : ITimelineEngine
 {
     private static readonly TimeSpan DueAtTolerance = TimeSpan.FromDays(7);
+    private static readonly TimeSpan EstimatedDueShift = TimeSpan.FromDays(30);
 
     private readonly AppDbContext _db;
     private readonly IReadOnlyList<IRule> _rules;
     private readonly TimeProvider _clock;
+    private readonly IMileageEstimationService? _mileageEstimation;
 
-    public TimelineEngine(AppDbContext db, IEnumerable<IRule> rules, TimeProvider? clock = null)
+    public TimelineEngine(
+        AppDbContext db,
+        IEnumerable<IRule> rules,
+        TimeProvider? clock = null,
+        IMileageEstimationService? mileageEstimation = null)
     {
         _db = db;
         _rules = rules.ToList();
         _clock = clock ?? TimeProvider.System;
+        _mileageEstimation = mileageEstimation;
     }
 
     public async Task<int> RunForVehicleAsync(Guid vehicleId, CancellationToken ct = default)
@@ -38,8 +46,11 @@ public class TimelineEngine : ITimelineEngine
 
         var (model, program) = await LoadProgramAsync(vehicle, ct);
         var overrides = await LoadOverridesAsync(vehicle, ct);
+        var now = _clock.GetUtcNow().UtcDateTime;
+        var estimate = await SafeEstimateAsync(vehicle.Id, now, ct);
 
-        var inserted = ProcessVehicle(vehicle, maintenance, existing, enabledCodes, model, program, overrides);
+        var inserted = ProcessVehicle(
+            vehicle, maintenance, existing, enabledCodes, model, program, overrides, estimate, now);
         if (inserted > 0) await _db.SaveChangesAsync(ct);
         return inserted;
     }
@@ -106,6 +117,7 @@ public class TimelineEngine : ITimelineEngine
                 g => (IReadOnlyList<VehicleProgramOverride>)g.ToList());
 
         var totalInserted = 0;
+        var now = _clock.GetUtcNow().UtcDateTime;
         foreach (var vehicle in vehicles)
         {
             var v = maintenanceByVehicle.TryGetValue(vehicle.Id, out var mList) ? mList : Array.Empty<MaintenanceRecord>();
@@ -128,11 +140,26 @@ public class TimelineEngine : ITimelineEngine
                 ? ovList
                 : Array.Empty<VehicleProgramOverride>();
 
-            totalInserted += ProcessVehicle(vehicle, v, e, enabledCodes, model, program, ovs);
+            var estimate = await SafeEstimateAsync(vehicle.Id, now, ct);
+            totalInserted += ProcessVehicle(
+                vehicle, v, e, enabledCodes, model, program, ovs, estimate, now);
         }
 
         if (totalInserted > 0) await _db.SaveChangesAsync(ct);
         return totalInserted;
+    }
+
+    private async Task<MileageEstimate?> SafeEstimateAsync(Guid vehicleId, DateTime now, CancellationToken ct)
+    {
+        if (_mileageEstimation is null) return null;
+        try
+        {
+            return await _mileageEstimation.EstimateAtAsync(vehicleId, now, ct);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private async Task<(VehicleModel? Model, MaintenanceProgram? Program)> LoadProgramAsync(
@@ -205,10 +232,11 @@ public class TimelineEngine : ITimelineEngine
         ISet<string> enabledRuleCodes,
         VehicleModel? model,
         MaintenanceProgram? program,
-        IReadOnlyList<VehicleProgramOverride> overrides)
+        IReadOnlyList<VehicleProgramOverride> overrides,
+        MileageEstimate? estimate,
+        DateTime now)
     {
-        var now = _clock.GetUtcNow().UtcDateTime;
-        var context = new RuleContext(vehicle, maintenance, now, model, program, overrides);
+        var context = new RuleContext(vehicle, maintenance, now, model, program, overrides, estimate);
 
         var inserted = 0;
         foreach (var rule in _rules)
@@ -218,7 +246,12 @@ public class TimelineEngine : ITimelineEngine
 
             foreach (var generated in rule.Generate(context))
             {
-                if (IsDuplicate(generated, existingEvents)) continue;
+                var existing = FindMatchingActive(generated, existingEvents);
+                if (existing is not null)
+                {
+                    UpdateExistingFromCandidate(existing, generated);
+                    continue;
+                }
                 _db.TimelineEvents.Add(generated);
                 existingEvents = existingEvents.Append(generated).ToList();
                 inserted++;
@@ -228,7 +261,7 @@ public class TimelineEngine : ITimelineEngine
         return inserted;
     }
 
-    private static bool IsDuplicate(TimelineEvent candidate, IReadOnlyList<TimelineEvent> existing)
+    private static TimelineEvent? FindMatchingActive(TimelineEvent candidate, IReadOnlyList<TimelineEvent> existing)
     {
         foreach (var e in existing)
         {
@@ -237,26 +270,56 @@ public class TimelineEngine : ITimelineEngine
             if (e.Status == TimelineEventStatus.Done || e.Status == TimelineEventStatus.Skipped) continue;
 
             // Strongest signal: same item code on same vehicle (Program rules).
-            if (!string.IsNullOrEmpty(candidate.ItemCode) && string.Equals(e.ItemCode, candidate.ItemCode, StringComparison.Ordinal))
-                return true;
+            if (!string.IsNullOrEmpty(candidate.ItemCode)
+                && string.Equals(e.ItemCode, candidate.ItemCode, StringComparison.Ordinal))
+                return e;
 
             if (candidate.DueAt.HasValue && e.DueAt.HasValue)
             {
                 var diff = (candidate.DueAt.Value - e.DueAt.Value).Duration();
-                if (diff <= DueAtTolerance) return true;
+                if (diff <= DueAtTolerance) return e;
             }
             else if (candidate.DueMileage.HasValue && e.DueMileage.HasValue)
             {
-                if (candidate.DueMileage.Value == e.DueMileage.Value) return true;
+                if (candidate.DueMileage.Value == e.DueMileage.Value) return e;
             }
             else if (!candidate.DueAt.HasValue && !e.DueAt.HasValue
                 && !candidate.DueMileage.HasValue && !e.DueMileage.HasValue)
             {
                 if (string.Equals(e.GeneratedFromRule, candidate.GeneratedFromRule, StringComparison.Ordinal))
-                    return true;
+                    return e;
             }
         }
-        return false;
+        return null;
+    }
+
+    /// <summary>
+    /// Refresh an existing pending event from a freshly generated candidate
+    /// when the mileage estimate has shifted significantly. Keeps the event
+    /// id stable so reminders/links remain valid.
+    /// </summary>
+    private static void UpdateExistingFromCandidate(TimelineEvent existing, TimelineEvent candidate)
+    {
+        var shouldUpdate = false;
+
+        if (candidate.EstimatedDueAt.HasValue && existing.EstimatedDueAt.HasValue)
+        {
+            var shift = (candidate.EstimatedDueAt.Value - existing.EstimatedDueAt.Value).Duration();
+            if (shift > EstimatedDueShift) shouldUpdate = true;
+        }
+        else if (candidate.EstimatedDueAt.HasValue != existing.EstimatedDueAt.HasValue)
+        {
+            shouldUpdate = true;
+        }
+
+        if (!shouldUpdate) return;
+
+        existing.Description = candidate.Description;
+        existing.DueAt = candidate.DueAt;
+        existing.DueMileage = candidate.DueMileage;
+        existing.EstimatedDueAt = candidate.EstimatedDueAt;
+        existing.EstimatedKmRemaining = candidate.EstimatedKmRemaining;
+        existing.MileageConfidenceAtGeneration = candidate.MileageConfidenceAtGeneration;
     }
 
     private async Task<HashSet<string>> GetEnabledRuleCodesAsync(Guid orgId, CancellationToken ct)
