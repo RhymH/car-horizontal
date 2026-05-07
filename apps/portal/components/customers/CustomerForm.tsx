@@ -39,11 +39,11 @@ export function CustomerForm({ register, control, errors }: CustomerFormProps) {
       </Field>
 
       <Field
-        label="Téléphone (E.164)"
+        label="Téléphone"
         error={errors.phone?.message}
-        hint="Ex. +33612345678"
+        hint="Format libre — l'indicatif pays sera ajouté automatiquement si manquant."
       >
-        <Input placeholder="+33..." {...register("phone")} />
+        <Input placeholder="06 12 34 56 78" {...register("phone")} />
       </Field>
 
       <Field

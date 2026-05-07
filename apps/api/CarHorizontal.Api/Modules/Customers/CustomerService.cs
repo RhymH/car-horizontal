@@ -163,12 +163,14 @@ public class CustomerService : ICustomerService
         var orgId = _currentUser.OrganizationId
             ?? throw new UnauthorizedAccessException("Active organization is required.");
 
+        var orgCountryCode = await GetOrgPhoneCountryCodeAsync(orgId, ct);
+
         var customer = new Customer
         {
             OrganizationId = orgId,
             FullName = request.FullName.Trim(),
             Email = NormalizeOptional(request.Email),
-            Phone = NormalizeOptional(request.Phone),
+            Phone = NormalizePhone(request.Phone, orgCountryCode),
             Address = NormalizeOptional(request.Address),
             City = NormalizeOptional(request.City),
             PostalCode = NormalizeOptional(request.PostalCode),
@@ -191,7 +193,11 @@ public class CustomerService : ICustomerService
 
         if (request.FullName is not null) customer.FullName = request.FullName.Trim();
         if (request.Email is not null) customer.Email = NormalizeOptional(request.Email);
-        if (request.Phone is not null) customer.Phone = NormalizeOptional(request.Phone);
+        if (request.Phone is not null)
+        {
+            var orgCountryCode = await GetOrgPhoneCountryCodeAsync(customer.OrganizationId, ct);
+            customer.Phone = NormalizePhone(request.Phone, orgCountryCode);
+        }
         if (request.Address is not null) customer.Address = NormalizeOptional(request.Address);
         if (request.City is not null) customer.City = NormalizeOptional(request.City);
         if (request.PostalCode is not null) customer.PostalCode = NormalizeOptional(request.PostalCode);
@@ -253,6 +259,24 @@ public class CustomerService : ICustomerService
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
         return value.Trim();
+    }
+
+    private static string? NormalizePhone(string? raw, string? orgCountryCode)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        // Try to canonicalise to E.164 using the org's country code; fall
+        // back to the trimmed raw input so the user's value is never silently lost.
+        return PhoneNormalizer.Normalize(raw, orgCountryCode) ?? raw.Trim();
+    }
+
+    private async Task<string?> GetOrgPhoneCountryCodeAsync(Guid orgId, CancellationToken ct)
+    {
+        return await _db.Organizations
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(o => o.Id == orgId && o.DeletedAt == null)
+            .Select(o => o.PhoneCountryCode)
+            .FirstOrDefaultAsync(ct);
     }
 
     private static CustomerStatus ParseStatus(string? raw)

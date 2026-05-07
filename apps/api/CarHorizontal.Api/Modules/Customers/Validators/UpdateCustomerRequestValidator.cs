@@ -1,3 +1,4 @@
+using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Customers.Dtos;
 using FluentValidation;
 
@@ -18,8 +19,9 @@ public class UpdateCustomerRequestValidator : AbstractValidator<UpdateCustomerRe
             .When(x => !string.IsNullOrWhiteSpace(x.Email));
 
         RuleFor(x => x.Phone)
-            .Matches(CustomerValidationRules.PhoneE164Pattern)
-            .WithMessage("Phone must be in E.164 format (e.g. +33612345678)")
+            .Must(PhoneNormalizer.IsAcceptable)
+            .WithMessage("Numéro de téléphone invalide.")
+            .MaximumLength(32)
             .When(x => !string.IsNullOrWhiteSpace(x.Phone));
 
         RuleFor(x => x.PostalCode).MaximumLength(20);

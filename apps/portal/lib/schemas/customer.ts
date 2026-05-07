@@ -3,7 +3,9 @@ import { z } from "zod";
 export const customerStatuses = ["Active", "Inactive", "Lost"] as const;
 export type CustomerStatus = (typeof customerStatuses)[number];
 
-const phonePattern = /^\+[1-9]\d{6,14}$/;
+// Tolerant phone matcher: 6–15 digits, optional leading + or 00,
+// allow spaces / dots / dashes / parentheses as separators.
+const phoneDigitCount = (v: string) => v.replace(/\D/g, "").length;
 
 const optionalEmail = z
   .string()
@@ -15,9 +17,17 @@ const optionalEmail = z
 
 const optionalPhone = z
   .string()
-  .refine((v) => v === "" || phonePattern.test(v), {
-    error: "Format E.164 attendu (ex. +33612345678).",
-  })
+  .max(32, { error: "32 caractères maximum." })
+  .refine(
+    (v) => {
+      if (v === "") return true;
+      // accepted characters: digits, +, spaces, dots, dashes, parens
+      if (!/^[\d+\s.\-()]+$/.test(v)) return false;
+      const digits = phoneDigitCount(v);
+      return digits >= 6 && digits <= 15;
+    },
+    { error: "Numéro de téléphone invalide." },
+  )
   .optional();
 
 export const customerFormSchema = z.object({

@@ -57,11 +57,7 @@ export function VehicleForm({
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field
-        label="Client *"
-        error={errors.customerId?.message}
-        span={2}
-      >
+      <Field label="Client *" error={errors.customerId?.message} span={2}>
         <Controller
           control={control}
           name="customerId"
@@ -102,7 +98,8 @@ export function VehicleForm({
                 }
                 field.onChange(model.id);
                 setValue("vehicleModelLabel", model.displayName);
-                const def = model.programs.find((p) => p.isDefault) ?? model.programs[0];
+                const def =
+                  model.programs.find((p) => p.isDefault) ?? model.programs[0];
                 setValue("selectedProgramId", def?.id ?? null);
                 if (!watch("make")) setValue("make", model.make);
                 if (!watch("model")) setValue("model", model.model);
@@ -141,8 +138,8 @@ export function VehicleForm({
           <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
             <CircleAlert className="mt-0.5 size-3.5 shrink-0" />
             <span>
-              Mode saisie libre : les rappels seront génériques pour ce véhicule.
-              Vous pourrez attacher un modèle plus tard.
+              Mode saisie libre : les rappels seront génériques pour ce
+              véhicule. Vous pourrez attacher un modèle plus tard.
             </span>
           </div>
         )}
@@ -181,7 +178,7 @@ export function VehicleForm({
               v === "" || v === null || v === undefined ? null : Number(v),
           })}
           min={1950}
-          placeholder="Optionnel"
+          placeholder=""
         />
       </Field>
 
@@ -189,7 +186,7 @@ export function VehicleForm({
         <Input
           {...register("licensePlate")}
           className="uppercase"
-          placeholder="AB-123-CD (optionnel)"
+          placeholder="AB-123-CD"
         />
       </Field>
 
