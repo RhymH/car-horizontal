@@ -24,6 +24,7 @@ import { extractApiErrorMessage } from "@/lib/api/errors";
 import { SnoozeTimelineDialog } from "@/components/timeline/SnoozeTimelineDialog";
 import { VehicleHeader } from "@/components/vehicles/VehicleHeader";
 import { VehicleSummaryCard } from "@/components/vehicles/VehicleSummaryCard";
+import { MileageEstimateCard } from "@/components/vehicles/MileageEstimateCard";
 import { VehicleTimelineSection } from "@/components/vehicles/VehicleTimelineSection";
 import { VehicleMaintenanceSection } from "@/components/vehicles/VehicleMaintenanceSection";
 import { MaintenanceProgramSection } from "@/components/vehicles/MaintenanceProgramSection";
@@ -161,8 +162,12 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-4">
           <VehicleSummaryCard vehicle={vehicle} />
+          <MileageEstimateCard
+            vehicle={vehicle}
+            onUpdateMileage={() => setMileageOpen(true)}
+          />
         </div>
         <div className="lg:col-span-2 space-y-4">
           <MaintenanceProgramSection

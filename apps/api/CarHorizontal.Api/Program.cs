@@ -5,6 +5,7 @@ using CarHorizontal.Api.Modules.Auth;
 using CarHorizontal.Api.Modules.Catalog;
 using CarHorizontal.Api.Modules.Customers;
 using CarHorizontal.Api.Modules.Maintenance;
+using CarHorizontal.Api.Modules.MileageCheck;
 using CarHorizontal.Api.Modules.Reminders;
 using CarHorizontal.Api.Modules.Timeline;
 using CarHorizontal.Api.Modules.Vehicles;
@@ -76,6 +77,7 @@ builder.Services.AddCarHorizontalMaintenance();
 builder.Services.AddCarHorizontalTimeline();
 builder.Services.AddCarHorizontalReminders();
 builder.Services.AddCarHorizontalCatalog();
+builder.Services.AddCarHorizontalMileageCheck();
 
 builder.Services.AddScoped<DevSeeder>();
 

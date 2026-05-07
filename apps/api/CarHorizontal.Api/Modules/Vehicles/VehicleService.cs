@@ -407,6 +407,32 @@ public class VehicleService : IVehicleService
         return await GetAsync(vehicle.Id, ct);
     }
 
+    public async Task<MileageEstimateDto> GetMileageEstimateAsync(Guid vehicleId, CancellationToken ct = default)
+    {
+        var vehicleExists = await _db.Vehicles.AnyAsync(v => v.Id == vehicleId, ct);
+        if (!vehicleExists) throw new KeyNotFoundException($"Vehicle {vehicleId} not found.");
+
+        var estimate = await _mileageEstimation.EstimateAtAsync(vehicleId, DateTime.UtcNow, ct);
+
+        var lastReading = await _db.VehicleMileageReadings
+            .AsNoTracking()
+            .Where(r => r.VehicleId == vehicleId)
+            .OrderByDescending(r => r.ObservedAt)
+            .Select(r => new { r.Mileage, r.ObservedAt })
+            .FirstOrDefaultAsync(ct);
+
+        return new MileageEstimateDto
+        {
+            EstimatedKm = estimate.EstimatedKm,
+            Confidence = estimate.Confidence.ToString(),
+            BasedOnReadings = estimate.BasedOnReadings,
+            DailyRate = estimate.DailyRate,
+            AsOf = estimate.AsOf,
+            LastObservedKm = lastReading?.Mileage,
+            LastObservedAt = lastReading?.ObservedAt
+        };
+    }
+
     public async Task<VehicleProgramProjectionDto?> GetProgramProjectionAsync(Guid vehicleId, CancellationToken ct = default)
     {
         var vehicle = await _db.Vehicles

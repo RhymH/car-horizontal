@@ -160,6 +160,24 @@ export interface UpdateMileagePayload {
   note?: string;
 }
 
+export type MileageConfidenceApi = "High" | "Medium" | "Low";
+
+export interface MileageEstimate {
+  estimatedKm: number;
+  confidence: MileageConfidenceApi;
+  basedOnReadings: number;
+  dailyRate: number;
+  asOf: string;
+  lastObservedKm: number | null;
+  lastObservedAt: string | null;
+}
+
+export interface MileageCheckRequestResult {
+  reminderId: string;
+  token: string;
+  expiresAt: string;
+}
+
 export const vehiclesApi = {
   async list(
     params: VehiclesListParams = {},
@@ -223,6 +241,24 @@ export const vehiclesApi = {
     const { data } = await apiClient.get<VehicleProgramProjection>(
       `/api/vehicles/${id}/program-projection`,
       { signal },
+    );
+    return data;
+  },
+
+  async getMileageEstimate(
+    id: string,
+    signal?: AbortSignal,
+  ): Promise<MileageEstimate> {
+    const { data } = await apiClient.get<MileageEstimate>(
+      `/api/vehicles/${id}/mileage-estimate`,
+      { signal },
+    );
+    return data;
+  },
+
+  async requestMileageCheck(id: string): Promise<MileageCheckRequestResult> {
+    const { data } = await apiClient.post<MileageCheckRequestResult>(
+      `/api/vehicles/${id}/mileage-check`,
     );
     return data;
   },

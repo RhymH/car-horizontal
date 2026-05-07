@@ -100,4 +100,11 @@ public class VehiclesController : ControllerBase
         if (result is null) return NotFound();
         return Ok(result);
     }
+
+    [HttpGet("{id:guid}/mileage-estimate")]
+    public async Task<ActionResult<MileageEstimateDto>> GetMileageEstimate(Guid id, CancellationToken ct)
+    {
+        var result = await _vehicles.GetMileageEstimateAsync(id, ct);
+        return Ok(result);
+    }
 }

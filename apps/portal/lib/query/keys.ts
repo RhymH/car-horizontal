@@ -18,6 +18,8 @@ export const queryKeys = {
       ["vehicles", "by-customer", customerId] as const,
     programProjection: (id: string) =>
       ["vehicles", "program-projection", id] as const,
+    mileageEstimate: (id: string) =>
+      ["vehicles", "mileage-estimate", id] as const,
   },
   catalog: {
     all: () => ["catalog"] as const,
