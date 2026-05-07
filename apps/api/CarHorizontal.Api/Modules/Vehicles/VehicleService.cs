@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Vehicles.Dtos;
+using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Customers;
 using CarHorizontal.Domain.Entities.Vehicles;
 using CarHorizontal.Infrastructure.Persistence;
@@ -126,6 +127,27 @@ public class VehicleService : IVehicleService
             .Select(c => c.FullName)
             .FirstOrDefaultAsync(ct) ?? string.Empty;
 
+        string? modelDisplayName = null;
+        string? programName = null;
+        if (vehicle.VehicleModelId.HasValue)
+        {
+            modelDisplayName = await _db.VehicleModels
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(m => m.Id == vehicle.VehicleModelId.Value && m.DeletedAt == null)
+                .Select(m => $"{m.Make} {m.Model} {m.Trim ?? m.EngineDisplayName}")
+                .FirstOrDefaultAsync(ct);
+        }
+        if (vehicle.SelectedProgramId.HasValue)
+        {
+            programName = await _db.MaintenancePrograms
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(p => p.Id == vehicle.SelectedProgramId.Value && p.DeletedAt == null)
+                .Select(p => p.Name)
+                .FirstOrDefaultAsync(ct);
+        }
+
         var maintenance = await _db.MaintenanceRecords
             .AsNoTracking()
             .Where(m => m.VehicleId == id)
@@ -179,6 +201,10 @@ public class VehicleService : IVehicleService
             PurchasedAt = vehicle.PurchasedAt,
             Color = vehicle.Color,
             PhotoFileId = vehicle.PhotoFileId,
+            VehicleModelId = vehicle.VehicleModelId,
+            SelectedProgramId = vehicle.SelectedProgramId,
+            VehicleModelDisplayName = modelDisplayName,
+            SelectedProgramName = programName,
             CreatedAt = vehicle.CreatedAt,
             UpdatedAt = vehicle.UpdatedAt,
             MaintenanceRecords = maintenance,
@@ -214,6 +240,11 @@ public class VehicleService : IVehicleService
             Color = NormalizeOptional(request.Color),
             PhotoFileId = request.PhotoFileId
         };
+
+        if (request.VehicleModelId.HasValue)
+        {
+            await ApplyVehicleModelLinkAsync(vehicle, request.VehicleModelId.Value, request.SelectedProgramId, ct);
+        }
 
         _db.Vehicles.Add(vehicle);
         await _db.SaveChangesAsync(ct);
@@ -259,6 +290,20 @@ public class VehicleService : IVehicleService
         if (request.PurchasedAt.HasValue) vehicle.PurchasedAt = request.PurchasedAt.Value;
         if (request.Color is not null) vehicle.Color = NormalizeOptional(request.Color);
         if (request.PhotoFileId.HasValue) vehicle.PhotoFileId = request.PhotoFileId.Value;
+
+        if (request.ClearVehicleModel)
+        {
+            vehicle.VehicleModelId = null;
+            vehicle.SelectedProgramId = null;
+        }
+        else if (request.VehicleModelId.HasValue)
+        {
+            await ApplyVehicleModelLinkAsync(vehicle, request.VehicleModelId.Value, request.SelectedProgramId, ct);
+        }
+        else if (request.SelectedProgramId.HasValue)
+        {
+            vehicle.SelectedProgramId = request.SelectedProgramId.Value;
+        }
 
         await _db.SaveChangesAsync(ct);
 
@@ -322,6 +367,38 @@ public class VehicleService : IVehicleService
         vehicle.PhotoFileId = photoFileId;
         await _db.SaveChangesAsync(ct);
         return await GetAsync(vehicle.Id, ct);
+    }
+
+    private async Task ApplyVehicleModelLinkAsync(Vehicle vehicle, Guid modelId, Guid? selectedProgramId, CancellationToken ct)
+    {
+        var model = await _db.VehicleModels
+            .IgnoreQueryFilters()
+            .Where(m => m.Id == modelId && m.DeletedAt == null)
+            .Include(m => m.Programs.Where(p => p.DeletedAt == null))
+            .FirstOrDefaultAsync(ct)
+            ?? throw new KeyNotFoundException($"Vehicle model {modelId} not found.");
+
+        vehicle.VehicleModelId = model.Id;
+
+        // Denormalise text fields from catalog so legacy lookups still work.
+        vehicle.Make = model.Make;
+        vehicle.Model = model.Model;
+        if (vehicle.Year == 0) vehicle.Year = model.ProductionStartYear;
+        vehicle.EngineType = model.EngineType;
+
+        if (selectedProgramId.HasValue
+            && model.Programs.Any(p => p.Id == selectedProgramId.Value))
+        {
+            vehicle.SelectedProgramId = selectedProgramId.Value;
+        }
+        else
+        {
+            var defaultProgram = model.Programs
+                .OrderByDescending(p => p.IsDefault)
+                .ThenBy(p => p.Name)
+                .FirstOrDefault();
+            vehicle.SelectedProgramId = defaultProgram?.Id;
+        }
     }
 
     private async Task EnsurePlateUniqueAsync(Guid orgId, string plate, Guid? excludingId, CancellationToken ct)

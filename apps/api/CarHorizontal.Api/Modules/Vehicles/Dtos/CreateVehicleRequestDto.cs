@@ -14,4 +14,6 @@ public class CreateVehicleRequestDto
     public DateTime? PurchasedAt { get; set; }
     public string? Color { get; set; }
     public Guid? PhotoFileId { get; set; }
+    public Guid? VehicleModelId { get; set; }
+    public Guid? SelectedProgramId { get; set; }
 }

@@ -17,6 +17,10 @@ public class VehicleDetailDto
     public DateTime? PurchasedAt { get; set; }
     public string? Color { get; set; }
     public Guid? PhotoFileId { get; set; }
+    public Guid? VehicleModelId { get; set; }
+    public Guid? SelectedProgramId { get; set; }
+    public string? VehicleModelDisplayName { get; set; }
+    public string? SelectedProgramName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public IReadOnlyList<VehicleMaintenanceDto> MaintenanceRecords { get; set; } = Array.Empty<VehicleMaintenanceDto>();
