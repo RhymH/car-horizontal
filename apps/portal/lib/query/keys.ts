@@ -57,7 +57,10 @@ export const queryKeys = {
     overview: () => ["dashboard", "overview"] as const,
   },
   loyalty: {
-    leaderboard: () => ["loyalty", "leaderboard"] as const,
+    overview: () => ["loyalty", "overview"] as const,
+    cohorts: () => ["loyalty", "cohorts"] as const,
+    atRisk: (limit?: number) => ["loyalty", "at-risk", limit ?? null] as const,
+    lost: (limit?: number) => ["loyalty", "lost", limit ?? null] as const,
   },
   search: {
     global: (q: string) => ["search", "global", q] as const,
