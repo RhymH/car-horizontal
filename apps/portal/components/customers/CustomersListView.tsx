@@ -32,6 +32,13 @@ import { CustomerFormDialog } from "@/components/customers/CustomerFormDialog";
 type StatusFilter = CustomerStatusApi | "All";
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+const PAGE_SIZE_ITEMS = Object.fromEntries(
+  PAGE_SIZE_OPTIONS.map((n) => [String(n), `${n} / page`]),
+);
+const STATUS_FILTER_ITEMS: Record<string, string> = {
+  All: "Tous les statuts",
+  ...customerStatusLabels,
+};
 
 export function CustomersListView() {
   const router = useRouter();
@@ -202,6 +209,7 @@ export function CustomersListView() {
           className="sm:max-w-xs"
         />
         <Select
+          items={STATUS_FILTER_ITEMS}
           value={statusFilter}
           onValueChange={(v) => onStatusChange(v as StatusFilter)}
         >
@@ -216,6 +224,7 @@ export function CustomersListView() {
           </SelectContent>
         </Select>
         <Select
+          items={PAGE_SIZE_ITEMS}
           value={String(pageSize)}
           onValueChange={(v) => onPageSizeChange(Number(v))}
         >

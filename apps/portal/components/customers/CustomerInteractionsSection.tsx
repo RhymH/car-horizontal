@@ -45,6 +45,11 @@ const dateTimeFmt = new Intl.DateTimeFormat("fr-FR", {
 
 type FilterValue = InteractionTypeApi | "All";
 
+const FILTER_ITEMS: Record<string, string> = {
+  All: "Tous",
+  ...interactionTypeLabels,
+};
+
 export interface CustomerInteractionsSectionProps {
   interactions: CustomerInteraction[];
   onAdd: () => void;
@@ -73,6 +78,7 @@ export function CustomerInteractionsSection({
       actions={
         <div className="flex gap-2">
           <Select
+            items={FILTER_ITEMS}
             value={filter}
             onValueChange={(v) => {
               setFilter(v as FilterValue);

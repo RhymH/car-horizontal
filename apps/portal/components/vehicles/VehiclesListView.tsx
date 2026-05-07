@@ -33,9 +33,24 @@ import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
 type EngineFilter = EngineTypeApi | "All";
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+const PAGE_SIZE_ITEMS = Object.fromEntries(
+  PAGE_SIZE_OPTIONS.map((n) => [String(n), `${n} / page`]),
+);
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS: number[] = [];
 for (let y = CURRENT_YEAR + 1; y >= 1980; y--) YEAR_OPTIONS.push(y);
+const YEAR_FROM_ITEMS: Record<string, string> = {
+  All: "Année min",
+  ...Object.fromEntries(YEAR_OPTIONS.map((y) => [String(y), `≥ ${y}`])),
+};
+const YEAR_TO_ITEMS: Record<string, string> = {
+  All: "Année max",
+  ...Object.fromEntries(YEAR_OPTIONS.map((y) => [String(y), `≤ ${y}`])),
+};
+const ENGINE_FILTER_ITEMS: Record<string, string> = {
+  All: "Toutes énergies",
+  ...engineTypeLabels,
+};
 
 export function VehiclesListView() {
   const router = useRouter();
@@ -160,6 +175,7 @@ export function VehiclesListView() {
           className="sm:max-w-xs"
         />
         <Select
+          items={ENGINE_FILTER_ITEMS}
           value={engineFilter}
           onValueChange={(v) => {
             setEngineFilter(v as EngineFilter);
@@ -179,6 +195,7 @@ export function VehiclesListView() {
           </SelectContent>
         </Select>
         <Select
+          items={YEAR_FROM_ITEMS}
           value={yearFrom}
           onValueChange={(v) => {
             setYearFrom(v ?? "All");
@@ -198,6 +215,7 @@ export function VehiclesListView() {
           </SelectContent>
         </Select>
         <Select
+          items={YEAR_TO_ITEMS}
           value={yearTo}
           onValueChange={(v) => {
             setYearTo(v ?? "All");
@@ -217,6 +235,7 @@ export function VehiclesListView() {
           </SelectContent>
         </Select>
         <Select
+          items={PAGE_SIZE_ITEMS}
           value={String(pageSize)}
           onValueChange={(v) => {
             setPageSize(Number(v));

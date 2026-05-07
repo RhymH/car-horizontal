@@ -139,6 +139,7 @@ export function AddInteractionDialog({
               name="type"
               render={({ field }) => (
                 <Select
+                  items={interactionTypeLabels}
                   value={field.value}
                   onValueChange={(v) => field.onChange(v as InteractionTypeApi)}
                 >

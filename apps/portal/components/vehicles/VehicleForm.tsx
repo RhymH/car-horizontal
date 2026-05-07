@@ -101,6 +101,7 @@ export function VehicleForm({
           name="engineType"
           render={({ field }) => (
             <Select
+              items={engineTypeLabels}
               value={field.value}
               onValueChange={(v) => v && field.onChange(v as EngineType)}
             >
@@ -125,6 +126,7 @@ export function VehicleForm({
           name="transmissionType"
           render={({ field }) => (
             <Select
+              items={{ __none: "—", ...transmissionLabels }}
               value={field.value || "__none"}
               onValueChange={(v) =>
                 field.onChange(v === "__none" ? undefined : (v as Transmission))

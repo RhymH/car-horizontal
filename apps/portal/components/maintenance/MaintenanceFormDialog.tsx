@@ -228,6 +228,7 @@ function MaintenanceFormDialogBody({
               name="type"
               render={({ field }) => (
                 <Select
+                  items={maintenanceTypeLabels}
                   value={field.value}
                   onValueChange={(v) =>
                     v && field.onChange(v as MaintenanceTypeApi)

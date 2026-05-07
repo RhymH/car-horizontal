@@ -59,6 +59,7 @@ export function CustomerForm({ register, control, errors }: CustomerFormProps) {
           name="status"
           render={({ field }) => (
             <Select
+              items={customerStatusLabels}
               value={field.value}
               onValueChange={(v) => field.onChange(v as CustomerStatus)}
             >
