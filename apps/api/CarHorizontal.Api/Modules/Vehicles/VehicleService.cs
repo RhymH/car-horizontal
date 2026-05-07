@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Vehicles.Dtos;
 using CarHorizontal.Domain.Entities.Customers;
@@ -37,8 +38,9 @@ public class VehicleService : IVehicleService
         {
             var s = request.Search.Trim();
             var pattern = $"%{s}%";
+            var plateRegex = PlateSearch.BuildLikeRegex(s);
             query = query.Where(v =>
-                EF.Functions.ILike(v.LicensePlate, pattern)
+                (plateRegex != null && Regex.IsMatch(v.LicensePlate, plateRegex))
                 || EF.Functions.ILike(v.Make, pattern)
                 || EF.Functions.ILike(v.Model, pattern)
                 || (v.Vin != null && EF.Functions.ILike(v.Vin, pattern)));

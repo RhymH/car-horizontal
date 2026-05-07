@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Search.Dtos;
 using CarHorizontal.Infrastructure.Persistence;
@@ -34,6 +35,7 @@ public class SearchController : ControllerBase
         var pattern = $"%{trimmed}%";
         var phoneSuffix = PhoneSearch.ExtractDigitSuffix(trimmed);
         var phonePattern = phoneSuffix is null ? null : $"%{phoneSuffix}%";
+        var plateRegex = PlateSearch.BuildLikeRegex(trimmed);
 
         var customers = await _db.Customers
             .AsNoTracking()
@@ -56,7 +58,7 @@ public class SearchController : ControllerBase
         var vehicles = await _db.Vehicles
             .AsNoTracking()
             .Where(v =>
-                EF.Functions.ILike(v.LicensePlate, pattern)
+                (plateRegex != null && Regex.IsMatch(v.LicensePlate, plateRegex))
                 || EF.Functions.ILike(v.Make, pattern)
                 || EF.Functions.ILike(v.Model, pattern))
             .OrderBy(v => v.LicensePlate)
