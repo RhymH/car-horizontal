@@ -12,6 +12,36 @@ d'acceptation**, **dépendances**.
 
 ---
 
+## 🎯 Vision produit non-négociable (lis-moi à chaque session)
+
+CarHorizontal cible **les petits garages et concessions indépendants** qui n'ont
+ni le temps ni l'envie de :
+- consulter le manuel constructeur de chaque véhicule pour savoir quoi faire et quand,
+- maintenir un tableau Excel des prochaines vidanges,
+- relancer leurs clients un par un pour les faire revenir.
+
+### Promesse produit
+> **« Le logiciel sait. Le garage agit. »**
+>
+> 1. Le garage saisit un véhicule en 30 secondes (marque, modèle, année, km).
+> 2. Le logiciel **anticipe automatiquement** ce qui doit être fait, **quand**, et **pourquoi**, en s'appuyant sur le programme d'entretien réel du constructeur (pas une moyenne générique).
+> 3. Le logiciel **envoie au client le bon message au bon moment**, sans intervention du garage.
+> 4. Le garage voit en un coup d'œil : "qui dois-je rappeler aujourd'hui ?" et "quoi faire sur ce véhicule la prochaine fois qu'il passe ?".
+
+### Ce qui NE doit JAMAIS se retrouver dans le produit
+- ❌ Une page de "configuration de règles" où le garagiste doit définir lui-même les intervalles d'entretien
+- ❌ Des rappels génériques "votre véhicule a besoin d'un entretien" — toujours préciser quoi, pourquoi, basé sur quel km/mois
+- ❌ Un onboarding qui demande à l'utilisateur de "comprendre" le moteur de timeline
+- ❌ De la saisie redondante (typer "Renault Clio" en texte libre alors qu'on peut le sélectionner dans un catalogue)
+- ❌ Des règles « tout le monde toutes les 15 000 km » : c'est le pire mensonge, et le garage le sait
+
+### Anti-pattern à détecter à chaque revue de phase
+**« Est-ce que cette feature ajoute de la charge mentale au garagiste, ou en retire ? »**
+- Si elle ajoute de la charge → la repenser ou la couper.
+- Si on a inventé une page de paramètres pour compenser un défaut d'intelligence du moteur → l'intelligence du moteur est insuffisante, pas la page de paramètres qui manque.
+
+---
+
 ## ⚠️ Règle anti-oubli (cross-module wiring)
 
 **Problème observé** : quand une tâche d'une phase amont (ex. T043 fiche client) référence
@@ -51,6 +81,11 @@ Tout résultat non-attendu = à traiter avant de fermer la phase.
 - [ ] Tous les `// TODO(TXXX)` qui pointaient sur cette phase ont été résolus
 - [ ] Audit grep ci-dessus passe sans surprise
 - [ ] Section "Cross-module backfill" de la phase n'a aucun item ouvert
+- [ ] **Test "charge mentale"** : pour chaque nouvelle feature livrée, demander à voix haute :
+  - "Est-ce que cette feature ajoute du travail au garagiste, ou en retire ?"
+  - "Est-ce que le garagiste comprend en 5 secondes pourquoi elle est là ?"
+  - "Est-ce que sans cette feature, le garagiste devrait quand même y penser ?"
+  - Si réponses → ajout / non / oui : la feature ne tient pas la promesse produit, la repenser.
 
 ---
 
@@ -513,17 +548,22 @@ Chaque tâche est préfixée par un identifiant `T###`. Les dépendances utilise
 
 ---
 
-## PHASE 7 — Timeline Engine (cœur différenciant)
+## PHASE 7 — Timeline Engine (squelette générique)
 
-### T070 — Moteur de règles Timeline
+> ⚠️ **Cette phase pose seulement le squelette technique** (interface IRule, contexte, orchestration).
+> La vraie intelligence métier vient de **Phase 7.5 (catalogue + ProgramExecutorRule)**.
+> Les rules génériques listées ci-dessous deviennent des **fallback** quand un véhicule
+> n'a pas de `VehicleModelId` lié au catalogue. Ne pas les développer plus que nécessaire.
+
+### T070 — Moteur de règles Timeline (squelette)
 - **Files** :
   - `Domain/Timeline/Rules/IRule.cs` + `RuleContext.cs`.
-  - `Domain/Timeline/Rules/SixMonthMaintenanceRule.cs`
-  - `Domain/Timeline/Rules/AnnualTechnicalInspectionRule.cs` (à partir de la 5e année si véhicule particulier en France)
-  - `Domain/Timeline/Rules/TireSwapRule.cs` (saisonnier oct/avr)
-  - `Domain/Timeline/Rules/MileageBasedServiceRule.cs` (tous les 15 000 km)
-  - `Domain/Timeline/Rules/TradeInOpportunityRule.cs` (3 ans après achat)
-  - `Domain/Timeline/Rules/WarrantyExpiryRule.cs`
+  - `Domain/Timeline/Rules/SixMonthMaintenanceRule.cs` 🔻 fallback uniquement (si pas de VehicleModelId)
+  - `Domain/Timeline/Rules/AnnualTechnicalInspectionRule.cs` (légal FR — garder, pas dépendant du modèle)
+  - `Domain/Timeline/Rules/TireSwapRule.cs` (saisonnier — garder)
+  - `Domain/Timeline/Rules/MileageBasedServiceRule.cs` 🔻 fallback uniquement
+  - `Domain/Timeline/Rules/TradeInOpportunityRule.cs` (commercial — garder)
+  - `Domain/Timeline/Rules/WarrantyExpiryRule.cs` (commercial — garder)
   - `Infrastructure/Timeline/TimelineEngine.cs` (orchestre les règles).
 - **Implémentation** :
   - Chaque règle implémente `bool Applies(Vehicle v)` + `IEnumerable<TimelineEvent> Generate(Vehicle v, DateTime now)`.
@@ -660,6 +700,271 @@ dans les phases précédentes parce que leur dépendance n'existait pas encore. 
 
 ---
 
+## PHASE 7.5 — Catalogue véhicules & programmes constructeur 🚨 CŒUR DU PRODUIT
+
+> **À faire AVANT de finir Phase 8.** C'est cette phase qui rend les rappels de Phase 8
+> intelligents. Sans elle, les rappels seront génériques et le produit perdra sa
+> différenciation. Tout le reste du système prend du sens grâce à ça.
+
+### Diagnostic de l'état actuel (mai 2026)
+
+L'implémentation Phase 7 actuelle est **trop générique** pour tenir la promesse produit :
+- `Vehicle` ne stocke `Make`/`Model`/`Year` qu'en texte libre — aucun lien à un catalogue
+- `MileageBasedServiceRule` déclenche un événement tous les 15 000 km **identiquement** pour tout véhicule
+- `SixMonthMaintenanceRule` ajoute un événement tous les 6 mois **identiquement**
+- Les libellés sont vagues ("Entretien semestriel recommandé", "Révision à 60 000 km")
+- Aucune notion de gravité (vidange ≠ courroie de distribution ≠ contrôle freins)
+
+**Résultat** : un garage qui reçoit ces rappels n'y croit pas, parce qu'il sait que sa
+Clio IV diesel a des intervalles précis (vidange 20 000 km / 12 mois, filtre carburant
+60 000 km, courroie 160 000 km/6 ans, etc.) — pas une moyenne arbitraire.
+
+### Objectif Phase 7.5
+
+**Le logiciel doit connaître nativement** que :
+- Une Renault Clio IV 1.5 dCi 2018 nécessite : vidange + filtre huile @ 20 000 km/12 mois,
+  filtre habitacle @ 30 000 km, filtre carburant @ 60 000 km, liquide de frein @ 2 ans,
+  courroie distribution @ 160 000 km/6 ans, liquide refroidissement @ 4 ans/90 000 km, etc.
+- Une Tesla Model 3 nécessite : vérification freins/liquide @ 2 ans, climatisation @ 6 ans,
+  rotation pneus @ 10 000–15 000 km — pas de vidange.
+- Une Peugeot 308 1.2 PureTech a son propre programme.
+
+Et **projeter ces règles** sur l'historique réel de chaque véhicule pour générer des
+événements timeline **précis** ("Vidange + filtre huile à 60 000 km — prévue dans 1 200 km").
+
+### T7.5-A — Domaine : entités catalogue
+
+- **Files** :
+  - `Domain/Entities/Catalog/VehicleModel.cs` (entité partagée **sans `OrganizationId`** — réf. globale)
+  - `Domain/Entities/Catalog/MaintenanceProgram.cs`
+  - `Domain/Entities/Catalog/MaintenanceProgramItem.cs`
+  - `Domain/Entities/Catalog/MaintenanceItemCode.cs` (énumération stable des codes : `oil_change`, `oil_filter`, `cabin_filter`, `air_filter`, `fuel_filter`, `brake_fluid`, `brake_pads_front`, `brake_pads_rear`, `brake_discs_front`, `brake_discs_rear`, `timing_belt`, `accessory_belt`, `coolant`, `spark_plugs`, `glow_plugs`, `transmission_fluid`, `differential_fluid`, `tire_rotation`, `tire_replacement`, `wipers`, `battery_check`, `ac_service`, `power_steering_fluid`, `dpf_regen`, etc.)
+  - `Domain/Entities/Catalog/MaintenanceItemSeverity.cs` enum (`Critical` = sécurité, `Recommended`, `Optional`)
+  - `Domain/Entities/Catalog/MaintenanceItemTrigger.cs` enum (`Earliest` — premier des deux, `Latest`, `TimeOnly`, `KmOnly`)
+  - `Domain/Entities/Vehicles/VehicleProgramOverride.cs` (override par véhicule, OrganizationEntityBase)
+- **Champs `VehicleModel`** :
+  - `Id, Make, Model, Trim?, EngineCode?, EngineDisplayName, EngineType, FuelType, ProductionStartYear, ProductionEndYear?, MarketRegion (FR/EU/Global), DisplayName (computed), Slug (unique), Aliases (string[])`
+- **Champs `MaintenanceProgram`** :
+  - `Id, VehicleModelId, Name (e.g. "Standard", "Usage intensif"), IsDefault, Source (Manufacturer|Curated|Custom), SourceReference?, ValidFromMileage = 0, ValidToMileage?`
+- **Champs `MaintenanceProgramItem`** :
+  - `Id, ProgramId, Code (MaintenanceItemCode), Title, Description?, IntervalMonths?, IntervalKm?, FirstOccurrenceMonths?, FirstOccurrenceKm?, Trigger (Earliest|Latest|TimeOnly|KmOnly), Severity (Critical|Recommended|Optional), EstimatedDurationMinutes?, EstimatedCostMin?, EstimatedCostMax?, RequiredParts (string[])`
+- **Champs `VehicleProgramOverride`** :
+  - `Id, OrganizationId, VehicleId, ItemCode, OverrideIntervalMonths?, OverrideIntervalKm?, Disabled (bool), Reason?`
+- **Acceptance** : compile, configurations EF posées, un VehicleModel peut avoir N programmes, chaque programme N items.
+- **Depends on** : T070
+
+### T7.5-B — Lier `Vehicle` au catalogue (refactor)
+
+- **Files** : `Domain/Entities/Vehicles/Vehicle.cs`, configuration EF, migration `LinkVehicleToCatalog`.
+- **Implémentation** :
+  - Ajouter `Vehicle.VehicleModelId (Guid?)` — nullable pour rétrocompatibilité avec véhicules existants en texte libre
+  - Garder `Make`, `Model`, `Year` mais les rendre **dénormalisés** depuis `VehicleModel` quand `VehicleModelId` est non-null (mis à jour à la création/modif)
+  - Ajouter `Vehicle.SelectedProgramId (Guid?)` — quand un VehicleModel a plusieurs programmes, l'org choisit lequel
+  - Migration CLI uniquement
+- **Backfill données existantes** : commande seed `dotnet run -- relink-vehicles` qui tente de matcher les véhicules existants par `(Make, Model, Year)` fuzzy (Levenshtein) → écrit un rapport `e:/tmp/relink-report.csv` à valider, n'écrit rien tant que pas validé.
+- **Acceptance** : un véhicule peut être créé soit avec `VehicleModelId` (préféré), soit avec saisie libre (legacy / modèle absent du catalogue).
+- **Depends on** : T7.5-A
+
+### T7.5-C — Seed du catalogue v1 (modèles courants en France)
+
+- **Files** :
+  - `apps/api/CarHorizontal.Infrastructure/Catalog/Seed/vehicle-models.json` (catalogue brut)
+  - `apps/api/CarHorizontal.Infrastructure/Catalog/Seed/CatalogSeeder.cs` (loader idempotent)
+- **Contenu MVP — au moins 50 modèles** couvrant ~80% du parc des petits garages FR :
+  - **Renault** : Clio II/III/IV/V (essence + dCi), Megane III/IV, Captur I/II, Scenic III/IV, Kangoo II/III, Twingo II/III, Zoé
+  - **Peugeot** : 207, 208 I/II, 308 II/III, 2008 I/II, 3008 II, 5008 II, Partner II/III, 508
+  - **Citroën** : C3 II/III, C4 II/III, Berlingo II/III, C5, DS3, DS4
+  - **Dacia** : Sandero I/II/III, Logan I/II, Duster I/II, Lodgy
+  - **Volkswagen** : Polo IV/V/VI, Golf VI/VII/VIII, Passat B7/B8, Tiguan I/II
+  - **Toyota** : Yaris III/IV, Corolla XII (hybride), Auris II, RAV4 IV/V
+  - **Ford** : Fiesta VII/VIII, Focus III/IV, Kuga II/III, Transit Custom
+  - **BMW** : Série 1 F20, Série 3 F30/G20, Série 5 F10/G30
+  - **Audi** : A1, A3 8V/8Y, A4 B8/B9
+  - **Tesla** : Model 3, Model Y
+  - **Hybrides spécifiques** : Toyota Prius IV, Hyundai Ioniq, Renault Captur E-Tech
+- **Programmes** : pour chaque modèle, programme **"Standard"** au minimum + **"Usage intensif"** quand pertinent (taxi, livraison)
+- **Sources** :
+  - Manuels constructeurs publics (PDF) — convertis en JSON manuellement pour la v1
+  - Bases publiques tierces (GitHub `vehicle-maintenance-schedules`, NHTSA, sites grossistes pièces)
+  - Validation par un mécanicien (à demander à l'utilisateur — un contact garage de confiance)
+- **Format JSON** :
+  ```json
+  {
+    "vehicleModels": [{
+      "slug": "renault-clio-iv-15-dci-90-2018-2023",
+      "make": "Renault", "model": "Clio IV", "trim": "1.5 dCi 90",
+      "engineCode": "K9K-628", "engineDisplayName": "1.5 dCi 90 ch",
+      "engineType": "Diesel", "fuelType": "Diesel",
+      "productionStartYear": 2018, "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": ["Clio IV dCi", "Clio 4 1.5 dCi"],
+      "programs": [{
+        "name": "Standard", "isDefault": true, "source": "Manufacturer",
+        "items": [
+          { "code": "oil_change",   "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+          { "code": "cabin_filter", "title": "Filtre habitacle",       "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+          { "code": "fuel_filter",  "title": "Filtre carburant",       "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+          { "code": "air_filter",   "title": "Filtre à air",           "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+          { "code": "brake_fluid",  "title": "Liquide de frein",       "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical" },
+          { "code": "timing_belt",  "title": "Courroie de distribution","intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+          { "code": "coolant",      "title": "Liquide de refroidissement","intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+        ]
+      }]
+    }]
+  }
+  ```
+- **Loader** : à chaque démarrage en dev, lit le JSON et upsert par `slug` (idempotent). En prod : commande explicite `dotnet run -- catalog-import path/to/file.json`.
+- **Acceptance** : `SELECT count(*) FROM "VehicleModels"` ≥ 50 après seed dev. Le programme de la Clio IV dCi est bien chargé.
+- **Depends on** : T7.5-A
+
+### T7.5-D — Refactor `TimelineEngine` : `ProgramExecutorRule`
+
+- **Files** :
+  - `Domain/Timeline/Rules/ProgramExecutorRule.cs` (NOUVEAU)
+  - `Domain/Timeline/Rules/SixMonthMaintenanceRule.cs` → **garder en fallback** quand `Vehicle.VehicleModelId == null`
+  - `Domain/Timeline/Rules/MileageBasedServiceRule.cs` → **idem fallback**
+  - `Infrastructure/Timeline/TimelineEngine.cs` (logique d'orchestration)
+- **Implémentation `ProgramExecutorRule`** :
+  - `Applies` : `Vehicle.VehicleModelId != null && Vehicle.SelectedProgramId != null`
+  - `Generate` :
+    1. Charge le `MaintenanceProgram` avec ses items
+    2. Charge l'historique : tous les `MaintenanceRecord` du véhicule, indexés par `Code` (à condition qu'on ait ajouté un champ `Code` sur `MaintenanceRecord` — voir T7.5-E)
+    3. Pour chaque `MaintenanceProgramItem` :
+       - Trouve le dernier MaintenanceRecord avec ce `Code` → `lastDoneAt`, `lastDoneKm`
+       - Calcule `nextDueAt` = `lastDoneAt + IntervalMonths` (si IntervalMonths)
+       - Calcule `nextDueKm` = `lastDoneKm + IntervalKm` (si IntervalKm)
+       - Selon `Trigger` (Earliest = celui qui arrive en premier après projection km), choisit l'échéance effective
+       - Pour la **première occurrence** : utilise `FirstOccurrenceMonths` / `FirstOccurrenceKm` si fournis, sinon `IntervalMonths` / `IntervalKm` à partir de `Vehicle.PurchasedAt` ou `CreatedAt`
+       - Crée un `TimelineEvent` avec :
+         - `Title` = `"{ProgramItem.Title} — {VehicleModel.DisplayName}"` (ex. "Vidange + filtre huile — Clio IV 1.5 dCi 90 ch")
+         - `Description` = phrase humaine ("Prévu à 60 000 km — vous êtes à 58 800 km, soit dans environ X jours / Y km")
+         - `Severity` reportée (pour styling UI + priorisation des reminders)
+         - `GeneratedFromRule` = `"Program:{ProgramId}:{ItemCode}"`
+         - Idempotence : ne recrée pas si un event identique (même `(VehicleId, ItemCode, DueAt±7j)`) existe déjà
+    4. Applique les `VehicleProgramOverride` quand présents (ignore items disabled, override intervals)
+- **Acceptance** :
+  - Test unitaire : véhicule Clio IV dCi avec 55 000 km et dernier filtre carburant à 0 km → `ProgramExecutorRule` génère un événement "Filtre carburant à 60 000 km" (severity Critical), pas un événement générique
+  - Test unitaire : Tesla Model 3 → ne génère **pas** d'événement vidange (le programme n'en a pas)
+  - Le job Hangfire `daily-timeline-regeneration` (T100) appelle bien le nouveau rule
+- **Depends on** : T7.5-A, T7.5-B, T7.5-C
+
+### T7.5-E — Lier `MaintenanceRecord` à un `ItemCode`
+
+- **Files** : `Domain/Entities/Maintenance/MaintenanceRecord.cs`, migration `MaintenanceRecordItemCode`, mise à jour DTOs/validators du module Maintenance.
+- **Implémentation** :
+  - Ajouter `MaintenanceRecord.ItemCodes (string[])` — un entretien peut couvrir plusieurs items (ex. "Grande révision" = oil_change + cabin_filter + brake_fluid)
+  - À la création/modif depuis `MaintenanceFormDialog`, **proposer une liste d'items** (cases à cocher pré-sélectionnées en fonction du `Type` choisi : "Vidange" → coche `oil_change` + `oil_filter` automatiquement, "Grande révision" → plusieurs cases)
+  - Ces codes alimentent l'historique exploité par `ProgramExecutorRule`
+- **Backfill données** : pour les `MaintenanceRecord` existants, mapper le champ `Type` (Oil/Tires/Brakes/...) vers les codes correspondants automatiquement (script de migration de données).
+- **Acceptance** : créer une "Grande révision" → coche `oil_change`, `oil_filter`, `cabin_filter`, `air_filter`, `brake_fluid` par défaut, modifiable. Après save, `ProgramExecutorRule` re-projecte la timeline et les prochains items pour ces codes sont décalés.
+- **Depends on** : T7.5-A, T7.5-D
+
+### T7.5-F — UI : `VehicleModelPicker` dans `VehicleFormDialog`
+
+- **Files** : `apps/portal/components/vehicles/VehicleModelPicker.tsx`, refactor `VehicleFormDialog.tsx`.
+- **API associée** : `GET /api/catalog/vehicle-models?q=&make=&fuel=&yearAt=&page=` (paginé, recherche fuzzy sur make/model/aliases).
+- **UI** :
+  - Au lieu de 3 inputs free-text Make/Model/Year, un **gros bloc combobox unique** :
+    - Étape 1 : tape "clio" → suggestions ("Renault Clio IV 1.5 dCi 90 ch — 2018-2023", "Renault Clio V 1.0 TCe 100 ch — 2019-...", etc.)
+    - Étape 2 : sélection → la fiche véhicule auto-remplit Make/Model/Year, montre une carte de confirmation avec photo générique du modèle + résumé du programme constructeur (ex. "9 entretiens programmés — vidange tous les 20 000 km, courroie à 160 000 km, etc.")
+  - Si plusieurs `MaintenanceProgram` disponibles (Standard / Intensif) → toggle juste en dessous
+  - Lien discret "Mon modèle n'est pas dans la liste" → bascule en **mode legacy** (saisie texte libre + warning "les rappels seront génériques pour ce véhicule, mais vous pouvez quand même utiliser CarHorizontal")
+- **Acceptance** :
+  - Ajouter un véhicule avec modèle catalogue : 4 clics, programme auto-attaché
+  - La timeline se peuple immédiatement avec les bons items
+- **Depends on** : T7.5-C, T052
+
+### T7.5-G — UI : section "Programme constructeur" sur `/vehicles/[id]`
+
+- **Files** :
+  - `apps/portal/components/vehicles/MaintenanceProgramSection.tsx`
+  - `apps/portal/components/vehicles/ProgramItemCard.tsx`
+  - `apps/portal/components/vehicles/ProgramOverrideDialog.tsx`
+- **API associée** : `GET /api/vehicles/{id}/program-projection` → renvoie pour chaque item du programme :
+  - `code, title, severity, lastDoneAt?, lastDoneKm?, nextDueAt?, nextDueKm?, status (Done|UpcomingSoon|Upcoming|Overdue|Future), kmRemaining?, daysRemaining?, estimatedCostRange?`
+- **UI** :
+  - **SectionCard "Programme d'entretien constructeur"** sous la section Résumé véhicule
+  - Sous-titre : "Renault Clio IV 1.5 dCi 90 ch — Standard" + lien "Changer le programme"
+  - **Vue par défaut** : 3 sous-listes Tabs : "À faire bientôt" / "Tout le programme" / "Historique"
+  - Chaque `ProgramItemCard` montre :
+    - Icône severity (🔴 Critique / 🟡 Recommandé / 🟢 Optionnel)
+    - Titre item + dernière fois ("Fait il y a 18 mois @ 38 000 km" ou "Jamais effectué")
+    - Prochaine échéance ("⏰ Dans 1 200 km" ou "📅 Dans 3 mois" ou "⚠️ En retard de 2 mois")
+    - Coût estimé si dispo
+    - Boutons : **"✓ Marquer comme fait"** (ouvre `MaintenanceFormDialog` avec `ItemCodes` pré-cochés), **"📣 Envoyer un rappel client"** (Phase 8), **"⚙️ Personnaliser pour ce véhicule"** (ouvre `ProgramOverrideDialog`)
+  - Mention en bas : "Ces préconisations sont basées sur le programme constructeur Renault. Vous pouvez les ajuster pour ce véhicule en cliquant sur l'item."
+- **Acceptance** :
+  - Sur une Clio IV avec 55 000 km, l'utilisateur voit immédiatement : "Filtre carburant prévu à 60 000 km — dans 1 200 km", "Vidange faite il y a 8 mois @ 47 000 km — prochaine dans 4 mois ou 12 000 km".
+  - Aucune saisie nécessaire, juste lecture.
+- **Depends on** : T7.5-D, T7.5-E, T7.5-F
+
+### T7.5-H — Wizard d'onboarding (réduction charge mentale)
+
+- **Goal** : un nouveau garage doit être opérationnel en 5 minutes, sans lire de doc.
+- **Files** : `apps/portal/app/(app)/onboarding/page.tsx`, composants `OnboardingStep1Garage.tsx`, `OnboardingStep2Customers.tsx`, `OnboardingStep3Vehicles.tsx`, `OnboardingStep4Messaging.tsx`, `OnboardingStep5Done.tsx`.
+- **Trigger** : à la première connexion d'un Owner d'une org sans aucun client, redirige automatiquement vers `/onboarding`. Skippable mais ré-affichable depuis `/settings`.
+- **Étapes** :
+  1. **Garage** : nom (pré-rempli), téléphone, adresse rapide, logo (optionnel)
+  2. **Clients** : "Importez votre fichier (CSV)" OU "Ajoutez votre premier client" (FormDialog) OU "Je le ferai plus tard"
+  3. **Véhicules** : pour chaque client ajouté, propose "Ajouter le véhicule" (utilise `VehicleModelPicker` — montre la promesse "Le programme constructeur sera attaché automatiquement")
+  4. **Messaging** : switch SMS / Email + un texte "Préférez-vous que CarHorizontal envoie les rappels automatiquement, ou simplement vous notifier en interne ?" (3 options : Auto / Notif puis manuel / Désactivé) + sender ID
+  5. **Done** : "Vous êtes prêt. Voici votre tableau de bord." → résumé visuel ("3 véhicules suivis, 12 entretiens anticipés sur les 12 prochains mois")
+- **Important** : à AUCUN moment l'utilisateur n'est exposé à la notion de "règle", "moteur", ou "configuration de timeline".
+- **Acceptance** : un nouvel utilisateur arrive sur le dashboard avec sa data prête en moins de 5 minutes.
+- **Depends on** : T7.5-F, T024
+
+### T7.5-I — Repositionner `/settings/timeline-rules` (T143)
+
+- **Goal** : le terme "règles timeline" est trop technique. Renommer + repositionner.
+- **Implémentation** :
+  - Renommer la page en **"Préférences d'entretien"**.
+  - Contenu épuré : **uniquement** des switches métier exprimés en langage garage :
+    - "Envoyer un rappel pour le contrôle technique légal (5 ans + tous les 2 ans)" : ON/OFF
+    - "Détecter les opportunités de reprise après 3 ans d'usage" : ON/OFF
+    - "Rappeler le changement de pneus saisonnier (octobre / avril)" : ON/OFF
+    - "Délai de prévenance par défaut avant un entretien : [14] jours" (slider 7-30j)
+  - **Pas** d'affichage des `MaintenanceProgramItem` ici (ils sont consultables sur la fiche véhicule).
+  - **Pas** de notion de "rule code".
+- **Depends on** : T143 (annule/remplace son contenu actuel)
+
+### T7.5-J — Backfill côté Phase 8 (Reminders intelligents)
+
+- **Goal** : les reminders générés par Phase 8 doivent être **contextuels** au programme.
+- **Implémentation** :
+  - Quand un `Reminder` est créé depuis un `TimelineEvent` issu de `ProgramExecutorRule`, il **embarque** le `ItemCode` et `Severity` dans son contenu.
+  - La **priorité d'envoi** dépend de la severity : Critical envoyés en premier, plus tôt (lead time = 21j au lieu de 14j).
+  - Le `Reminder.ResolvedSubject` et `ResolvedBody` utilisent un template **spécifique au code item** quand disponible (ex. `reminder.maintenance.timing_belt.email`), sinon fallback sur `reminder.maintenance.generic.email`.
+- **Depends on** : T080, T091, T7.5-D
+
+### T7.5-K — Templates par défaut enrichis (Phase 9)
+
+- **Goal** : que les templates par défaut soient **immédiatement utiles** (le garage n'a rien à écrire).
+- **Implémentation** : ajouter dans le seed templates (T091) **un template par `MaintenanceItemCode` critique** :
+  - `reminder.maintenance.oil_change.sms` :
+    > Bonjour {{customer.firstName}}, votre {{vehicle.modelDisplayName}} approche des {{event.dueMileage}} km : il est temps de programmer votre vidange + filtre huile. Souhaitez-vous prendre rendez-vous ? — {{org.name}}
+  - `reminder.maintenance.timing_belt.email` :
+    > Sujet : Courroie de distribution — votre {{vehicle.modelDisplayName}}
+    > Bonjour {{customer.firstName}},
+    > Votre véhicule approche des {{event.dueMileage}} km. Le constructeur préconise le remplacement de la courroie de distribution à cette échéance. C'est une intervention essentielle pour éviter une casse moteur.
+    > Coût indicatif : {{event.estimatedCost}}.
+    > Voulez-vous que nous vous prenions un créneau ? Réponse à ce mail ou appelez-nous au {{org.phone}}.
+    > {{org.name}}
+  - Idem pour : `brake_fluid`, `fuel_filter`, `cabin_filter`, `coolant`, `tire_replacement` (saisonnier), `technical_inspection` (légal FR)
+- **Acceptance** : un garage qui n'a rien configuré reçoit déjà des messages **utiles et précis**.
+- **Depends on** : T091, T7.5-D
+
+### T7.5-L — Dashboard : widget "Charge mentale évitée"
+
+- **Goal** : montrer la valeur perçue.
+- **Implémentation** : dans le dashboard (T111), ajouter un mini-widget "Le mois dernier" :
+  - "Le logiciel a anticipé X entretiens" (count des `TimelineEvent` générés ce mois)
+  - "Y rappels envoyés automatiquement à vos clients" (sans intervention)
+  - "Estimation : Z heures économisées"
+- C'est de la com produit, mais ça ancre le **bénéfice** chez le garagiste.
+- **Depends on** : T111, T7.5-D
+
+---
+
 ## PHASE 8 — Rappels Automatiques
 
 ### 🔁 Cross-module backfill (à faire pendant cette phase)
@@ -668,8 +973,13 @@ Quand cette phase est livrée, **rouvrir** ces écrans des phases amont et activ
 - **T7.1-C (fiche client → tab Timeline)** : action inline "Envoyer rappel" qui était désactivée → activer en branchant `POST /api/reminders/from-timeline/{id}`.
 - **T053 (fiche véhicule → section Timeline)** : action "Envoyer rappel" : idem.
 - **T072 (page Timeline globale)** : actions "Envoyer rappel maintenant" + bouton card "📣" : brancher.
+- **T7.5-G (section Programme constructeur)** : bouton "📣 Envoyer un rappel client" sur chaque ProgramItemCard : brancher en passant le `ItemCode` au reminder pour que le template choisi soit le bon.
 - **Notification toast** d'envoi : "Rappel programmé / envoyé immédiatement".
 - **Audit grep** : `rg -i "rappel.*phase|reminder.*not yet|TODO.*reminder"` doit revenir vide.
+
+### ⚠️ Dépendance Phase 7.5
+
+Avant d'investir Phase 8 trop loin : **Phase 7.5 doit avoir livré au moins T7.5-A à T7.5-D**. Sinon les Reminders générés seront génériques et perdront leur intérêt produit. Si Phase 8 est partiellement faite avec des Reminders génériques, c'est OK pour le squelette technique, mais tagger ces tickets avec `// TODO(T7.5-J): re-enrich with program context` pour ne pas oublier de les rouvrir.
 
 ### T080 — API Reminders
 - **Files** : `Api/Modules/Reminders/RemindersController.cs`, service, DTOs.
@@ -713,6 +1023,7 @@ Quand cette phase est livrée, **rouvrir** ces écrans des phases amont et activ
 
 - **T021 (register)** : email de bienvenue non envoyé jusqu'ici → brancher template `lifecycle.welcome.email` au moment de la création du compte.
 - **T142 (invitations membres)** : remplacer le stub d'invitation par un envoi réel d'email avec token.
+- **T7.5-K (templates par item)** : ajouter au seed les templates par `MaintenanceItemCode` listés dans T7.5-K. C'est ce qui rend les rappels précis ("courroie de distribution" plutôt que "entretien").
 - **Audit grep** : `rg -i "email.*phase|sms.*phase|messaging.*not yet"` vide.
 - Vérifier que les anciens `MessageLog` créés pendant Phase 8 (avec NoOp) sont bien lisibles en base.
 
@@ -803,6 +1114,8 @@ Quand cette phase est livrée, **rouvrir** ces écrans des phases amont et activ
 - **Page d'accueil par défaut** : jusqu'ici probablement un stub `PageStub` à `/dashboard` → remplacer par la vraie page.
 - **QuickActions dropdown** : doit ouvrir directement les 4 dialogs déjà existants (`CustomerFormDialog`, `VehicleFormDialog`, `ReminderFormDialog`, `AppointmentFormDialog`). Aucun nouveau dialog à créer ; juste réutiliser les composants des phases 4/5/8/12.
 - **KpiCard "lien voir tous"** : chacun doit naviguer vers la page liste filtrée correspondante (ex. "clients à relancer" → `/clients?status=at-risk`).
+- **T7.5-L (widget "Charge mentale évitée")** : intégrer dans le dashboard le widget qui montre "X entretiens anticipés ce mois grâce à CarHorizontal". C'est le hero indicator du produit.
+- **Vue "À faire cette semaine"** : nouvelle carte (en plus de UpcomingReminders) qui liste les `TimelineEvent` à severity Critical dans les 7 prochains jours, avec action "Envoyer rappel" en un clic.
 - **Note sur la dépendance circulaire** : T110 dépend de T120 (loyalty trend). **Ordre d'exécution** : faire **T120 (calcul loyalty)** AVANT T110/T111, sinon le BFF ne peut pas alimenter le `LoyaltyTrend`. La tâche T120 est dans Phase 13 — soit on la sort plus tôt, soit on stubbe le champ dans le BFF en attendant (et on l'ajoute à la backfill de Phase 13).
 
 ### T110 — Endpoint BFF Dashboard
@@ -974,11 +1287,12 @@ Quand cette phase est livrée, **rouvrir** ces écrans des phases amont et activ
 - **Acceptance** : flux complet.
 - **Depends on** : T140, T024
 
-### T143 — Onglet Règles Timeline
-- **Files** : `app/(app)/settings/timeline-rules/page.tsx`.
-- **UI** : liste des règles avec switch on/off, paramètres editables (lead time, intervalle km, etc.).
-- **Acceptance** : désactiver une règle empêche la génération des events correspondants.
-- **Depends on** : T070
+### T143 — Onglet Préférences d'entretien (ex-"Règles Timeline")
+- **⚠️ Voir T7.5-I** : cette tâche est repositionnée. **Ne pas exposer la notion technique de "rule"** au garagiste.
+- **Files** : `app/(app)/settings/maintenance-preferences/page.tsx`.
+- **UI** : uniquement des switches en langage métier (rappel contrôle technique, opportunité de reprise, pneus saisonniers, délai de prévenance par défaut). Les programmes d'entretien constructeur ne sont **PAS** modifiables ici — ils se gèrent au cas par cas sur la fiche véhicule (T7.5-G).
+- **Acceptance** : un garagiste ouvre la page → 4 switches compréhensibles, aucune mention de "rule", "code", "moteur".
+- **Depends on** : T070, T7.5-I
 
 ### T144 — Onglet Préférences personnelles
 - **UI** : Nom complet, email (verrouillé, "Demander un changement"), changer mot de passe (modale), avatar, notifications in-app.
@@ -1183,18 +1497,21 @@ Pour la navigation :
 5. **Premier vertical métier** (Clients) : T040 → T044
 6. **Deuxième vertical** (Véhicules) : T050 → T053
 7. **Maintenance** : T060 → T061
-8. **Cœur différenciant** : T070 → T072 (Timeline), T080 → T082 (Reminders)
-9. **Messaging** : T090 → T093
-10. **Jobs Hangfire** : T100 → T101
-11. **Dashboard** : T110 → T111
-12. **Rendez-vous** : T115 → T116
-13. **Fidélisation** : T120 → T121
-14. **Files** : T130 → T131
-15. **Paramètres** : T140 → T144
-16. **Notifications in-app** : T150
-17. **Observabilité** : T160 → T161
-18. **Infra déploiement** : T170 → T176
-19. **Polish & QA** : T180 → T186
+8. **Squelette Timeline** : T070 → T072
+9. **🚨 Catalogue & programmes constructeur (CŒUR PRODUIT)** : T7.5-A → T7.5-G + T7.5-I (préférences renommées). T7.5-H (onboarding wizard) peut attendre la fin de Phase 8.
+10. **Reminders intelligents** : T080 → T082 + backfill T7.5-J
+11. **Messaging contextuel** : T090 → T093 + backfill T7.5-K (templates par item)
+12. **Jobs Hangfire** : T100 → T101
+13. **Dashboard intelligent** : T110 → T111 + T7.5-L (widget "charge mentale évitée")
+14. **Onboarding wizard** : T7.5-H (si pas fait à l'étape 9)
+15. **Rendez-vous** : T115 → T116
+16. **Fidélisation** : T120 → T121
+17. **Files** : T130 → T131
+18. **Paramètres** : T140 → T144
+19. **Notifications in-app** : T150
+20. **Observabilité** : T160 → T161
+21. **Infra déploiement** : T170 → T176
+22. **Polish & QA** : T180 → T186
 
 Chaque tâche doit être validée (build vert + manipulation manuelle) avant de passer à la suivante.
 
@@ -1208,4 +1525,14 @@ Chaque tâche doit être validée (build vert + manipulation manuelle) avant de 
 - Planning atelier multi-baies / gestion temps mécaniciens.
 - Intégrations DMS tiers.
 - App mobile native.
-- IA prédictive (phase 3 future).
+- IA prédictive sur les pannes (phase 3 future).
+- **Édition libre de programmes constructeur depuis l'UI** : risque que le garagiste casse la donnée. À la place : `VehicleProgramOverride` au cas par cas (T7.5-A) si vraiment nécessaire.
+- **Page de "configuration du moteur de timeline"** : la promesse produit interdit de demander au garagiste de configurer ce que le constructeur sait déjà.
+
+# 🌱 Évolutions post-MVP du catalogue (Phase 2/3)
+
+- **API publique constructeur** : remplacer le seed JSON par un connecteur quand c'est possible (peu probable que les constructeurs ouvrent ces données — explorer plutôt des partenariats données type Autodata, Haynes, TecAlliance).
+- **Web scraping légal** des manuels constructeurs publics + ML pour extraire les programmes.
+- **Crowdsourcing** : permettre aux garages contributeurs de soumettre des corrections sur le catalogue (validées par modération CarHorizontal). Les retours du terrain valent de l'or.
+- **VIN decoding** : intégration NHTSA / DAT pour qu'un scan VIN remplisse la fiche véhicule + sélectionne le bon `VehicleModel` automatiquement.
+- **Apprentissage par usage** : si 100 garages enregistrent un entretien "filtre carburant" à 65 000 km en moyenne sur le même modèle alors que le programme dit 60 000, signaler l'écart au curateur du catalogue.
