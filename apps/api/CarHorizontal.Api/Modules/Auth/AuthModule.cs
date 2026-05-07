@@ -1,4 +1,5 @@
 using System.Text;
+using CarHorizontal.Api.Modules.Organizations;
 using CarHorizontal.Domain.Entities.Identity;
 using CarHorizontal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -38,6 +39,8 @@ public static class AuthModule
 
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<IOrganizationService, OrganizationService>();
+        services.AddScoped<IAuthService, AuthService>();
 
         var jwt = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
             ?? throw new InvalidOperationException("Jwt configuration section is missing.");
