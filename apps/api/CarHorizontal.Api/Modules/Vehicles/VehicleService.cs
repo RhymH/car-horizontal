@@ -40,7 +40,7 @@ public class VehicleService : IVehicleService
             var pattern = $"%{s}%";
             var plateRegex = PlateSearch.BuildLikeRegex(s);
             query = query.Where(v =>
-                (plateRegex != null && Regex.IsMatch(v.LicensePlate, plateRegex))
+                (plateRegex != null && Regex.IsMatch(v.LicensePlate, plateRegex, RegexOptions.IgnoreCase))
                 || EF.Functions.ILike(v.Make, pattern)
                 || EF.Functions.ILike(v.Model, pattern)
                 || (v.Vin != null && EF.Functions.ILike(v.Vin, pattern)));

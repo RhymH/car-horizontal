@@ -11,14 +11,16 @@ internal static class PlateSearch
     /// which Npgsql translates to the <c>~</c> operator.
     /// </summary>
     /// <example>
-    /// Input "AA-111-AA" → "(?i)A[^A-Za-z0-9]*A[^A-Za-z0-9]*1[^A-Za-z0-9]*1[^A-Za-z0-9]*1[^A-Za-z0-9]*A[^A-Za-z0-9]*A[^A-Za-z0-9]*".
-    /// Returns null when the input has no alphanumeric character.
+    /// Input "AA-111-AA" → "A[^A-Za-z0-9]*A[^A-Za-z0-9]*1[^A-Za-z0-9]*1[^A-Za-z0-9]*1[^A-Za-z0-9]*A[^A-Za-z0-9]*A[^A-Za-z0-9]*".
+    /// Returns null when the input has no alphanumeric character. Callers should
+    /// pass <see cref="System.Text.RegularExpressions.RegexOptions.IgnoreCase"/> so
+    /// Npgsql translates the match to the case-insensitive <c>~*</c> operator.
     /// </example>
     public static string? BuildLikeRegex(string? raw)
     {
         if (string.IsNullOrEmpty(raw)) return null;
 
-        var sb = new StringBuilder("(?i)");
+        var sb = new StringBuilder();
         var hasContent = false;
         foreach (var ch in raw)
         {
