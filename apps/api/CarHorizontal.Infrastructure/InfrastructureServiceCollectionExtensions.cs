@@ -1,4 +1,5 @@
 using CarHorizontal.Domain.Timeline.Rules;
+using CarHorizontal.Infrastructure.Catalog.Seed;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Persistence.Interceptors;
 using CarHorizontal.Infrastructure.Reminders;
@@ -38,6 +39,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<ITimelineEngine, TimelineEngine>();
 
         services.AddScoped<IAutoReminderScheduler, AutoReminderScheduler>();
+
+        services.AddScoped<ICatalogSeeder, CatalogSeeder>();
 
         return services;
     }

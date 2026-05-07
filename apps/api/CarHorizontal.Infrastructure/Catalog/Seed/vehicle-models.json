@@ -1,0 +1,1746 @@
+{
+  "vehicleModels": [
+    {
+      "slug": "renault-clio-ii-12-16v-75-2001-2009",
+      "make": "Renault",
+      "model": "Clio II",
+      "trim": "1.2 16V 75",
+      "engineCode": "D4F-712",
+      "engineDisplayName": "1.2 16V 75 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2001,
+      "productionEndYear": 2009,
+      "marketRegion": "FR",
+      "aliases": ["Clio 2 1.2 16V", "Clio Campus 1.2"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 15000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 40000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 60, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 500, "estimatedCostMax": 900 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-clio-iii-15-dci-85-2005-2012",
+      "make": "Renault",
+      "model": "Clio III",
+      "trim": "1.5 dCi 85",
+      "engineCode": "K9K-768",
+      "engineDisplayName": "1.5 dCi 85 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2005,
+      "productionEndYear": 2012,
+      "marketRegion": "FR",
+      "aliases": ["Clio 3 dCi 85"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "glow_plugs", "title": "Bougies de préchauffage", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-clio-iii-12-16v-75-2005-2012",
+      "make": "Renault",
+      "model": "Clio III",
+      "trim": "1.2 16V 75",
+      "engineCode": "D4F-740",
+      "engineDisplayName": "1.2 16V 75 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2005,
+      "productionEndYear": 2012,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 15000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 40000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 60, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 500, "estimatedCostMax": 900 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-clio-iv-15-dci-90-2018-2023",
+      "make": "Renault",
+      "model": "Clio IV",
+      "trim": "1.5 dCi 90",
+      "engineCode": "K9K-628",
+      "engineDisplayName": "1.5 dCi 90 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2018,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": ["Clio IV dCi", "Clio 4 1.5 dCi 90"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical" },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-clio-iv-09-tce-90-2013-2019",
+      "make": "Renault",
+      "model": "Clio IV",
+      "trim": "0.9 TCe 90",
+      "engineCode": "H4Bt",
+      "engineDisplayName": "0.9 TCe 90 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2013,
+      "productionEndYear": 2019,
+      "marketRegion": "FR",
+      "aliases": ["Clio 4 TCe 90"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 15000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-clio-v-10-tce-100-2019-2024",
+      "make": "Renault",
+      "model": "Clio V",
+      "trim": "1.0 TCe 100",
+      "engineCode": "H4D-450",
+      "engineDisplayName": "1.0 TCe 100 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2019,
+      "productionEndYear": 2024,
+      "marketRegion": "FR",
+      "aliases": ["Clio 5 TCe 100"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-megane-iii-15-dci-110-2009-2016",
+      "make": "Renault",
+      "model": "Megane III",
+      "trim": "1.5 dCi 110",
+      "engineCode": "K9K-836",
+      "engineDisplayName": "1.5 dCi 110 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2009,
+      "productionEndYear": 2016,
+      "marketRegion": "FR",
+      "aliases": ["Megane 3 dCi 110"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-megane-iv-13-tce-140-2018-2022",
+      "make": "Renault",
+      "model": "Megane IV",
+      "trim": "1.3 TCe 140",
+      "engineCode": "H5Ht",
+      "engineDisplayName": "1.3 TCe 140 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2018,
+      "productionEndYear": 2022,
+      "marketRegion": "FR",
+      "aliases": ["Megane 4 TCe 140"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-megane-iv-15-dci-110-2016-2022",
+      "make": "Renault",
+      "model": "Megane IV",
+      "trim": "1.5 dCi 110",
+      "engineCode": "K9K-647",
+      "engineDisplayName": "1.5 dCi 110 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2016,
+      "productionEndYear": 2022,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-captur-i-09-tce-90-2013-2019",
+      "make": "Renault",
+      "model": "Captur I",
+      "trim": "0.9 TCe 90",
+      "engineCode": "H4Bt",
+      "engineDisplayName": "0.9 TCe 90 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2013,
+      "productionEndYear": 2019,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 15000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-captur-ii-13-tce-140-2019-2024",
+      "make": "Renault",
+      "model": "Captur II",
+      "trim": "1.3 TCe 140",
+      "engineCode": "H5Ht",
+      "engineDisplayName": "1.3 TCe 140 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2019,
+      "productionEndYear": 2024,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-captur-ii-16-e-tech-145-2020-2024",
+      "make": "Renault",
+      "model": "Captur II",
+      "trim": "1.6 E-Tech 145 Hybride",
+      "engineCode": "H4M",
+      "engineDisplayName": "1.6 E-Tech 145 ch (Hybride)",
+      "engineType": "Hybrid",
+      "fuelType": "Hybrid",
+      "productionStartYear": 2020,
+      "productionEndYear": 2024,
+      "marketRegion": "FR",
+      "aliases": ["Captur E-Tech Hybride"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-scenic-iv-13-tce-140-2019-2022",
+      "make": "Renault",
+      "model": "Scenic IV",
+      "trim": "1.3 TCe 140",
+      "engineCode": "H5Ht",
+      "engineDisplayName": "1.3 TCe 140 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2019,
+      "productionEndYear": 2022,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-kangoo-ii-15-dci-90-2013-2021",
+      "make": "Renault",
+      "model": "Kangoo II",
+      "trim": "1.5 dCi 90",
+      "engineCode": "K9K-808",
+      "engineDisplayName": "1.5 dCi 90 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2013,
+      "productionEndYear": 2021,
+      "marketRegion": "FR",
+      "aliases": ["Kangoo 2 dCi 90"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-kangoo-iii-15-blue-dci-95-2021-2025",
+      "make": "Renault",
+      "model": "Kangoo III",
+      "trim": "1.5 Blue dCi 95",
+      "engineCode": "K9K",
+      "engineDisplayName": "1.5 Blue dCi 95 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2021,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 25000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-twingo-iii-10-sce-65-2014-2023",
+      "make": "Renault",
+      "model": "Twingo III",
+      "trim": "1.0 SCe 65",
+      "engineCode": "B4D-400",
+      "engineDisplayName": "1.0 SCe 65 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2014,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": ["Twingo 3 SCe 65"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 15000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 500, "estimatedCostMax": 900 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-zoe-r110-2019-2023",
+      "make": "Renault",
+      "model": "Zoé",
+      "trim": "R110 ZE 50",
+      "engineDisplayName": "R110 électrique 108 ch",
+      "engineType": "Electric",
+      "fuelType": "Electric",
+      "productionStartYear": 2019,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": ["Zoe ZE50", "Zoe R110"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 100000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "tire_rotation", "title": "Permutation pneus", "intervalKm": 15000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "ac_service", "title": "Climatisation (recharge)", "intervalMonths": 48, "trigger": "TimeOnly", "severity": "Recommended" },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" },
+            { "code": "wipers", "title": "Essuie-glaces", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-207-14-vti-95-2006-2014",
+      "make": "Peugeot",
+      "model": "207",
+      "trim": "1.4 VTi 95",
+      "engineCode": "EP3",
+      "engineDisplayName": "1.4 VTi 95 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2006,
+      "productionEndYear": 2014,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 40000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 60, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 500, "estimatedCostMax": 900 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-208-i-12-puretech-110-2015-2019",
+      "make": "Peugeot",
+      "model": "208 I",
+      "trim": "1.2 PureTech 110",
+      "engineCode": "EB2DT",
+      "engineDisplayName": "1.2 PureTech 110 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2015,
+      "productionEndYear": 2019,
+      "marketRegion": "FR",
+      "aliases": ["208 PureTech 110"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution (humide)", "intervalMonths": 72, "intervalKm": 100000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 800, "estimatedCostMax": 1500 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-208-ii-12-puretech-100-2019-2024",
+      "make": "Peugeot",
+      "model": "208 II",
+      "trim": "1.2 PureTech 100",
+      "engineCode": "EB2ADT",
+      "engineDisplayName": "1.2 PureTech 100 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2019,
+      "productionEndYear": 2024,
+      "marketRegion": "FR",
+      "aliases": ["208 2 PureTech 100"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution (humide)", "intervalMonths": 72, "intervalKm": 100000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 800, "estimatedCostMax": 1500 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-308-ii-16-hdi-115-2014-2021",
+      "make": "Peugeot",
+      "model": "308 II",
+      "trim": "1.6 BlueHDi 115",
+      "engineCode": "DV6FC",
+      "engineDisplayName": "1.6 BlueHDi 115 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2014,
+      "productionEndYear": 2021,
+      "marketRegion": "FR",
+      "aliases": ["308 2 1.6 HDi"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "glow_plugs", "title": "Bougies de préchauffage", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 180000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 700, "estimatedCostMax": 1300 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-308-iii-12-puretech-130-2021-2025",
+      "make": "Peugeot",
+      "model": "308 III",
+      "trim": "1.2 PureTech 130",
+      "engineCode": "EB2ADTS",
+      "engineDisplayName": "1.2 PureTech 130 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2021,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": ["308 3 PureTech 130"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution (humide)", "intervalMonths": 72, "intervalKm": 100000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 800, "estimatedCostMax": 1500 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-2008-i-15-bluehdi-100-2016-2019",
+      "make": "Peugeot",
+      "model": "2008 I",
+      "trim": "1.5 BlueHDi 100",
+      "engineCode": "DV5RD",
+      "engineDisplayName": "1.5 BlueHDi 100 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2016,
+      "productionEndYear": 2019,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 25000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 180000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 700, "estimatedCostMax": 1300 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-2008-ii-12-puretech-130-2020-2025",
+      "make": "Peugeot",
+      "model": "2008 II",
+      "trim": "1.2 PureTech 130",
+      "engineCode": "EB2ADTS",
+      "engineDisplayName": "1.2 PureTech 130 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2020,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution (humide)", "intervalMonths": 72, "intervalKm": 100000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 800, "estimatedCostMax": 1500 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-3008-ii-15-bluehdi-130-2017-2023",
+      "make": "Peugeot",
+      "model": "3008 II",
+      "trim": "1.5 BlueHDi 130",
+      "engineCode": "DV5RC",
+      "engineDisplayName": "1.5 BlueHDi 130 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2017,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 25000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 180000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 700, "estimatedCostMax": 1300 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-5008-ii-15-bluehdi-130-2017-2023",
+      "make": "Peugeot",
+      "model": "5008 II",
+      "trim": "1.5 BlueHDi 130",
+      "engineCode": "DV5RC",
+      "engineDisplayName": "1.5 BlueHDi 130 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2017,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 25000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 180000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 700, "estimatedCostMax": 1300 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-508-ii-16-puretech-180-2018-2023",
+      "make": "Peugeot",
+      "model": "508 II",
+      "trim": "1.6 PureTech 180",
+      "engineCode": "EP6FADTXD",
+      "engineDisplayName": "1.6 PureTech 180 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2018,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "transmission_fluid", "title": "Boîte à vitesses (huile)", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended", "estimatedCostMin": 150, "estimatedCostMax": 250 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "peugeot-partner-iii-15-bluehdi-100-2018-2025",
+      "make": "Peugeot",
+      "model": "Partner III",
+      "trim": "1.5 BlueHDi 100",
+      "engineCode": "DV5RD",
+      "engineDisplayName": "1.5 BlueHDi 100 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2018,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 25000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 180000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 700, "estimatedCostMax": 1300 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "citroen-c3-ii-14-hdi-70-2009-2016",
+      "make": "Citroën",
+      "model": "C3 II",
+      "trim": "1.4 HDi 70",
+      "engineCode": "DV4TD",
+      "engineDisplayName": "1.4 HDi 70 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2009,
+      "productionEndYear": 2016,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "glow_plugs", "title": "Bougies de préchauffage", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 60, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 700, "estimatedCostMax": 1300 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "citroen-c3-iii-12-puretech-110-2016-2024",
+      "make": "Citroën",
+      "model": "C3 III",
+      "trim": "1.2 PureTech 110",
+      "engineCode": "EB2DT",
+      "engineDisplayName": "1.2 PureTech 110 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2016,
+      "productionEndYear": 2024,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution (humide)", "intervalMonths": 72, "intervalKm": 100000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 800, "estimatedCostMax": 1500 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "citroen-c4-ii-16-hdi-92-2010-2018",
+      "make": "Citroën",
+      "model": "C4 II",
+      "trim": "1.6 HDi 92",
+      "engineCode": "DV6DTED",
+      "engineDisplayName": "1.6 HDi 92 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2010,
+      "productionEndYear": 2018,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "glow_plugs", "title": "Bougies de préchauffage", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 180000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 700, "estimatedCostMax": 1300 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "citroen-c4-iii-12-puretech-130-2020-2025",
+      "make": "Citroën",
+      "model": "C4 III",
+      "trim": "1.2 PureTech 130",
+      "engineCode": "EB2ADTS",
+      "engineDisplayName": "1.2 PureTech 130 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2020,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution (humide)", "intervalMonths": 72, "intervalKm": 100000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 800, "estimatedCostMax": 1500 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "citroen-berlingo-iii-15-bluehdi-100-2018-2025",
+      "make": "Citroën",
+      "model": "Berlingo III",
+      "trim": "1.5 BlueHDi 100",
+      "engineCode": "DV5RD",
+      "engineDisplayName": "1.5 BlueHDi 100 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2018,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 25000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 180000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 700, "estimatedCostMax": 1300 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "citroen-ds3-16-vti-120-2010-2015",
+      "make": "Citroën",
+      "model": "DS3",
+      "trim": "1.6 VTi 120",
+      "engineCode": "EP6",
+      "engineDisplayName": "1.6 VTi 120 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2010,
+      "productionEndYear": 2015,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 40000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "dacia-sandero-ii-09-tce-90-2012-2020",
+      "make": "Dacia",
+      "model": "Sandero II",
+      "trim": "0.9 TCe 90",
+      "engineCode": "H4Bt",
+      "engineDisplayName": "0.9 TCe 90 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2012,
+      "productionEndYear": 2020,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 15000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "dacia-sandero-iii-10-tce-90-2021-2025",
+      "make": "Dacia",
+      "model": "Sandero III",
+      "trim": "1.0 TCe 90",
+      "engineCode": "H4D",
+      "engineDisplayName": "1.0 TCe 90 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2021,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "dacia-logan-ii-15-dci-90-2013-2020",
+      "make": "Dacia",
+      "model": "Logan II",
+      "trim": "1.5 dCi 90",
+      "engineCode": "K9K",
+      "engineDisplayName": "1.5 dCi 90 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2013,
+      "productionEndYear": 2020,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "dacia-duster-i-15-dci-110-2010-2017",
+      "make": "Dacia",
+      "model": "Duster I",
+      "trim": "1.5 dCi 110",
+      "engineCode": "K9K-896",
+      "engineDisplayName": "1.5 dCi 110 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2010,
+      "productionEndYear": 2017,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "glow_plugs", "title": "Bougies de préchauffage", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "dacia-duster-ii-15-blue-dci-115-2018-2024",
+      "make": "Dacia",
+      "model": "Duster II",
+      "trim": "1.5 Blue dCi 115",
+      "engineCode": "K9K",
+      "engineDisplayName": "1.5 Blue dCi 115 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2018,
+      "productionEndYear": 2024,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "volkswagen-polo-vi-10-tsi-95-2018-2024",
+      "make": "Volkswagen",
+      "model": "Polo VI",
+      "trim": "1.0 TSI 95",
+      "engineCode": "DKLA",
+      "engineDisplayName": "1.0 TSI 95 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2018,
+      "productionEndYear": 2024,
+      "marketRegion": "FR",
+      "aliases": ["Polo 6 TSI 95"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 36, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "volkswagen-golf-vii-16-tdi-110-2012-2020",
+      "make": "Volkswagen",
+      "model": "Golf VII",
+      "trim": "1.6 TDI 110",
+      "engineCode": "CRKB",
+      "engineDisplayName": "1.6 TDI 110 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2012,
+      "productionEndYear": 2020,
+      "marketRegion": "FR",
+      "aliases": ["Golf 7 TDI 110"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 36, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "transmission_fluid", "title": "Boîte à vitesses (huile)", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended", "estimatedCostMin": 150, "estimatedCostMax": 250 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "volkswagen-golf-vii-14-tsi-125-2012-2020",
+      "make": "Volkswagen",
+      "model": "Golf VII",
+      "trim": "1.4 TSI 125",
+      "engineCode": "CXSA",
+      "engineDisplayName": "1.4 TSI 125 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2012,
+      "productionEndYear": 2020,
+      "marketRegion": "FR",
+      "aliases": ["Golf 7 TSI 125"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 36, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "transmission_fluid", "title": "Boîte à vitesses (huile)", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended", "estimatedCostMin": 150, "estimatedCostMax": 250 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "volkswagen-golf-viii-15-etsi-150-2020-2025",
+      "make": "Volkswagen",
+      "model": "Golf VIII",
+      "trim": "1.5 eTSI 150",
+      "engineCode": "DPCA",
+      "engineDisplayName": "1.5 eTSI 150 ch",
+      "engineType": "Hybrid",
+      "fuelType": "Hybrid",
+      "productionStartYear": 2020,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": ["Golf 8 eTSI"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 36, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "volkswagen-passat-b8-20-tdi-150-2014-2023",
+      "make": "Volkswagen",
+      "model": "Passat B8",
+      "trim": "2.0 TDI 150",
+      "engineCode": "CRLB",
+      "engineDisplayName": "2.0 TDI 150 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2014,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 36, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "transmission_fluid", "title": "Boîte à vitesses (huile)", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended", "estimatedCostMin": 150, "estimatedCostMax": 250 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "volkswagen-tiguan-ii-20-tdi-150-2016-2023",
+      "make": "Volkswagen",
+      "model": "Tiguan II",
+      "trim": "2.0 TDI 150",
+      "engineCode": "DFGA",
+      "engineDisplayName": "2.0 TDI 150 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2016,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 36, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "toyota-yaris-iv-15-hybride-116-2020-2025",
+      "make": "Toyota",
+      "model": "Yaris IV",
+      "trim": "1.5 Hybride 116",
+      "engineCode": "M15A-FXE",
+      "engineDisplayName": "1.5 Hybride 116 ch",
+      "engineType": "Hybrid",
+      "fuelType": "Hybrid",
+      "productionStartYear": 2020,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": ["Yaris 4 Hybride"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 15000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 100000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "toyota-corolla-xii-18-hybride-122-2019-2025",
+      "make": "Toyota",
+      "model": "Corolla XII",
+      "trim": "1.8 Hybride 122",
+      "engineCode": "2ZR-FXE",
+      "engineDisplayName": "1.8 Hybride 122 ch",
+      "engineType": "Hybrid",
+      "fuelType": "Hybrid",
+      "productionStartYear": 2019,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": ["Corolla 12 Hybride"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 15000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 100000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" },
+            { "code": "wipers", "title": "Essuie-glaces", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "toyota-rav4-v-25-hybride-218-2019-2024",
+      "make": "Toyota",
+      "model": "RAV4 V",
+      "trim": "2.5 Hybride 218",
+      "engineCode": "A25A-FXS",
+      "engineDisplayName": "2.5 Hybride 218 ch",
+      "engineType": "Hybrid",
+      "fuelType": "Hybrid",
+      "productionStartYear": 2019,
+      "productionEndYear": 2024,
+      "marketRegion": "FR",
+      "aliases": ["RAV4 5 Hybride"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 15000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 100000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" },
+            { "code": "tire_rotation", "title": "Permutation pneus", "intervalKm": 15000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "ford-fiesta-vii-10-ecoboost-100-2017-2023",
+      "make": "Ford",
+      "model": "Fiesta VII",
+      "trim": "1.0 EcoBoost 100",
+      "engineCode": "SFJA",
+      "engineDisplayName": "1.0 EcoBoost 100 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2017,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution (humide)", "intervalMonths": 120, "intervalKm": 150000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 800, "estimatedCostMax": 1500 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "ford-focus-iv-15-ecoblue-120-2018-2024",
+      "make": "Ford",
+      "model": "Focus IV",
+      "trim": "1.5 EcoBlue 120",
+      "engineCode": "XWDA",
+      "engineDisplayName": "1.5 EcoBlue 120 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2018,
+      "productionEndYear": 2024,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution (humide)", "intervalMonths": 120, "intervalKm": 240000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 800, "estimatedCostMax": 1500 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 100000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "bmw-serie-3-g20-320d-2019-2025",
+      "make": "BMW",
+      "model": "Série 3 G20",
+      "trim": "320d 190",
+      "engineCode": "B47D20",
+      "engineDisplayName": "2.0 320d 190 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2019,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": ["BMW 320d G20"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 100000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "transmission_fluid", "title": "Boîte à vitesses (huile)", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended", "estimatedCostMin": 150, "estimatedCostMax": 250 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "audi-a3-8y-30-tfsi-110-2020-2025",
+      "make": "Audi",
+      "model": "A3 8Y",
+      "trim": "30 TFSI 110",
+      "engineCode": "DLAA",
+      "engineDisplayName": "1.0 TFSI 110 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2020,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": ["A3 8Y 30 TFSI"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 36, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "battery_check", "title": "Batterie (test)", "intervalMonths": 12, "trigger": "TimeOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "audi-a4-b9-20-tdi-150-2015-2023",
+      "make": "Audi",
+      "model": "A4 B9",
+      "trim": "2.0 TDI 150",
+      "engineCode": "DEUA",
+      "engineDisplayName": "2.0 TDI 150 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2015,
+      "productionEndYear": 2023,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 24, "intervalKm": 30000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 36, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "accessory_belt", "title": "Courroie d'accessoire", "intervalKm": 150000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 60, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended", "estimatedCostMin": 80, "estimatedCostMax": 150 },
+            { "code": "dpf_regen", "title": "Régénération FAP", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "transmission_fluid", "title": "Boîte à vitesses (huile)", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended", "estimatedCostMin": 150, "estimatedCostMax": 250 }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "tesla-model-3-2019-2025",
+      "make": "Tesla",
+      "model": "Model 3",
+      "engineDisplayName": "Électrique",
+      "engineType": "Electric",
+      "fuelType": "Electric",
+      "productionStartYear": 2019,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": ["Tesla Model 3 SR+", "Tesla Model 3 LR"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Recommended" },
+            { "code": "ac_service", "title": "Climatisation (recharge)", "intervalMonths": 48, "trigger": "TimeOnly", "severity": "Recommended" },
+            { "code": "tire_rotation", "title": "Permutation pneus", "intervalKm": 10000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "tesla-model-y-2021-2025",
+      "make": "Tesla",
+      "model": "Model Y",
+      "engineDisplayName": "Électrique",
+      "engineType": "Electric",
+      "fuelType": "Electric",
+      "productionStartYear": 2021,
+      "productionEndYear": 2025,
+      "marketRegion": "FR",
+      "aliases": ["Tesla Model Y LR", "Tesla Model Y Performance"],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Recommended" },
+            { "code": "ac_service", "title": "Climatisation (recharge)", "intervalMonths": 48, "trigger": "TimeOnly", "severity": "Recommended" },
+            { "code": "tire_rotation", "title": "Permutation pneus", "intervalKm": 10000, "trigger": "KmOnly", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-clio-iv-15-dci-75-2013-2018",
+      "make": "Renault",
+      "model": "Clio IV",
+      "trim": "1.5 dCi 75",
+      "engineCode": "K9K-612",
+      "engineDisplayName": "1.5 dCi 75 ch",
+      "engineType": "Diesel",
+      "fuelType": "Diesel",
+      "productionStartYear": 2013,
+      "productionEndYear": 2018,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "fuel_filter", "title": "Filtre carburant", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Critical" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "glow_plugs", "title": "Bougies de préchauffage", "intervalKm": 100000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 160000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renault-megane-iii-16-16v-110-2009-2016",
+      "make": "Renault",
+      "model": "Megane III",
+      "trim": "1.6 16V 110",
+      "engineCode": "K4M-858",
+      "engineDisplayName": "1.6 16V 110 ch",
+      "engineType": "Gasoline",
+      "fuelType": "Gasoline",
+      "productionStartYear": 2009,
+      "productionEndYear": 2016,
+      "marketRegion": "FR",
+      "aliases": [],
+      "programs": [
+        {
+          "name": "Standard",
+          "isDefault": true,
+          "source": "Manufacturer",
+          "items": [
+            { "code": "oil_change", "title": "Vidange + filtre huile", "intervalMonths": 12, "intervalKm": 20000, "trigger": "Earliest", "severity": "Critical" },
+            { "code": "cabin_filter", "title": "Filtre habitacle", "intervalKm": 30000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "air_filter", "title": "Filtre à air", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "spark_plugs", "title": "Bougies d'allumage", "intervalKm": 60000, "trigger": "KmOnly", "severity": "Recommended" },
+            { "code": "brake_fluid", "title": "Liquide de frein", "intervalMonths": 24, "trigger": "TimeOnly", "severity": "Critical", "estimatedCostMin": 50, "estimatedCostMax": 90 },
+            { "code": "timing_belt", "title": "Courroie de distribution", "intervalMonths": 72, "intervalKm": 120000, "trigger": "Earliest", "severity": "Critical", "estimatedCostMin": 600, "estimatedCostMax": 1100 },
+            { "code": "coolant", "title": "Liquide de refroidissement", "intervalMonths": 48, "intervalKm": 90000, "trigger": "Earliest", "severity": "Recommended" }
+          ]
+        }
+      ]
+    }
+  ]
+}

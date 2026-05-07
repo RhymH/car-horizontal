@@ -8,6 +8,7 @@ using CarHorizontal.Api.Modules.Reminders;
 using CarHorizontal.Api.Modules.Timeline;
 using CarHorizontal.Api.Modules.Vehicles;
 using CarHorizontal.Infrastructure;
+using CarHorizontal.Infrastructure.Catalog.Seed;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
@@ -92,6 +93,9 @@ if (builder.Configuration.GetValue<bool>("Database:RunMigrationsOnStartup"))
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
+
+    var catalogSeeder = scope.ServiceProvider.GetRequiredService<ICatalogSeeder>();
+    await catalogSeeder.SeedFromEmbeddedAsync();
 
     if (app.Environment.IsDevelopment())
     {
