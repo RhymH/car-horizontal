@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CarHorizontal.Api/CarHorizontal.Api.csproj" />
+  <Project Path="CarHorizontal.Domain/CarHorizontal.Domain.csproj" />
+  <Project Path="CarHorizontal.Infrastructure/CarHorizontal.Infrastructure.csproj" />
+</Solution>
