@@ -11,4 +11,5 @@ public interface IVehicleService
     Task DeleteAsync(Guid id, CancellationToken ct = default);
     Task<VehicleDetailDto> UpdateMileageAsync(Guid id, UpdateMileageRequestDto request, CancellationToken ct = default);
     Task<VehicleDetailDto> SetPhotoAsync(Guid id, Guid photoFileId, CancellationToken ct = default);
+    Task<VehicleProgramProjectionDto?> GetProgramProjectionAsync(Guid vehicleId, CancellationToken ct = default);
 }

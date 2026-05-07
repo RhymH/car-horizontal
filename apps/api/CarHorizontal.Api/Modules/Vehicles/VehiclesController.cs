@@ -92,4 +92,12 @@ public class VehiclesController : ControllerBase
             message = "Photo storage backend is not yet available (planned in Phase 14)."
         });
     }
+
+    [HttpGet("{id:guid}/program-projection")]
+    public async Task<ActionResult<VehicleProgramProjectionDto>> GetProgramProjection(Guid id, CancellationToken ct)
+    {
+        var result = await _vehicles.GetProgramProjectionAsync(id, ct);
+        if (result is null) return NotFound();
+        return Ok(result);
+    }
 }

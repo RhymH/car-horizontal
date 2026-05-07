@@ -12,4 +12,5 @@ public class UpdateMaintenanceRequestDto
     public int? NextDueMileage { get; set; }
     public bool ClearNextDueAt { get; set; }
     public bool ClearNextDueMileage { get; set; }
+    public string[]? ItemCodes { get; set; }
 }

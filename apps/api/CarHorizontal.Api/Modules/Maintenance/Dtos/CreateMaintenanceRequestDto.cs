@@ -10,4 +10,5 @@ public class CreateMaintenanceRequestDto
     public string? MechanicName { get; set; }
     public DateTime? NextDueAt { get; set; }
     public int? NextDueMileage { get; set; }
+    public string[]? ItemCodes { get; set; }
 }

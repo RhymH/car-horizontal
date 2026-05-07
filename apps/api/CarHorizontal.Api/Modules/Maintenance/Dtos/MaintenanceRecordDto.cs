@@ -14,4 +14,5 @@ public class MaintenanceRecordDto
     public int? NextDueMileage { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public IReadOnlyList<string> ItemCodes { get; set; } = Array.Empty<string>();
 }

@@ -1,4 +1,5 @@
 using CarHorizontal.Api.Modules.Maintenance.Dtos;
+using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Maintenance;
 using CarHorizontal.Domain.Entities.Timeline;
 using CarHorizontal.Infrastructure.Persistence;
@@ -83,12 +84,13 @@ public class MaintenanceService : IMaintenanceService
         var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId, ct)
             ?? throw new KeyNotFoundException($"Vehicle {vehicleId} not found.");
 
+        var type = Enum.Parse<MaintenanceType>(request.Type, ignoreCase: true);
         var record = new MaintenanceRecord
         {
             OrganizationId = orgId,
             VehicleId = vehicle.Id,
             PerformedAt = DateTime.SpecifyKind(request.PerformedAt, DateTimeKind.Utc),
-            Type = Enum.Parse<MaintenanceType>(request.Type, ignoreCase: true),
+            Type = type,
             Description = (request.Description ?? string.Empty).Trim(),
             MileageAtService = request.MileageAtService,
             Cost = request.Cost,
@@ -96,7 +98,8 @@ public class MaintenanceService : IMaintenanceService
             NextDueAt = request.NextDueAt.HasValue
                 ? DateTime.SpecifyKind(request.NextDueAt.Value, DateTimeKind.Utc)
                 : null,
-            NextDueMileage = request.NextDueMileage
+            NextDueMileage = request.NextDueMileage,
+            ItemCodes = ResolveItemCodes(request.ItemCodes, type)
         };
 
         _db.MaintenanceRecords.Add(record);
@@ -142,6 +145,11 @@ public class MaintenanceService : IMaintenanceService
         if (request.ClearNextDueMileage) record.NextDueMileage = null;
         else if (request.NextDueMileage.HasValue)
             record.NextDueMileage = request.NextDueMileage.Value;
+
+        if (request.ItemCodes is not null)
+        {
+            record.ItemCodes = ResolveItemCodes(request.ItemCodes, record.Type);
+        }
 
         await _db.SaveChangesAsync(ct);
 
@@ -248,8 +256,41 @@ public class MaintenanceService : IMaintenanceService
         NextDueAt = m.NextDueAt,
         NextDueMileage = m.NextDueMileage,
         CreatedAt = m.CreatedAt,
-        UpdatedAt = m.UpdatedAt
+        UpdatedAt = m.UpdatedAt,
+        ItemCodes = m.ItemCodes
     };
+
+    private static string[] ResolveItemCodes(string[]? supplied, MaintenanceType type)
+    {
+        if (supplied is { Length: > 0 })
+        {
+            return supplied
+                .Select(c => c.Trim())
+                .Where(c => MaintenanceItemCode.IsKnown(c))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        return type switch
+        {
+            MaintenanceType.Oil => new[] { MaintenanceItemCode.OilChange },
+            MaintenanceType.Tires => new[] { MaintenanceItemCode.TireReplacement },
+            MaintenanceType.Brakes => new[]
+            {
+                MaintenanceItemCode.BrakePadsFront,
+                MaintenanceItemCode.BrakeDiscsFront
+            },
+            MaintenanceType.FullService => new[]
+            {
+                MaintenanceItemCode.OilChange,
+                MaintenanceItemCode.CabinFilter,
+                MaintenanceItemCode.AirFilter,
+                MaintenanceItemCode.BrakeFluid
+            },
+            MaintenanceType.TechnicalInspection => new[] { MaintenanceItemCode.TechnicalInspection },
+            _ => Array.Empty<string>()
+        };
+    }
 
     private static string? NormalizeOptional(string? value)
     {

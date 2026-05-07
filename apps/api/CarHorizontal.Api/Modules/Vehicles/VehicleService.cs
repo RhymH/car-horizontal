@@ -369,6 +369,145 @@ public class VehicleService : IVehicleService
         return await GetAsync(vehicle.Id, ct);
     }
 
+    public async Task<VehicleProgramProjectionDto?> GetProgramProjectionAsync(Guid vehicleId, CancellationToken ct = default)
+    {
+        var vehicle = await _db.Vehicles
+            .AsNoTracking()
+            .FirstOrDefaultAsync(v => v.Id == vehicleId, ct)
+            ?? throw new KeyNotFoundException($"Vehicle {vehicleId} not found.");
+
+        var dto = new VehicleProgramProjectionDto
+        {
+            VehicleId = vehicle.Id,
+            VehicleModelId = vehicle.VehicleModelId,
+            ProgramId = vehicle.SelectedProgramId
+        };
+
+        if (!vehicle.VehicleModelId.HasValue) return dto;
+
+        var model = await _db.VehicleModels
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.Id == vehicle.VehicleModelId.Value && m.DeletedAt == null, ct);
+        if (model is not null) dto.VehicleModelDisplayName = model.DisplayName;
+
+        MaintenanceProgram? program = null;
+        if (vehicle.SelectedProgramId.HasValue)
+        {
+            program = await _db.MaintenancePrograms
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Include(p => p.Items)
+                .FirstOrDefaultAsync(p => p.Id == vehicle.SelectedProgramId.Value && p.DeletedAt == null, ct);
+        }
+        program ??= await _db.MaintenancePrograms
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Include(p => p.Items)
+            .Where(p => p.VehicleModelId == vehicle.VehicleModelId.Value && p.DeletedAt == null)
+            .OrderByDescending(p => p.IsDefault)
+            .ThenBy(p => p.Name)
+            .FirstOrDefaultAsync(ct);
+
+        if (program is null) return dto;
+        dto.ProgramId = program.Id;
+        dto.ProgramName = program.Name;
+
+        var maintenance = await _db.MaintenanceRecords
+            .AsNoTracking()
+            .Where(m => m.VehicleId == vehicle.Id)
+            .OrderByDescending(m => m.PerformedAt)
+            .ToListAsync(ct);
+
+        var historyByCode = maintenance
+            .Where(m => m.ItemCodes.Length > 0)
+            .SelectMany(m => m.ItemCodes.Select(code => (code, record: m)))
+            .GroupBy(x => x.code, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(x => x.record.PerformedAt).Select(x => x.record).ToList(),
+                StringComparer.OrdinalIgnoreCase);
+
+        var overrides = await _db.VehicleProgramOverrides
+            .AsNoTracking()
+            .Where(o => o.VehicleId == vehicle.Id)
+            .ToListAsync(ct);
+        var overrideByCode = overrides.ToDictionary(o => o.ItemCode, StringComparer.OrdinalIgnoreCase);
+
+        var now = DateTime.UtcNow;
+
+        var items = new List<VehicleProgramItemProjectionDto>();
+        foreach (var pi in program.Items.OrderBy(i => (int)i.Severity).ThenBy(i => i.IntervalKm ?? int.MaxValue))
+        {
+            overrideByCode.TryGetValue(pi.Code, out var ov);
+            var disabled = ov?.Disabled ?? false;
+
+            var intervalMonths = ov?.OverrideIntervalMonths ?? pi.IntervalMonths;
+            var intervalKm = ov?.OverrideIntervalKm ?? pi.IntervalKm;
+
+            historyByCode.TryGetValue(pi.Code, out var history);
+            var lastDone = history?.FirstOrDefault();
+
+            DateTime? nextDueAt = null;
+            int? nextDueKm = null;
+
+            if (!disabled)
+            {
+                if (lastDone is null)
+                {
+                    var anchorDate = vehicle.PurchasedAt ?? vehicle.CreatedAt;
+                    var firstMonths = pi.FirstOccurrenceMonths ?? intervalMonths;
+                    var firstKm = pi.FirstOccurrenceKm ?? intervalKm;
+                    if (firstMonths is not null) nextDueAt = anchorDate.AddMonths(firstMonths.Value);
+                    if (firstKm is not null) nextDueKm = firstKm.Value;
+                }
+                else
+                {
+                    if (intervalMonths is not null) nextDueAt = lastDone.PerformedAt.AddMonths(intervalMonths.Value);
+                    if (intervalKm is not null) nextDueKm = lastDone.MileageAtService + intervalKm.Value;
+                }
+
+                if (pi.Trigger == Domain.Entities.Catalog.MaintenanceItemTrigger.TimeOnly) nextDueKm = null;
+                if (pi.Trigger == Domain.Entities.Catalog.MaintenanceItemTrigger.KmOnly) nextDueAt = null;
+            }
+
+            int? kmRemaining = nextDueKm.HasValue ? nextDueKm.Value - vehicle.CurrentMileage : null;
+            int? daysRemaining = nextDueAt.HasValue ? (int)Math.Round((nextDueAt.Value - now).TotalDays) : null;
+
+            var status = ComputeStatus(disabled, lastDone is not null, kmRemaining, daysRemaining);
+
+            items.Add(new VehicleProgramItemProjectionDto
+            {
+                Code = pi.Code,
+                Title = pi.Title,
+                Severity = pi.Severity.ToString(),
+                LastDoneAt = lastDone?.PerformedAt,
+                LastDoneKm = lastDone?.MileageAtService,
+                NextDueAt = nextDueAt,
+                NextDueKm = nextDueKm,
+                Status = status,
+                KmRemaining = kmRemaining,
+                DaysRemaining = daysRemaining,
+                EstimatedCostMin = pi.EstimatedCostMin,
+                EstimatedCostMax = pi.EstimatedCostMax,
+                HasOverride = ov is not null,
+                Disabled = disabled
+            });
+        }
+
+        dto.Items = items;
+        return dto;
+    }
+
+    private static string ComputeStatus(bool disabled, bool everDone, int? kmRemaining, int? daysRemaining)
+    {
+        if (disabled) return "Disabled";
+        if (kmRemaining is < 0 || daysRemaining is < 0) return "Overdue";
+        if (kmRemaining is <= 1500 || daysRemaining is <= 30) return "UpcomingSoon";
+        if (kmRemaining is <= 5000 || daysRemaining is <= 90) return "Upcoming";
+        return everDone ? "Future" : "Future";
+    }
+
     private async Task ApplyVehicleModelLinkAsync(Vehicle vehicle, Guid modelId, Guid? selectedProgramId, CancellationToken ct)
     {
         var model = await _db.VehicleModels
