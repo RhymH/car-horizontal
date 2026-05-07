@@ -1,6 +1,7 @@
 using CarHorizontal.Api.Modules.Auth.Dtos;
 using CarHorizontal.Api.Modules.Organizations;
 using CarHorizontal.Domain.Entities.Identity;
+using CarHorizontal.Domain.Entities.Organizations;
 using CarHorizontal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,8 @@ public class AuthService : IAuthService
         var existing = await _userManager.FindByEmailAsync(request.Email);
         if (existing is not null) throw new UserAlreadyExistsException(request.Email);
 
+        await using var transaction = await _db.Database.BeginTransactionAsync(ct);
+
         var user = new AppUser
         {
             UserName = request.Email,
@@ -56,9 +59,19 @@ public class AuthService : IAuthService
             throw new AuthException($"Failed to create user: {msg}");
         }
 
-        var org = await _organizations.CreateForOwnerAsync(user.Id, request.FullName, ct);
-
-        var tokens = await IssueTokensAsync(user, org.Id, OrganizationRole.Owner.ToString(), ip, userAgent, ct);
+        Organization org;
+        AuthTokensDto tokens;
+        try
+        {
+            org = await _organizations.CreateForOwnerAsync(user.Id, request.FullName, ct);
+            tokens = await IssueTokensAsync(user, org.Id, OrganizationRole.Owner.ToString(), ip, userAgent, ct);
+            await transaction.CommitAsync(ct);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
 
         return new RegisterResponseDto
         {
