@@ -38,7 +38,7 @@ export function CustomerVehiclesSection({
           description="Rattachez un véhicule pour suivre son entretien."
           action={
             <Button size="sm" onClick={onAddVehicle}>
-              Ajouter un véhicule
+              Ajouter le premier véhicule
             </Button>
           }
         />
