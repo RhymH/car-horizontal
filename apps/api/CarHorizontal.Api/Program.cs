@@ -3,6 +3,7 @@ using CarHorizontal.Api.Extensions;
 using CarHorizontal.Api.Middleware;
 using CarHorizontal.Api.Modules.Auth;
 using CarHorizontal.Api.Modules.Customers;
+using CarHorizontal.Api.Modules.Maintenance;
 using CarHorizontal.Api.Modules.Vehicles;
 using CarHorizontal.Infrastructure;
 using CarHorizontal.Infrastructure.Persistence;
@@ -67,6 +68,7 @@ builder.Services.AddCarHorizontalInfrastructure(builder.Configuration);
 builder.Services.AddCarHorizontalAuth(builder.Configuration);
 builder.Services.AddCarHorizontalCustomers();
 builder.Services.AddCarHorizontalVehicles();
+builder.Services.AddCarHorizontalMaintenance();
 
 builder.Services.AddScoped<DevSeeder>();
 
