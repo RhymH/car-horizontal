@@ -24,6 +24,7 @@ import { CustomerInteractionsSection } from "@/components/customers/CustomerInte
 import { CustomerFormDialog } from "@/components/customers/CustomerFormDialog";
 import { AddInteractionDialog } from "@/components/customers/AddInteractionDialog";
 import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
+import { CustomerTimelineTab } from "@/components/customers/CustomerTimelineTab";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "2-digit",
@@ -177,11 +178,11 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
           </div>
         </TabsContent>
         <TabsContent value="timeline" className="mt-4">
-          <SectionCard title="Timeline">
-            <p className="text-sm text-muted-foreground">
-              Les événements à venir et passés liés à ce client apparaîtront ici
-              une fois le module Timeline activé (Phase 6).
-            </p>
+          <SectionCard
+            title="Timeline"
+            description="Événements à venir et passés liés à ce client."
+          >
+            <CustomerTimelineTab customerId={customer.id} />
           </SectionCard>
         </TabsContent>
       </Tabs>
