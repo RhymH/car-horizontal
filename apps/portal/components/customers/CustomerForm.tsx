@@ -1,6 +1,10 @@
 "use client";
 
-import { type Control, type UseFormRegister, type FieldErrors } from "react-hook-form";
+import {
+  type Control,
+  type UseFormRegister,
+  type FieldErrors,
+} from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,18 +42,11 @@ export function CustomerForm({ register, control, errors }: CustomerFormProps) {
         <Input type="email" {...register("email")} />
       </Field>
 
-      <Field
-        label="Téléphone"
-        error={errors.phone?.message}
-        hint="Format libre — l'indicatif pays sera ajouté automatiquement si manquant."
-      >
+      <Field label="Téléphone" error={errors.phone?.message} hint="">
         <Input placeholder="06 12 34 56 78" {...register("phone")} />
       </Field>
 
-      <Field
-        label="Date d'acquisition *"
-        error={errors.acquiredAt?.message}
-      >
+      <Field label="Date d'acquisition *" error={errors.acquiredAt?.message}>
         <Input type="date" {...register("acquiredAt")} />
       </Field>
 
@@ -90,11 +87,7 @@ export function CustomerForm({ register, control, errors }: CustomerFormProps) {
         <Input {...register("postalCode")} />
       </Field>
 
-      <Field
-        label="Tags"
-        span={2}
-        hint="Tapez puis Entrée pour ajouter."
-      >
+      <Field label="Tags" span={2} hint="Tapez puis Entrée pour ajouter.">
         <Controller
           control={control}
           name="tags"
