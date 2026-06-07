@@ -9,6 +9,7 @@ using CarHorizontal.Api.Modules.Loyalty;
 using CarHorizontal.Api.Modules.Maintenance;
 using CarHorizontal.Api.Modules.MileageCheck;
 using CarHorizontal.Api.Modules.Appointments;
+using CarHorizontal.Api.Modules.Notifications;
 using CarHorizontal.Api.Modules.Reminders;
 using CarHorizontal.Api.Modules.Timeline;
 using CarHorizontal.Api.Modules.Vehicles;
@@ -84,12 +85,14 @@ builder.Services.AddCarHorizontalCatalog();
 builder.Services.AddCarHorizontalMileageCheck();
 builder.Services.AddCarHorizontalDashboard();
 builder.Services.AddCarHorizontalLoyalty();
+builder.Services.AddCarHorizontalNotifications();
 
 builder.Services.AddCarHorizontalHangfire(builder.Configuration);
 builder.Services.AddScoped<CarHorizontal.Api.Jobs.TimelineRegenerationJob>();
 builder.Services.AddScoped<CarHorizontal.Api.Jobs.EnsureRemindersJob>();
 builder.Services.AddScoped<CarHorizontal.Api.Jobs.DispatchDueRemindersJob>();
 builder.Services.AddScoped<CarHorizontal.Api.Jobs.LoyaltyRecomputeJob>();
+builder.Services.AddScoped<CarHorizontal.Api.Jobs.GenerateNotificationsJob>();
 
 builder.Services.AddScoped<DevSeeder>();
 

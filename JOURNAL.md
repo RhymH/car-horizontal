@@ -6,6 +6,23 @@
 
 ---
 
+## 2026-06-07 — P1-B : Centre de notifications collaborateurs
+
+**Fonctionnalité**
+Inbox d'actions intelligentes pour le garage. Un générateur transforme les signaux déjà calculés en notifications contextualisées et actionnables :
+- échéances Timeline dans les 30 jours ou en retard (entretien, contrôle technique, pneus, fin de garantie, opportunité de reprise) ;
+- clients **inactifs depuis ≈12 mois** (opportunité de relance).
+Chaque notification porte une sévérité (Urgent / À traiter / Opportunité / Info) et une **action « 1 clic »** (voir client, voir véhicule, planifier un RDV, envoyer un rappel). Génération **idempotente** (clé de déduplication) — rejouable sans doublon.
+
+**Comment y accéder / tester**
+- Portal : **cloche dans la barre du haut** (badge de non-lus, rafraîchi toutes les 60 s) + entrée **« Notifications »** dans la sidebar → page `/notifications` (onglets À traiter / Traitées / Ignorées, actions Traité / Ignorer).
+- Génération auto : job Hangfire `daily-generate-notifications` (02h30, après la régénération Timeline). Dashboard `http://localhost:5080/hangfire`.
+- Génération manuelle (Owner/Admin) : `POST /api/notifications/generate`.
+- API : `GET /api/notifications`, `GET /api/notifications/unread-count`, `POST /api/notifications/{id}/read|done|dismiss`.
+- Le filtrage multitenant est porté par le filtre global du DbContext.
+
+---
+
 ## 2026-06-07 — P0-A : Envoi réel des messages (SMS/Email)
 
 **Fonctionnalité**

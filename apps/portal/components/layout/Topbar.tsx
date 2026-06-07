@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 import { OrgSwitcher } from "@/components/layout/OrgSwitcher";
 import { UserMenu } from "@/components/layout/UserMenu";
 
@@ -11,6 +12,7 @@ export function Topbar() {
       <Breadcrumbs />
       <div className="ml-auto flex items-center gap-2">
         <GlobalSearch />
+        <NotificationBell />
         <OrgSwitcher />
         <UserMenu />
       </div>

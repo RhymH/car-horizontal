@@ -65,4 +65,10 @@ export const queryKeys = {
   search: {
     global: (q: string) => ["search", "global", q] as const,
   },
+  notifications: {
+    all: () => ["notifications"] as const,
+    list: (filters?: Record<string, unknown>) =>
+      ["notifications", "list", filters ?? {}] as const,
+    unreadCount: () => ["notifications", "unread-count"] as const,
+  },
 } as const;

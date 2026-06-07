@@ -71,6 +71,13 @@ public static class HangfireConfig
             "weekly-loyalty-recompute",
             job => job.RunAsync(CancellationToken.None),
             "0 4 * * 1");
+
+        // After the nightly timeline regeneration (02:00) so notifications reflect
+        // freshly recomputed events.
+        RecurringJob.AddOrUpdate<GenerateNotificationsJob>(
+            "daily-generate-notifications",
+            job => job.RunAsync(CancellationToken.None),
+            "30 2 * * *");
     }
 }
 

@@ -1,8 +1,10 @@
 using CarHorizontal.Domain.Messaging;
+using CarHorizontal.Domain.Notifications;
 using CarHorizontal.Domain.Timeline.Rules;
 using CarHorizontal.Domain.Vehicles;
 using CarHorizontal.Infrastructure.Catalog.Seed;
 using CarHorizontal.Infrastructure.Messaging;
+using CarHorizontal.Infrastructure.Notifications;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Persistence.Interceptors;
 using CarHorizontal.Infrastructure.Reminders;
@@ -47,6 +49,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IAutoReminderScheduler, AutoReminderScheduler>();
 
         services.AddScoped<IMileageEstimationService, MileageEstimationService>();
+
+        services.AddScoped<INotificationGenerator, NotificationGenerator>();
 
         services.AddScoped<ICatalogSeeder, CatalogSeeder>();
 

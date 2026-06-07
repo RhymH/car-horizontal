@@ -6,6 +6,7 @@ using CarHorizontal.Domain.Entities.Files;
 using CarHorizontal.Domain.Entities.Identity;
 using CarHorizontal.Domain.Entities.Maintenance;
 using CarHorizontal.Domain.Entities.Messaging;
+using CarHorizontal.Domain.Entities.Notifications;
 using CarHorizontal.Domain.Entities.Organizations;
 using CarHorizontal.Domain.Entities.Reminders;
 using CarHorizontal.Domain.Entities.Timeline;
@@ -49,6 +50,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
     public DbSet<FileFolder> FileFolders => Set<FileFolder>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

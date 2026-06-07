@@ -8,6 +8,7 @@ import {
   Car,
   Activity,
   Bell,
+  Inbox,
   CalendarDays,
   ClipboardList,
   Heart,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
+  { href: "/notifications", label: "Notifications", icon: Inbox },
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/vehicles", label: "Véhicules", icon: Car },
   { href: "/timeline", label: "Timeline", icon: Activity },
