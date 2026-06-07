@@ -1,6 +1,8 @@
+using CarHorizontal.Domain.Messaging;
 using CarHorizontal.Domain.Timeline.Rules;
 using CarHorizontal.Domain.Vehicles;
 using CarHorizontal.Infrastructure.Catalog.Seed;
+using CarHorizontal.Infrastructure.Messaging;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Persistence.Interceptors;
 using CarHorizontal.Infrastructure.Reminders;
@@ -9,6 +11,7 @@ using CarHorizontal.Infrastructure.Vehicles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace CarHorizontal.Infrastructure;
 
@@ -47,6 +50,39 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddScoped<ICatalogSeeder, CatalogSeeder>();
 
+        AddMessaging(services, configuration);
+
         return services;
+    }
+
+    /// <summary>
+    /// Registers the outbound messaging pipeline. The concrete sender per channel
+    /// is chosen via configuration (<c>Messaging:Email:Provider</c> /
+    /// <c>Messaging:Sms:Provider</c>), defaulting to the simulated "log" provider.
+    /// An unknown provider fails fast at resolution time rather than silently
+    /// falling back — so a misconfigured prod never *thinks* it is sending.
+    /// </summary>
+    private static void AddMessaging(IServiceCollection services, IConfiguration configuration)
+    {
+        var emailProvider = configuration["Messaging:Email:Provider"] ?? "log";
+        var smsProvider = configuration["Messaging:Sms:Provider"] ?? "log";
+
+        services.AddScoped<IEmailSender>(sp => emailProvider.Trim().ToLowerInvariant() switch
+        {
+            "log" => new LogEmailSender(sp.GetRequiredService<ILogger<LogEmailSender>>()),
+            _ => throw new NotSupportedException(
+                $"Email provider '{emailProvider}' is not implemented. " +
+                "Use 'log', or add an IEmailSender implementation and register it here.")
+        });
+
+        services.AddScoped<ISmsSender>(sp => smsProvider.Trim().ToLowerInvariant() switch
+        {
+            "log" => new LogSmsSender(sp.GetRequiredService<ILogger<LogSmsSender>>()),
+            _ => throw new NotSupportedException(
+                $"SMS provider '{smsProvider}' is not implemented. " +
+                "Use 'log', or add an ISmsSender implementation and register it here.")
+        });
+
+        services.AddScoped<IMessageDispatcher, MessageDispatcher>();
     }
 }

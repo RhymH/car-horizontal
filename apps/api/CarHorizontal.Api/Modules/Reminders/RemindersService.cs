@@ -1,6 +1,7 @@
 using CarHorizontal.Api.Modules.Reminders.Dtos;
 using CarHorizontal.Domain.Entities.Messaging;
 using CarHorizontal.Domain.Entities.Reminders;
+using CarHorizontal.Domain.Messaging;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Reminders;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,18 @@ public class RemindersService : IRemindersService
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
     private readonly IAutoReminderScheduler _scheduler;
+    private readonly IMessageDispatcher _dispatcher;
 
-    public RemindersService(AppDbContext db, ICurrentUserService currentUser, IAutoReminderScheduler scheduler)
+    public RemindersService(
+        AppDbContext db,
+        ICurrentUserService currentUser,
+        IAutoReminderScheduler scheduler,
+        IMessageDispatcher dispatcher)
     {
         _db = db;
         _currentUser = currentUser;
         _scheduler = scheduler;
+        _dispatcher = dispatcher;
     }
 
     public async Task<ReminderListResponseDto> ListAsync(ReminderListRequestDto request, CancellationToken ct = default)
@@ -235,14 +242,81 @@ public class RemindersService : IRemindersService
         if (entity.Status == ReminderStatus.Cancelled)
             throw new InvalidOperationException("A cancelled reminder cannot be sent.");
 
-        // Phase 8 placeholder: actual SMS/Email dispatch is wired up in Phase 9 (T090).
-        // For now, mark as sent immediately so the workflow is testable end-to-end.
-        entity.Status = ReminderStatus.Sent;
-        entity.SentAt = DateTime.UtcNow;
-        entity.FailureReason = null;
+        // Manual "send now" goes through the same dispatcher + logging path as the
+        // background job, so the persisted status reflects the real delivery outcome.
+        var (recipient, subject, body) = await ResolveMessageAsync(entity, ct);
+        var result = await _dispatcher.DispatchAsync(entity.Channel, recipient, subject, body, ct);
+
+        if (result.Success)
+        {
+            entity.Status = ReminderStatus.Sent;
+            entity.SentAt = DateTime.UtcNow;
+            entity.FailureReason = null;
+        }
+        else
+        {
+            entity.Status = ReminderStatus.Failed;
+            entity.FailureReason = result.ErrorMessage;
+        }
+
+        _db.MessageLogs.Add(new MessageLog
+        {
+            OrganizationId = entity.OrganizationId,
+            CustomerId = entity.CustomerId,
+            ReminderId = entity.Id,
+            Channel = entity.Channel,
+            Recipient = recipient ?? string.Empty,
+            Subject = subject,
+            Body = body,
+            Status = result.Success ? MessageStatus.Sent : MessageStatus.Failed,
+            ProviderMessageId = result.ProviderMessageId,
+            SentAt = DateTime.UtcNow,
+            ErrorMessage = result.ErrorMessage
+        });
 
         await _db.SaveChangesAsync(ct);
         return await GetDtoAsync(entity.Id, ct);
+    }
+
+    /// <summary>
+    /// Resolves recipient/subject/body for a reminder, mirroring the dispatch job:
+    /// prefer the reminder's resolved body, then its template, then a safe fallback.
+    /// </summary>
+    private async Task<(string? Recipient, string? Subject, string Body)> ResolveMessageAsync(
+        Reminder reminder,
+        CancellationToken ct)
+    {
+        var customer = await _db.Customers
+            .Where(c => c.Id == reminder.CustomerId)
+            .Select(c => new { c.FullName, c.Email, c.Phone })
+            .FirstOrDefaultAsync(ct);
+
+        var recipient = reminder.Channel switch
+        {
+            MessageChannel.Email => customer?.Email,
+            MessageChannel.Sms => customer?.Phone,
+            _ => null
+        };
+
+        if (!string.IsNullOrWhiteSpace(reminder.ResolvedBody))
+            return (recipient, reminder.ResolvedSubject, reminder.ResolvedBody);
+
+        if (reminder.TemplateId.HasValue)
+        {
+            var template = await _db.MessageTemplates
+                .Where(t => t.Id == reminder.TemplateId.Value && t.Active)
+                .Select(t => new { t.Subject, t.Body })
+                .FirstOrDefaultAsync(ct);
+            if (template is not null)
+                return (recipient, template.Subject, template.Body);
+        }
+
+        var fallbackSubject = reminder.Channel == MessageChannel.Email ? "Rappel CarHorizontal" : null;
+        var fallbackBody = !string.IsNullOrWhiteSpace(customer?.FullName)
+            ? $"Bonjour {customer!.FullName}, un rappel d'entretien arrive à échéance."
+            : "Un rappel d'entretien arrive à échéance.";
+
+        return (recipient, fallbackSubject, fallbackBody);
     }
 
     public async Task<ReminderDto> SnoozeAsync(Guid id, SnoozeReminderRequestDto request, CancellationToken ct = default)

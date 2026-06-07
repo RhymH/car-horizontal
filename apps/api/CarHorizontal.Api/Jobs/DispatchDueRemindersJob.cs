@@ -1,5 +1,6 @@
 using CarHorizontal.Domain.Entities.Messaging;
 using CarHorizontal.Domain.Entities.Reminders;
+using CarHorizontal.Domain.Messaging;
 using CarHorizontal.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,18 +10,24 @@ namespace CarHorizontal.Api.Jobs;
 /// T101 — Dispatch due reminders.
 /// Selects every <see cref="ReminderStatus.Scheduled"/> reminder whose
 /// <c>ScheduledAt</c> is in the past, resolves the message body (template or
-/// resolved fallback), invokes the messaging dispatcher (NoOp until Phase 9
-/// wires up real SMS/Email senders) and records the outcome on both the
-/// <see cref="Reminder"/> and the <see cref="MessageLog"/>.
+/// resolved fallback), hands it to the <see cref="IMessageDispatcher"/> and
+/// records the <em>actual</em> outcome on both the <see cref="Reminder"/> and
+/// the <see cref="MessageLog"/>. Status is derived from the delivery result —
+/// a reminder is never marked Sent unless a sender reported success.
 /// </summary>
 public class DispatchDueRemindersJob
 {
     private readonly AppDbContext _db;
+    private readonly IMessageDispatcher _dispatcher;
     private readonly ILogger<DispatchDueRemindersJob> _logger;
 
-    public DispatchDueRemindersJob(AppDbContext db, ILogger<DispatchDueRemindersJob> logger)
+    public DispatchDueRemindersJob(
+        AppDbContext db,
+        IMessageDispatcher dispatcher,
+        ILogger<DispatchDueRemindersJob> logger)
     {
         _db = db;
+        _dispatcher = dispatcher;
         _logger = logger;
     }
 
@@ -49,19 +56,21 @@ public class DispatchDueRemindersJob
             {
                 var (recipient, subject, body) = await ResolveMessageAsync(reminder, ct);
 
-                if (string.IsNullOrWhiteSpace(recipient))
+                var result = await _dispatcher.DispatchAsync(
+                    reminder.Channel, recipient, subject, body, ct);
+
+                if (result.Success)
                 {
-                    reminder.Status = ReminderStatus.Failed;
-                    reminder.FailureReason = "Customer has no contact for the chosen channel.";
-                    failed++;
-                }
-                else
-                {
-                    // NoOp dispatch — Phase 9 (T090) will plug in real senders here.
                     reminder.Status = ReminderStatus.Sent;
                     reminder.SentAt = DateTime.UtcNow;
                     reminder.FailureReason = null;
                     sent++;
+                }
+                else
+                {
+                    reminder.Status = ReminderStatus.Failed;
+                    reminder.FailureReason = result.ErrorMessage;
+                    failed++;
                 }
 
                 _db.MessageLogs.Add(new MessageLog
@@ -73,10 +82,10 @@ public class DispatchDueRemindersJob
                     Recipient = recipient ?? string.Empty,
                     Subject = subject,
                     Body = body,
-                    Status = reminder.Status == ReminderStatus.Sent ? MessageStatus.Sent : MessageStatus.Failed,
-                    ProviderMessageId = reminder.Status == ReminderStatus.Sent ? $"noop:{reminder.Id}" : null,
+                    Status = result.Success ? MessageStatus.Sent : MessageStatus.Failed,
+                    ProviderMessageId = result.ProviderMessageId,
                     SentAt = DateTime.UtcNow,
-                    ErrorMessage = reminder.FailureReason
+                    ErrorMessage = result.ErrorMessage
                 });
             }
             catch (Exception ex)
