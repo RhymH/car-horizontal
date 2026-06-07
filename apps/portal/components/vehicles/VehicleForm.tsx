@@ -9,8 +9,10 @@ import {
   type UseFormSetValue,
   type UseFormWatch,
 } from "react-hook-form";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -20,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { CustomerCombobox } from "@/components/vehicles/CustomerCombobox";
 import { VehicleModelPicker } from "@/components/vehicles/VehicleModelPicker";
-import { engineTypeLabels } from "@/lib/api/vehicles";
+import { engineTypeLabels, vehiclesApi } from "@/lib/api/vehicles";
 import {
   engineTypes,
   transmissionLabels,
@@ -30,7 +32,7 @@ import {
   type VehicleFormValues,
 } from "@/lib/schemas/vehicle";
 import { cn } from "@/lib/utils";
-import { CircleAlert, Sparkles } from "lucide-react";
+import { CircleAlert, Sparkles, Loader2, Wand2 } from "lucide-react";
 
 export interface VehicleFormProps {
   register: UseFormRegister<VehicleFormValues>;
@@ -54,6 +56,33 @@ export function VehicleForm({
   const vehicleModelId = watch("vehicleModelId");
   const vehicleModelLabel = watch("vehicleModelLabel");
   const [legacyMode, setLegacyMode] = useState<boolean>(!vehicleModelId);
+  const [decoding, setDecoding] = useState(false);
+
+  const makeEditable = !vehicleModelId || legacyMode;
+
+  const handleDecodeVin = async () => {
+    const vin = (watch("vin") ?? "").trim();
+    if (!vin) {
+      toast.error("Saisissez d'abord un VIN.");
+      return;
+    }
+    setDecoding(true);
+    try {
+      const r = await vehiclesApi.decodeVin(vin);
+      if (!r.isValid) {
+        toast.error("VIN non reconnu", { description: r.error ?? undefined });
+        return;
+      }
+      if (r.make && makeEditable) setValue("make", r.make, { shouldDirty: true });
+      if (r.modelYear) setValue("year", r.modelYear, { shouldDirty: true });
+      const summary = [r.make, r.modelYear, r.country].filter(Boolean).join(" · ");
+      toast.success("VIN décodé", { description: summary || undefined });
+    } catch {
+      toast.error("Décodage impossible pour le moment.");
+    } finally {
+      setDecoding(false);
+    }
+  };
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -190,8 +219,23 @@ export function VehicleForm({
         />
       </Field>
 
-      <Field label="VIN" error={errors.vin?.message}>
-        <Input {...register("vin")} placeholder="VF1..." />
+      <Field
+        label="VIN"
+        error={errors.vin?.message}
+        hint="Décodez le VIN pour pré-remplir la marque et l'année."
+      >
+        <div className="flex gap-2">
+          <Input {...register("vin")} placeholder="VF1..." className="uppercase" />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleDecodeVin}
+            disabled={decoding}
+          >
+            {decoding ? <Loader2 className="animate-spin" /> : <Wand2 />}
+            Décoder
+          </Button>
+        </div>
       </Field>
 
       <Field label="Couleur" error={errors.color?.message}>

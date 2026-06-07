@@ -262,4 +262,22 @@ export const vehiclesApi = {
     );
     return data;
   },
+
+  async decodeVin(vin: string): Promise<VinDecodeResult> {
+    const { data } = await apiClient.post<VinDecodeResult>(
+      "/api/vehicles/decode-vin",
+      { vin },
+    );
+    return data;
+  },
 };
+
+export interface VinDecodeResult {
+  vin: string;
+  isValid: boolean;
+  make: string | null;
+  country: string | null;
+  modelYear: number | null;
+  wmi: string | null;
+  error: string | null;
+}

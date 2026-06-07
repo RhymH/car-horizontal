@@ -1,4 +1,5 @@
 using CarHorizontal.Api.Modules.Vehicles.Dtos;
+using CarHorizontal.Domain.Vehicles;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,20 +12,43 @@ namespace CarHorizontal.Api.Modules.Vehicles;
 public class VehiclesController : ControllerBase
 {
     private readonly IVehicleService _vehicles;
+    private readonly IVinDecoder _vinDecoder;
     private readonly IValidator<CreateVehicleRequestDto> _createValidator;
     private readonly IValidator<UpdateVehicleRequestDto> _updateValidator;
     private readonly IValidator<UpdateMileageRequestDto> _mileageValidator;
 
     public VehiclesController(
         IVehicleService vehicles,
+        IVinDecoder vinDecoder,
         IValidator<CreateVehicleRequestDto> createValidator,
         IValidator<UpdateVehicleRequestDto> updateValidator,
         IValidator<UpdateMileageRequestDto> mileageValidator)
     {
         _vehicles = vehicles;
+        _vinDecoder = vinDecoder;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _mileageValidator = mileageValidator;
+    }
+
+    /// <summary>
+    /// Decodes a VIN locally to help pre-fill a vehicle form (make, year, country).
+    /// Returns IsValid=false with a reason when the VIN is malformed.
+    /// </summary>
+    [HttpPost("decode-vin")]
+    public ActionResult<VinDecodeResponseDto> DecodeVin([FromBody] DecodeVinRequestDto request)
+    {
+        var r = _vinDecoder.Decode(request.Vin);
+        return Ok(new VinDecodeResponseDto
+        {
+            Vin = r.Vin,
+            IsValid = r.IsValid,
+            Make = r.Make,
+            Country = r.Country,
+            ModelYear = r.ModelYear,
+            Wmi = r.Wmi,
+            Error = r.Error
+        });
     }
 
     [HttpGet]

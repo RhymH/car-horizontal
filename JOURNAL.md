@@ -6,6 +6,21 @@
 
 ---
 
+## 2026-06-07 — P1-C : Décodage VIN → remplissage auto du véhicule
+
+**Fonctionnalité**
+Décodeur de VIN **intégré et hors-ligne** (aucune API externe) pour réduire la saisie. À la création/édition d'un véhicule, un bouton **« Décoder »** à côté du champ VIN pré-remplit la **marque** et l'**année** (et affiche le pays). Derrière une abstraction `IVinDecoder` → on pourra brancher NHTSA / un SIV plus tard sans rien changer d'autre.
+
+**Détails**
+- Validation **structurelle** (17 caractères, charset ISO sans I/O/Q). Le check-digit nord-américain n'est **pas** exigé (souvent absent sur les VINs FR/EU — l'imposer rejetterait la plupart des Renault/Peugeot).
+- Marque/pays via table WMI (constructeurs FR/EU + majeurs), année via position 10 désambiguïsée par la position 7.
+
+**Comment y accéder / tester**
+- Portal : Véhicules → « Nouveau véhicule » → saisir un VIN → bouton **« Décoder »** → marque + année se remplissent (toast récap). La marque n'est écrasée qu'en mode saisie libre ; l'année toujours.
+- API : `POST /api/vehicles/decode-vin` body `{ "vin": "WVWZZZ1KZ8W000001" }` → `{ isValid, make, country, modelYear, wmi, error }`. VIN invalide → `isValid:false` + raison.
+
+---
+
 ## 2026-06-07 — P1-B : Centre de notifications collaborateurs
 
 **Fonctionnalité**

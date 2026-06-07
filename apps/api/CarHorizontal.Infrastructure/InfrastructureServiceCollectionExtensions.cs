@@ -50,6 +50,8 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddScoped<IMileageEstimationService, MileageEstimationService>();
 
+        services.AddSingleton<IVinDecoder, VinDecoder>();
+
         services.AddScoped<INotificationGenerator, NotificationGenerator>();
 
         services.AddScoped<ICatalogSeeder, CatalogSeeder>();
