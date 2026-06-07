@@ -14,8 +14,9 @@ namespace CarHorizontal.Infrastructure.Notifications;
 /// 1. Upcoming or overdue timeline events (maintenance, inspection, tyre swap,
 ///    trade-in opportunity, warranty expiry).
 /// 2. Customers that have gone quiet for ≈12 months (reactivation opportunity).
-/// Idempotent via <see cref="Notification.DedupKey"/>: an open notification with
-/// the same key is never duplicated.
+/// Idempotent via <see cref="Notification.DedupKey"/>: a notification that already
+/// exists for a key — including ones already handled or dismissed — is never
+/// recreated, so handled items don't resurface on the next run.
 /// </summary>
 public class NotificationGenerator : INotificationGenerator
 {
@@ -44,21 +45,27 @@ public class NotificationGenerator : INotificationGenerator
         var now = _clock.GetUtcNow().UtcDateTime;
 
         var created = 0;
-        var openKeys = await LoadOpenDedupKeysAsync(organizationId, ct);
+        var existingKeys = await LoadExistingDedupKeysAsync(organizationId, ct);
 
-        created += await GenerateFromTimelineAsync(organizationId, now, openKeys, ct);
-        created += await GenerateInactiveCustomersAsync(organizationId, now, openKeys, ct);
+        created += await GenerateFromTimelineAsync(organizationId, now, existingKeys, ct);
+        created += await GenerateInactiveCustomersAsync(organizationId, now, existingKeys, ct);
 
         if (created > 0) await _db.SaveChangesAsync(ct);
         return created;
     }
 
-    private async Task<HashSet<string>> LoadOpenDedupKeysAsync(Guid? organizationId, CancellationToken ct)
+    /// <summary>
+    /// Loads dedup keys for <em>every</em> existing notification (any status), so a
+    /// notification that has already been raised — including ones already handled
+    /// (Done) or dismissed — is never recreated. A genuinely new obligation yields a
+    /// new key (timeline events are keyed by their unique id), so fresh signals still
+    /// surface.
+    /// </summary>
+    private async Task<HashSet<string>> LoadExistingDedupKeysAsync(Guid? organizationId, CancellationToken ct)
     {
         var query = _db.Notifications
             .IgnoreQueryFilters()
-            .Where(n => n.DeletedAt == null
-                && (n.Status == NotificationStatus.New || n.Status == NotificationStatus.Read));
+            .Where(n => n.DeletedAt == null);
 
         if (organizationId is { } org)
             query = query.Where(n => n.OrganizationId == org);
@@ -70,7 +77,7 @@ public class NotificationGenerator : INotificationGenerator
     private async Task<int> GenerateFromTimelineAsync(
         Guid? organizationId,
         DateTime now,
-        HashSet<string> openKeys,
+        HashSet<string> existingKeys,
         CancellationToken ct)
     {
         var horizon = now.AddDays(TimelineLookaheadDays);
@@ -108,7 +115,7 @@ public class NotificationGenerator : INotificationGenerator
         foreach (var ev in events)
         {
             var key = $"timeline:{ev.Id}";
-            if (!openKeys.Add(key)) continue; // already open
+            if (!existingKeys.Add(key)) continue; // already raised
 
             var vehicleLabel = ev.Vehicle is null
                 ? "le véhicule"
@@ -147,7 +154,7 @@ public class NotificationGenerator : INotificationGenerator
     private async Task<int> GenerateInactiveCustomersAsync(
         Guid? organizationId,
         DateTime now,
-        HashSet<string> openKeys,
+        HashSet<string> existingKeys,
         CancellationToken ct)
     {
         var cutoff = now.AddDays(-InactivityDays);
@@ -179,7 +186,7 @@ public class NotificationGenerator : INotificationGenerator
             if (lastActivity >= cutoff) continue;
 
             var key = $"inactive:{c.Id}";
-            if (!openKeys.Add(key)) continue;
+            if (!existingKeys.Add(key)) continue;
 
             var months = Math.Max(1, (int)Math.Round((now - lastActivity).TotalDays / 30.0));
 

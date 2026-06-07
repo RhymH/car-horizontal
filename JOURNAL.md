@@ -21,6 +21,8 @@ Chaque notification porte une sévérité (Urgent / À traiter / Opportunité / 
 - API : `GET /api/notifications`, `GET /api/notifications/unread-count`, `POST /api/notifications/{id}/read|done|dismiss`.
 - Le filtrage multitenant est porté par le filtre global du DbContext.
 
+**Correctif (même jour)** : la déduplication ne regardait que les notifications *ouvertes*, donc « Actualiser » recréait une notif déjà **traitée/ignorée**. Désormais la dédup considère tout le cycle de vie → une notif traitée ne ressort plus (seule une nouvelle échéance, nouvel id, en génère une).
+
 ---
 
 ## 2026-06-07 — P0-A : Envoi réel des messages (SMS/Email)
