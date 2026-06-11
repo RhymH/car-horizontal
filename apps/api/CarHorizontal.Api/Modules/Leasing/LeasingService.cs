@@ -31,24 +31,22 @@ public class LeasingService : ILeasingService
         }
 
         // Tri : contrats actifs d'abord, par échéance la plus proche.
-        var rows = await query
+        var contracts = await query
             .OrderBy(c => c.Status)
             .ThenBy(c => c.EndDate)
-            .Select(c => Project(c, _db))
             .ToListAsync(ct);
 
-        var items = rows.Select(ToDto).ToList();
+        var items = await MapManyAsync(contracts, ct);
         return new LeasingContractListResponseDto { Items = items, Total = items.Count };
     }
 
     public async Task<LeasingContractDto> GetAsync(Guid id, CancellationToken ct = default)
     {
-        var row = await _db.LeasingContracts.AsNoTracking()
-            .Where(c => c.Id == id)
-            .Select(c => Project(c, _db))
-            .FirstOrDefaultAsync(ct)
+        var contract = await _db.LeasingContracts.AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id, ct)
             ?? throw new KeyNotFoundException($"Contrat de leasing {id} introuvable.");
-        return ToDto(row);
+
+        return (await MapManyAsync(new[] { contract }, ct))[0];
     }
 
     public async Task<LeasingContractDto> CreateAsync(
@@ -121,40 +119,58 @@ public class LeasingService : ILeasingService
 
     // --- Helpers --------------------------------------------------------
 
-    /// <summary>Projection EF (entité + libellés véhicule/client) translatable en SQL.</summary>
-    private static ContractRow Project(LeasingContract c, AppDbContext db) => new()
+    /// <summary>
+    /// Mappe des contrats en DTO en chargeant les libellés véhicule/client via des
+    /// requêtes groupées (2 au total), sans sous-requête corrélée dans le Select —
+    /// ce qui évitait la traduction SQL et provoquait une évaluation client en
+    /// pleine itération (erreur Npgsql "command already in progress").
+    /// </summary>
+    private async Task<List<LeasingContractDto>> MapManyAsync(
+        IReadOnlyList<LeasingContract> contracts,
+        CancellationToken ct)
     {
-        Contract = c,
-        CustomerFullName = db.Customers.Where(x => x.Id == c.CustomerId).Select(x => x.FullName).FirstOrDefault() ?? string.Empty,
-        Make = db.Vehicles.Where(v => v.Id == c.VehicleId).Select(v => v.Make).FirstOrDefault(),
-        Model = db.Vehicles.Where(v => v.Id == c.VehicleId).Select(v => v.Model).FirstOrDefault(),
-        LicensePlate = db.Vehicles.Where(v => v.Id == c.VehicleId).Select(v => v.LicensePlate).FirstOrDefault()
-    };
+        if (contracts.Count == 0) return new List<LeasingContractDto>();
 
-    private static LeasingContractDto ToDto(ContractRow r)
-    {
-        var c = r.Contract;
-        var label = $"{r.Make} {r.Model}".Trim();
-        return new LeasingContractDto
+        var vehicleIds = contracts.Select(c => c.VehicleId).Distinct().ToList();
+        var customerIds = contracts.Select(c => c.CustomerId).Distinct().ToList();
+
+        var vehicles = (await _db.Vehicles.AsNoTracking()
+                .Where(v => vehicleIds.Contains(v.Id))
+                .Select(v => new { v.Id, v.Make, v.Model, v.LicensePlate })
+                .ToListAsync(ct))
+            .ToDictionary(v => v.Id);
+
+        var customerNames = (await _db.Customers.AsNoTracking()
+                .Where(c => customerIds.Contains(c.Id))
+                .Select(c => new { c.Id, c.FullName })
+                .ToListAsync(ct))
+            .ToDictionary(c => c.Id, c => c.FullName);
+
+        return contracts.Select(c =>
         {
-            Id = c.Id,
-            VehicleId = c.VehicleId,
-            VehicleLabel = string.IsNullOrWhiteSpace(label) ? null : label,
-            LicensePlate = r.LicensePlate,
-            CustomerId = c.CustomerId,
-            CustomerFullName = r.CustomerFullName,
-            Lessor = c.Lessor,
-            Reference = c.Reference,
-            MonthlyPayment = c.MonthlyPayment,
-            StartDate = c.StartDate,
-            EndDate = c.EndDate,
-            MileageCapKm = c.MileageCapKm,
-            BuyoutValue = c.BuyoutValue,
-            Status = c.Status.ToString(),
-            Notes = c.Notes,
-            CreatedAt = c.CreatedAt,
-            UpdatedAt = c.UpdatedAt
-        };
+            vehicles.TryGetValue(c.VehicleId, out var v);
+            var label = v is null ? null : $"{v.Make} {v.Model}".Trim();
+            return new LeasingContractDto
+            {
+                Id = c.Id,
+                VehicleId = c.VehicleId,
+                VehicleLabel = string.IsNullOrWhiteSpace(label) ? null : label,
+                LicensePlate = v?.LicensePlate,
+                CustomerId = c.CustomerId,
+                CustomerFullName = customerNames.GetValueOrDefault(c.CustomerId, string.Empty),
+                Lessor = c.Lessor,
+                Reference = c.Reference,
+                MonthlyPayment = c.MonthlyPayment,
+                StartDate = c.StartDate,
+                EndDate = c.EndDate,
+                MileageCapKm = c.MileageCapKm,
+                BuyoutValue = c.BuyoutValue,
+                Status = c.Status.ToString(),
+                Notes = c.Notes,
+                CreatedAt = c.CreatedAt,
+                UpdatedAt = c.UpdatedAt
+            };
+        }).ToList();
     }
 
     private static string? NormalizeOptional(string? value)
@@ -162,14 +178,4 @@ public class LeasingService : ILeasingService
 
     private static DateTime ToUtc(DateTime value)
         => value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc);
-
-    /// <summary>Ligne intermédiaire de projection (entité + libellés).</summary>
-    private sealed class ContractRow
-    {
-        public required LeasingContract Contract { get; init; }
-        public string CustomerFullName { get; init; } = string.Empty;
-        public string? Make { get; init; }
-        public string? Model { get; init; }
-        public string? LicensePlate { get; init; }
-    }
 }
