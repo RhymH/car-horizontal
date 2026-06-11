@@ -4,6 +4,7 @@ using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Customers;
 using CarHorizontal.Domain.Entities.Files;
 using CarHorizontal.Domain.Entities.Identity;
+using CarHorizontal.Domain.Entities.Leasing;
 using CarHorizontal.Domain.Entities.Maintenance;
 using CarHorizontal.Domain.Entities.Messaging;
 using CarHorizontal.Domain.Entities.Notifications;
@@ -52,6 +53,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<FileFolder> FileFolders => Set<FileFolder>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<LeasingContract> LeasingContracts => Set<LeasingContract>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
