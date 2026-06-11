@@ -29,6 +29,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     }
 
     public DbSet<Organization> Organizations => Set<Organization>();
+    public DbSet<OrganizationFeature> OrganizationFeatures => Set<OrganizationFeature>();
     public DbSet<UserOrganization> UserOrganizations => Set<UserOrganization>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
