@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-06-11 — Phase 1 : Socle "plugins" (capabilities par organisation)
+
+**Fonctionnalité**
+Base du fonctionnement par plugins : chaque module (leasing, ventes, promotions, recommandation d'articles, portail client…) est une **capability** activable **par organisation**. Source de vérité unique : le registre `Capabilities` (Domain). Activation persistée dans `OrganizationFeature` (absence de ligne = défaut de la capability, OFF par défaut = opt-in/vendable).
+
+**Comment y accéder / tester**
+- Lire l'état effectif des plugins de l'org : `GET /api/me/capabilities` → liste `{ key, label, description, enabled }`. Les fronts s'en serviront pour afficher/masquer les modules.
+- Activer/désactiver (Owner/Admin) : `PUT /api/organizations/capabilities/{key}` body `{ "enabled": true|false }`. Capability inconnue → 404.
+- Gating d'un endpoint : décorer avec `[RequireCapability(Capabilities.Leasing)]` → 403 `application/problem+json` si le plugin n'est pas activé (sera utilisé dès le module Leasing).
+- Capabilities connues : `leasing`, `sales`, `promotions`, `article-recommendations`, `client-portal`.
+
+---
+
 ## 2026-06-07 — P1-C : Décodage VIN → remplissage auto du véhicule
 
 **Fonctionnalité**
