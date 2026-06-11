@@ -2,6 +2,7 @@ using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Extensions;
 using CarHorizontal.Api.Middleware;
 using CarHorizontal.Api.Modules.Auth;
+using CarHorizontal.Api.Modules.Capabilities;
 using CarHorizontal.Api.Modules.Catalog;
 using CarHorizontal.Api.Modules.Customers;
 using CarHorizontal.Api.Modules.Dashboard;
@@ -86,6 +87,7 @@ builder.Services.AddCarHorizontalMileageCheck();
 builder.Services.AddCarHorizontalDashboard();
 builder.Services.AddCarHorizontalLoyalty();
 builder.Services.AddCarHorizontalNotifications();
+builder.Services.AddCarHorizontalCapabilities();
 
 builder.Services.AddCarHorizontalHangfire(builder.Configuration);
 builder.Services.AddScoped<CarHorizontal.Api.Jobs.TimelineRegenerationJob>();
