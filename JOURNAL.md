@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-06-11 — Phase 2 (en cours) : Plugin Leasing — backend CRUD
+
+**Fonctionnalité (livrée)**
+Gestion des contrats de leasing (LOA/LLD) côté pro, **activable comme plugin** : entité `LeasingContract` (bailleur, mensualité, début/fin, plafond km, valeur de rachat, statut) rattachée véhicule+client. CRUD complet, **gaté par la capability `leasing`**.
+
+**Comment y accéder / tester**
+- Activer le plugin (Owner/Admin) : `PUT /api/organizations/capabilities/leasing` `{ "enabled": true }`. Tant qu'il est off, toutes les routes leasing renvoient **403**.
+- CRUD : `GET/POST /api/leasing-contracts`, `GET/PATCH/DELETE /api/leasing-contracts/{id}`. Filtres liste : `vehicleId`, `customerId`, `status`. Le client est déduit du véhicule ; suppression = soft delete.
+
+**À venir (Phase 2)** : règle Timeline (fin de contrat, risque dépassement km) → centre de notifications ; affichage sur la fiche véhicule (front pro).
+
+---
+
 ## 2026-06-11 — Phase 1 : Socle "plugins" (capabilities par organisation)
 
 **Fonctionnalité**
