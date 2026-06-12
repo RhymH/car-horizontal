@@ -20,7 +20,12 @@ Gestion des contrats de leasing (LOA/LLD) côté pro, **activable comme plugin**
 - Ces événements alimentent le **centre de notifications** (fin de leasing = opportunité, risque km = à traiter), avec **remontée précoce** (visibles même si l'échéance est au-delà de la fenêtre 30 j habituelle).
 - Validé end-to-end : création contrat → notification « Fin de leasing à anticiper » contextualisée.
 
-**À venir (Phase 2)** : affichage/édition du contrat sur la fiche véhicule (front pro).
+**Front pro (ajouté)**
+- Section **Leasing** sur la fiche véhicule (`/vehicles/[id]`) : liste des contrats + ajout/édition/suppression (modale RHF+Zod). **Gatée par la capability** (`useCapabilities`/`useCapability` → `/me/capabilities`) : invisible si le plugin est off.
+- Les jalons (fin de contrat, risque km) restent affichés dans la **timeline** du véhicule ; la relance passe par les **notifications**.
+- Validé navigateur : section visible, 2 contrats listés (Arval, DIAC), modale fonctionnelle.
+
+**Phase 2 — Leasing : terminée.** Reste (hors Phase 2) : un écran de **réglages plugins** pour activer/désactiver les capabilities depuis l'UI (aujourd'hui via l'API `PUT /api/organizations/capabilities/{key}`).
 
 ---
 
