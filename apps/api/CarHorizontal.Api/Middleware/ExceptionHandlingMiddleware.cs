@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Auth;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +43,7 @@ public class ExceptionHandlingMiddleware
             ValidationException ve => (StatusCodes.Status400BadRequest, "Validation failed", BuildValidationDetail(ve)),
             UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "Forbidden", ex.Message),
             KeyNotFoundException => (StatusCodes.Status404NotFound, "Resource not found", ex.Message),
+            ConflictException => (StatusCodes.Status409Conflict, "Conflict", ex.Message),
             InvalidCredentialsException => (StatusCodes.Status401Unauthorized, "Invalid credentials", ex.Message),
             UserAlreadyExistsException => (StatusCodes.Status409Conflict, "User already exists", ex.Message),
             OrganizationMembershipException => (StatusCodes.Status403Forbidden, "Forbidden", ex.Message),

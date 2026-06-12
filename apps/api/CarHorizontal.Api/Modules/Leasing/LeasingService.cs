@@ -1,3 +1,4 @@
+using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Leasing.Dtos;
 using CarHorizontal.Domain.Entities.Leasing;
 using CarHorizontal.Infrastructure.Persistence;
@@ -66,6 +67,10 @@ public class LeasingService : ILeasingService
             .FirstOrDefaultAsync(ct)
             ?? throw new KeyNotFoundException("Véhicule introuvable.");
 
+        // Règle métier : un véhicule ne peut avoir qu'un contrat actif à la fois.
+        await EnsureNoActiveOverlapAsync(
+            vehicle.Id, ToUtc(request.StartDate), ToUtc(request.EndDate), excludeId: null, ct);
+
         var entity = new LeasingContract
         {
             OrganizationId = orgId,
@@ -110,6 +115,10 @@ public class LeasingService : ILeasingService
         if (request.EndDate.HasValue) entity.EndDate = ToUtc(request.EndDate.Value);
         if (!string.IsNullOrWhiteSpace(request.Status))
             entity.Status = Enum.Parse<LeasingContractStatus>(request.Status, ignoreCase: true);
+
+        // Si le contrat reste/redevient actif, il ne doit pas chevaucher un autre actif.
+        if (entity.Status == LeasingContractStatus.Active)
+            await EnsureNoActiveOverlapAsync(entity.VehicleId, entity.StartDate, entity.EndDate, entity.Id, ct);
 
         await _db.SaveChangesAsync(ct);
         await _timeline.RunForVehicleAsync(entity.VehicleId, ct);
@@ -181,6 +190,28 @@ public class LeasingService : ILeasingService
                 UpdatedAt = c.UpdatedAt
             };
         }).ToList();
+    }
+
+    /// <summary>
+    /// Refuse (409) la présence de deux contrats <see cref="LeasingContractStatus.Active"/>
+    /// dont les périodes se chevauchent sur le même véhicule. Chevauchement =
+    /// startA ≤ endB ET startB ≤ endA. <paramref name="excludeId"/> exclut le contrat courant (édition).
+    /// </summary>
+    private async Task EnsureNoActiveOverlapAsync(
+        Guid vehicleId, DateTime start, DateTime end, Guid? excludeId, CancellationToken ct)
+    {
+        var overlaps = await _db.LeasingContracts.AsNoTracking().AnyAsync(c =>
+            c.VehicleId == vehicleId
+            && c.Status == LeasingContractStatus.Active
+            && (excludeId == null || c.Id != excludeId)
+            && c.StartDate <= end
+            && start <= c.EndDate, ct);
+
+        if (overlaps)
+        {
+            throw new ConflictException(
+                "Un contrat de leasing actif existe déjà sur ce véhicule pour cette période.");
+        }
     }
 
     private static string? NormalizeOptional(string? value)
