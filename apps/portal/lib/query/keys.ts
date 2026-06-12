@@ -71,4 +71,12 @@ export const queryKeys = {
       ["notifications", "list", filters ?? {}] as const,
     unreadCount: () => ["notifications", "unread-count"] as const,
   },
+  capabilities: {
+    all: () => ["capabilities"] as const,
+    list: () => ["capabilities", "list"] as const,
+  },
+  leasing: {
+    all: () => ["leasing"] as const,
+    byVehicle: (vehicleId: string) => ["leasing", "by-vehicle", vehicleId] as const,
+  },
 } as const;
