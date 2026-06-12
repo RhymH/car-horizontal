@@ -28,6 +28,7 @@ import { MileageEstimateCard } from "@/components/vehicles/MileageEstimateCard";
 import { VehicleTimelineSection } from "@/components/vehicles/VehicleTimelineSection";
 import { VehicleMaintenanceSection } from "@/components/vehicles/VehicleMaintenanceSection";
 import { MaintenanceProgramSection } from "@/components/vehicles/MaintenanceProgramSection";
+import { LeasingSection } from "@/components/leasing/LeasingSection";
 import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
 import { UpdateMileageDialog } from "@/components/vehicles/UpdateMileageDialog";
 import { MaintenanceFormDialog } from "@/components/maintenance/MaintenanceFormDialog";
@@ -180,6 +181,7 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
             onSnooze={(e) => setSnoozeTarget(e)}
             onSendReminder={(e) => sendReminderMutation.mutate(e.id)}
           />
+          <LeasingSection vehicleId={vehicle.id} />
           <VehicleMaintenanceSection
             records={vehicle.maintenanceRecords}
             onAdd={() => setMaintenanceDialog({ kind: "create" })}
