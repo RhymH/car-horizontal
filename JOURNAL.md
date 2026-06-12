@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-06-12 — Réglages plugins (UI)
+
+**Fonctionnalité**
+Écran **Paramètres** (remplace le stub) avec une section **Modules (plugins)** : un interrupteur par capability (Leasing, Vente, Promotions, Reco articles, Portail client). État effectif lu via `/me/capabilities`, activation via `PUT /api/organizations/capabilities/{key}`. Réservé **Owner/Admin** (les autres voient l'état en lecture). Activer/désactiver un module affiche/masque ses écrans (ex. la section Leasing de la fiche véhicule).
+
+**Comment y accéder** : sidebar **Paramètres** → carte « Modules (plugins) ».
+
+---
+
 ## 2026-06-11 — Phase 2 (en cours) : Plugin Leasing — backend CRUD
 
 **Fonctionnalité (livrée)**
