@@ -25,6 +25,8 @@ Gestion des contrats de leasing (LOA/LLD) côté pro, **activable comme plugin**
 - Les jalons (fin de contrat, risque km) restent affichés dans la **timeline** du véhicule ; la relance passe par les **notifications**.
 - Validé navigateur : section visible, 2 contrats listés (Arval, DIAC), modale fonctionnelle.
 
+**Règle métier** : un véhicule ne peut avoir **qu'un seul contrat de leasing actif à la fois** — la création/màj d'un contrat actif chevauchant un autre renvoie **409** (`ConflictException`).
+
 **Phase 2 — Leasing : terminée.** Reste (hors Phase 2) : un écran de **réglages plugins** pour activer/désactiver les capabilities depuis l'UI (aujourd'hui via l'API `PUT /api/organizations/capabilities/{key}`).
 
 ---
