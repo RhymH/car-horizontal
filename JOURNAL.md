@@ -15,7 +15,12 @@ Gestion des contrats de leasing (LOA/LLD) côté pro, **activable comme plugin**
 - Activer le plugin (Owner/Admin) : `PUT /api/organizations/capabilities/leasing` `{ "enabled": true }`. Tant qu'il est off, toutes les routes leasing renvoient **403**.
 - CRUD : `GET/POST /api/leasing-contracts`, `GET/PATCH/DELETE /api/leasing-contracts/{id}`. Filtres liste : `vehicleId`, `customerId`, `status`. Le client est déduit du véhicule ; suppression = soft delete.
 
-**À venir (Phase 2)** : règle Timeline (fin de contrat, risque dépassement km) → centre de notifications ; affichage sur la fiche véhicule (front pro).
+**Ajouté (Timeline + Notifications)**
+- Règle Timeline `LeasingTimelineRule` : génère **fin de contrat** (échéance ~120 j) et **risque de dépassement du plafond km** (km projeté à l'échéance via l'estimation kilométrique). Créer/modifier un contrat **régénère la timeline du véhicule** → affichage immédiat.
+- Ces événements alimentent le **centre de notifications** (fin de leasing = opportunité, risque km = à traiter), avec **remontée précoce** (visibles même si l'échéance est au-delà de la fenêtre 30 j habituelle).
+- Validé end-to-end : création contrat → notification « Fin de leasing à anticiper » contextualisée.
+
+**À venir (Phase 2)** : affichage/édition du contrat sur la fiche véhicule (front pro).
 
 ---
 
