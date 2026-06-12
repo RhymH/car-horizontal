@@ -1,4 +1,5 @@
 using CarHorizontal.Domain.Entities.Catalog;
+using CarHorizontal.Domain.Entities.Leasing;
 using CarHorizontal.Domain.Entities.Maintenance;
 using CarHorizontal.Domain.Entities.Vehicles;
 using CarHorizontal.Domain.Vehicles;
@@ -12,4 +13,5 @@ public sealed record RuleContext(
     VehicleModel? VehicleModel = null,
     MaintenanceProgram? Program = null,
     IReadOnlyList<VehicleProgramOverride>? Overrides = null,
-    MileageEstimate? CurrentMileageEstimate = null);
+    MileageEstimate? CurrentMileageEstimate = null,
+    IReadOnlyList<LeasingContract>? LeasingContracts = null);

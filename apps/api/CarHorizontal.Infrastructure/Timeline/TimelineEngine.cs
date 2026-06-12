@@ -1,4 +1,5 @@
 using CarHorizontal.Domain.Entities.Catalog;
+using CarHorizontal.Domain.Entities.Leasing;
 using CarHorizontal.Domain.Entities.Maintenance;
 using CarHorizontal.Domain.Entities.Timeline;
 using CarHorizontal.Domain.Entities.Vehicles;
@@ -46,11 +47,14 @@ public class TimelineEngine : ITimelineEngine
 
         var (model, program) = await LoadProgramAsync(vehicle, ct);
         var overrides = await LoadOverridesAsync(vehicle, ct);
+        var leasing = await _db.LeasingContracts
+            .Where(c => c.VehicleId == vehicleId)
+            .ToListAsync(ct);
         var now = _clock.GetUtcNow().UtcDateTime;
         var estimate = await SafeEstimateAsync(vehicle.Id, now, ct);
 
         var inserted = ProcessVehicle(
-            vehicle, maintenance, existing, enabledCodes, model, program, overrides, estimate, now);
+            vehicle, maintenance, existing, enabledCodes, model, program, overrides, estimate, leasing, now);
         if (inserted > 0) await _db.SaveChangesAsync(ct);
         return inserted;
     }
@@ -116,6 +120,13 @@ public class TimelineEngine : ITimelineEngine
                 g => g.Key,
                 g => (IReadOnlyList<VehicleProgramOverride>)g.ToList());
 
+        var leasingByVehicle = (await _db.LeasingContracts
+                .IgnoreQueryFilters()
+                .Where(c => c.OrganizationId == organizationId && c.DeletedAt == null && vehicleIds.Contains(c.VehicleId))
+                .ToListAsync(ct))
+            .GroupBy(c => c.VehicleId)
+            .ToDictionary(g => g.Key, g => (IReadOnlyList<LeasingContract>)g.ToList());
+
         var totalInserted = 0;
         var now = _clock.GetUtcNow().UtcDateTime;
         foreach (var vehicle in vehicles)
@@ -140,9 +151,13 @@ public class TimelineEngine : ITimelineEngine
                 ? ovList
                 : Array.Empty<VehicleProgramOverride>();
 
+            var leasing = leasingByVehicle.TryGetValue(vehicle.Id, out var leaseList)
+                ? leaseList
+                : Array.Empty<LeasingContract>();
+
             var estimate = await SafeEstimateAsync(vehicle.Id, now, ct);
             totalInserted += ProcessVehicle(
-                vehicle, v, e, enabledCodes, model, program, ovs, estimate, now);
+                vehicle, v, e, enabledCodes, model, program, ovs, estimate, leasing, now);
         }
 
         if (totalInserted > 0) await _db.SaveChangesAsync(ct);
@@ -234,9 +249,10 @@ public class TimelineEngine : ITimelineEngine
         MaintenanceProgram? program,
         IReadOnlyList<VehicleProgramOverride> overrides,
         MileageEstimate? estimate,
+        IReadOnlyList<LeasingContract> leasing,
         DateTime now)
     {
-        var context = new RuleContext(vehicle, maintenance, now, model, program, overrides, estimate);
+        var context = new RuleContext(vehicle, maintenance, now, model, program, overrides, estimate, leasing);
 
         var inserted = 0;
         foreach (var rule in _rules)

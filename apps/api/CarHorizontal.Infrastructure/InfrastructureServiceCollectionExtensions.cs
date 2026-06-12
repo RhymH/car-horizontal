@@ -44,6 +44,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IRule, MileageBasedServiceRule>();
         services.AddScoped<IRule, TradeInOpportunityRule>();
         services.AddScoped<IRule, WarrantyExpiryRule>();
+        services.AddScoped<IRule, LeasingTimelineRule>();
         services.AddScoped<ITimelineEngine, TimelineEngine>();
 
         services.AddScoped<IAutoReminderScheduler, AutoReminderScheduler>();
