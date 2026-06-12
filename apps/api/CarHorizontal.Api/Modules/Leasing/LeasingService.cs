@@ -1,6 +1,7 @@
 using CarHorizontal.Api.Modules.Leasing.Dtos;
 using CarHorizontal.Domain.Entities.Leasing;
 using CarHorizontal.Infrastructure.Persistence;
+using CarHorizontal.Infrastructure.Timeline;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarHorizontal.Api.Modules.Leasing;
@@ -9,11 +10,13 @@ public class LeasingService : ILeasingService
 {
     private readonly AppDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly ITimelineEngine _timeline;
 
-    public LeasingService(AppDbContext db, ICurrentUserService currentUser)
+    public LeasingService(AppDbContext db, ICurrentUserService currentUser, ITimelineEngine timeline)
     {
         _db = db;
         _currentUser = currentUser;
+        _timeline = timeline;
     }
 
     public async Task<LeasingContractListResponseDto> ListAsync(
@@ -81,6 +84,11 @@ public class LeasingService : ILeasingService
 
         _db.LeasingContracts.Add(entity);
         await _db.SaveChangesAsync(ct);
+
+        // Régénère la timeline du véhicule pour faire apparaître aussitôt les
+        // échéances leasing (fin de contrat, risque km) — comme MaintenanceService.
+        await _timeline.RunForVehicleAsync(entity.VehicleId, ct);
+
         return await GetAsync(entity.Id, ct);
     }
 
@@ -104,6 +112,8 @@ public class LeasingService : ILeasingService
             entity.Status = Enum.Parse<LeasingContractStatus>(request.Status, ignoreCase: true);
 
         await _db.SaveChangesAsync(ct);
+        await _timeline.RunForVehicleAsync(entity.VehicleId, ct);
+
         return await GetAsync(entity.Id, ct);
     }
 

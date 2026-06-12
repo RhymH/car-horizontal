@@ -86,8 +86,14 @@ public class NotificationGenerator : INotificationGenerator
             .IgnoreQueryFilters()
             .Where(t => t.DeletedAt == null
                 && (t.Status == TimelineEventStatus.Pending || t.Status == TimelineEventStatus.Triggered)
-                && t.DueAt != null
-                && t.DueAt <= horizon);
+                && (
+                    // Échéances classiques : dans la fenêtre d'anticipation.
+                    (t.DueAt != null && t.DueAt <= horizon)
+                    // Signaux leasing : on les remonte dès qu'ils existent (alerte précoce),
+                    // même si l'échéance du contrat est lointaine.
+                    || t.Kind == TimelineEventKind.LeaseEnd
+                    || t.Kind == TimelineEventKind.MileageCapRisk
+                ));
 
         if (organizationId is { } org)
             query = query.Where(t => t.OrganizationId == org);
@@ -219,6 +225,8 @@ public class NotificationGenerator : INotificationGenerator
         TimelineEventKind.TireSwap => (NotificationKind.TireSwapDue, NotificationAction.CreateAppointment),
         TimelineEventKind.TradeInOpportunity => (NotificationKind.TradeInOpportunity, NotificationAction.ViewCustomer),
         TimelineEventKind.WarrantyExpiry => (NotificationKind.WarrantyExpiring, NotificationAction.ViewCustomer),
+        TimelineEventKind.LeaseEnd => (NotificationKind.LeaseEnding, NotificationAction.ViewCustomer),
+        TimelineEventKind.MileageCapRisk => (NotificationKind.MileageCapRisk, NotificationAction.ViewCustomer),
         _ => (NotificationKind.MaintenanceDue, NotificationAction.ViewVehicle)
     };
 
@@ -228,8 +236,14 @@ public class NotificationGenerator : INotificationGenerator
         bool overdue)
     {
         // Opportunities stay "opportunity" — they are not time-critical chores.
-        if (kind is TimelineEventKind.TradeInOpportunity or TimelineEventKind.WarrantyExpiry)
+        if (kind is TimelineEventKind.TradeInOpportunity
+            or TimelineEventKind.WarrantyExpiry
+            or TimelineEventKind.LeaseEnd)
             return NotificationSeverity.Opportunity;
+
+        // Mileage-cap overage is a financial risk to flag, not a chore.
+        if (kind is TimelineEventKind.MileageCapRisk)
+            return NotificationSeverity.Warning;
 
         if (overdue) return NotificationSeverity.Critical;
 
@@ -248,6 +262,8 @@ public class NotificationGenerator : INotificationGenerator
         NotificationKind.TireSwapDue => "Changement de pneus à prévoir",
         NotificationKind.TradeInOpportunity => "Opportunité de reprise",
         NotificationKind.WarrantyExpiring => "Fin de garantie proche",
+        NotificationKind.LeaseEnding => "Fin de leasing à anticiper",
+        NotificationKind.MileageCapRisk => "Risque de dépassement km (leasing)",
         _ => string.IsNullOrWhiteSpace(eventTitle) ? "Échéance véhicule" : eventTitle
     };
 
@@ -273,6 +289,10 @@ public class NotificationGenerator : INotificationGenerator
                 $"{who} : {vehicleLabel} atteint un profil intéressant pour une reprise. Une proposition peut être pertinente.",
             NotificationKind.WarrantyExpiring =>
                 $"{who} : la garantie de {vehicleLabel} expire bientôt{date}. C'est le moment d'en parler.",
+            NotificationKind.LeaseEnding =>
+                $"{who} : le contrat de leasing de {vehicleLabel} arrive à échéance{date}. Proposez une restitution ou un renouvellement.",
+            NotificationKind.MileageCapRisk =>
+                $"{who} : {vehicleLabel} risque de dépasser le plafond kilométrique du leasing avant l'échéance{date}. Prévenez le client pour éviter des frais.",
             _ => $"{who} : une échéance approche pour {vehicleLabel}{date}."
         };
     }

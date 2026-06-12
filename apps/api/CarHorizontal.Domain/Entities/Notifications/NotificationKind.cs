@@ -22,5 +22,11 @@ public enum NotificationKind
     WarrantyExpiring = 4,
 
     /// <summary>Customer has had no recorded activity for a long period (≈12 months).</summary>
-    InactiveCustomer = 5
+    InactiveCustomer = 5,
+
+    /// <summary>Leasing contract is approaching its end (restitution / renewal).</summary>
+    LeaseEnding = 6,
+
+    /// <summary>Projected mileage will exceed the leasing contractual cap.</summary>
+    MileageCapRisk = 7
 }

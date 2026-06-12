@@ -7,6 +7,8 @@ export const notificationKinds = [
   "TradeInOpportunity",
   "WarrantyExpiring",
   "InactiveCustomer",
+  "LeaseEnding",
+  "MileageCapRisk",
 ] as const;
 export type NotificationKindApi = (typeof notificationKinds)[number];
 
@@ -17,6 +19,8 @@ export const notificationKindLabels: Record<NotificationKindApi, string> = {
   TradeInOpportunity: "Reprise",
   WarrantyExpiring: "Garantie",
   InactiveCustomer: "Client inactif",
+  LeaseEnding: "Fin de leasing",
+  MileageCapRisk: "Dépassement km",
 };
 
 export type NotificationSeverityApi =
