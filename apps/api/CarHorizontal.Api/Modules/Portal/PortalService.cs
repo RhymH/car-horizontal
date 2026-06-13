@@ -1,5 +1,6 @@
 using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Portal.Dtos;
+using CarHorizontal.Domain.Entities.Leasing;
 using CarHorizontal.Domain.Entities.Timeline;
 using CarHorizontal.Domain.Entities.Vehicles;
 using CarHorizontal.Domain.Vehicles;
@@ -67,7 +68,10 @@ public class PortalService : IPortalService
             .Where(t => vehicleIds.Contains(t.VehicleId)
                 && (t.Status == TimelineEventStatus.Pending || t.Status == TimelineEventStatus.Triggered)
                 && t.DueAt != null
-                && t.DueAt >= now)
+                && t.DueAt >= now
+                // Le risque de dépassement km est présenté comme une bannière dédiée,
+                // pas comme une échéance de la liste.
+                && t.Kind != TimelineEventKind.MileageCapRisk)
             .OrderBy(t => t.DueAt)
             .ToListAsync(ct);
 
@@ -83,6 +87,8 @@ public class PortalService : IPortalService
                     Severity = e.Severity?.ToString()
                 }).ToList());
 
+        var capAlerts = await BuildMileageCapAlertsAsync(vehicles, ct);
+
         return vehicles.Select(v => new PortalVehicleDto
         {
             Id = v.Id,
@@ -92,7 +98,8 @@ public class PortalService : IPortalService
             LicensePlate = v.LicensePlate,
             CurrentMileage = v.CurrentMileage,
             MileageUpdatedAt = v.MileageUpdatedAt,
-            UpcomingEvents = eventsByVehicle.TryGetValue(v.Id, out var evs) ? evs : new List<PortalVehicleEventDto>()
+            UpcomingEvents = eventsByVehicle.TryGetValue(v.Id, out var evs) ? evs : new List<PortalVehicleEventDto>(),
+            MileageCapAlert = capAlerts.GetValueOrDefault(v.Id)
         }).ToList();
     }
 
@@ -133,6 +140,57 @@ public class PortalService : IPortalService
         // Rafraîchit l'estimation et la timeline (échéances ancrées sur le km).
         _mileageEstimation.InvalidateCache(vehicle.Id);
         await _timeline.RunForVehicleAsync(vehicle.Id, ct);
+    }
+
+    /// <summary>
+    /// Pour chaque véhicule sous contrat de leasing actif avec plafond km :
+    /// alerte si le plafond est déjà dépassé, ou si le km projeté à l'échéance le dépasse.
+    /// </summary>
+    private async Task<Dictionary<Guid, PortalMileageCapAlertDto>> BuildMileageCapAlertsAsync(
+        IReadOnlyList<Vehicle> vehicles, CancellationToken ct)
+    {
+        var result = new Dictionary<Guid, PortalMileageCapAlertDto>();
+        var vehicleIds = vehicles.Select(v => v.Id).ToList();
+
+        var caps = (await _db.LeasingContracts.AsNoTracking()
+                .Where(c => vehicleIds.Contains(c.VehicleId)
+                    && c.Status == LeasingContractStatus.Active
+                    && c.MileageCapKm != null)
+                .Select(c => new { c.VehicleId, Cap = c.MileageCapKm!.Value, c.EndDate })
+                .ToListAsync(ct))
+            .GroupBy(c => c.VehicleId)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        foreach (var v in vehicles)
+        {
+            if (!caps.TryGetValue(v.Id, out var c)) continue;
+
+            var projected = v.CurrentMileage;
+            try
+            {
+                var estimate = await _mileageEstimation.EstimateAtAsync(v.Id, c.EndDate, ct);
+                if (estimate.EstimatedKm > projected) projected = estimate.EstimatedKm;
+            }
+            catch
+            {
+                // Estimation indisponible : on se base sur le km courant.
+            }
+
+            var exceeded = v.CurrentMileage > c.Cap;
+            var risk = projected > c.Cap;
+            if (exceeded || risk)
+            {
+                result[v.Id] = new PortalMileageCapAlertDto
+                {
+                    CapKm = c.Cap,
+                    CurrentKm = v.CurrentMileage,
+                    ProjectedKm = projected,
+                    Exceeded = exceeded
+                };
+            }
+        }
+
+        return result;
     }
 
     private Guid RequireCustomer() =>

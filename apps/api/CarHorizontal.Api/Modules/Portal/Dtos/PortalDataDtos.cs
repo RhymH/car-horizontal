@@ -25,6 +25,21 @@ public class SubmitMileageRequestDto
     public int Mileage { get; set; }
 }
 
+/// <summary>
+/// Alerte plafond kilométrique d'un contrat de leasing, destinée au client :
+/// l'avertit qu'il dépasse (ou va dépasser) le plafond et qu'il doit en parler
+/// à son garage pour éviter des frais.
+/// </summary>
+public class PortalMileageCapAlertDto
+{
+    public int CapKm { get; set; }
+    public int CurrentKm { get; set; }
+    /// <summary>Kilométrage projeté à l'échéance du contrat (estimation).</summary>
+    public int ProjectedKm { get; set; }
+    /// <summary>Vrai si le plafond est déjà dépassé (sinon : risque à l'échéance).</summary>
+    public bool Exceeded { get; set; }
+}
+
 /// <summary>Un véhicule du client + ses prochaines échéances (dashboard).</summary>
 public class PortalVehicleDto
 {
@@ -36,4 +51,7 @@ public class PortalVehicleDto
     public int CurrentMileage { get; set; }
     public DateTime MileageUpdatedAt { get; set; }
     public List<PortalVehicleEventDto> UpcomingEvents { get; set; } = new();
+
+    /// <summary>Présente uniquement si un contrat de leasing actif est (ou sera) dépassé en km.</summary>
+    public PortalMileageCapAlertDto? MileageCapAlert { get; set; }
 }

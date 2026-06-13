@@ -3,8 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, LogOut, Car, CalendarClock, Gauge, Check, X } from "lucide-react";
-import { portalApi, apiErrorMessage, type PortalVehicle } from "@/lib/api/portal";
+import { Loader2, LogOut, Car, CalendarClock, Gauge, Check, X, AlertTriangle } from "lucide-react";
+import {
+  portalApi,
+  apiErrorMessage,
+  type PortalVehicle,
+  type PortalMileageCapAlert,
+} from "@/lib/api/portal";
 import { tokenStore } from "@/lib/auth/tokens";
 import { cn } from "@/lib/utils";
 
@@ -89,6 +94,38 @@ export default function DashboardPage() {
         </div>
       )}
     </main>
+  );
+}
+
+function MileageCapBanner({ alert }: { alert: PortalMileageCapAlert }) {
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-2.5 border-b border-border px-5 py-3 text-sm",
+        alert.exceeded ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning",
+      )}
+    >
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+      <p>
+        {alert.exceeded ? (
+          <>
+            Vous avez <strong>dépassé</strong> le plafond kilométrique de votre leasing (
+            {numberFmt.format(alert.currentKm)} km parcourus pour {numberFmt.format(alert.capKm)} km
+            autorisés).{" "}
+          </>
+        ) : (
+          <>
+            À ce rythme, vous allez <strong>dépasser</strong> le plafond km de votre leasing (≈
+            {" "}
+            {numberFmt.format(alert.projectedKm)} km projetés pour {numberFmt.format(alert.capKm)} km
+            autorisés).{" "}
+          </>
+        )}
+        <span className="font-medium">
+          Contactez votre garage pour en discuter et éviter des frais de dépassement.
+        </span>
+      </p>
+    </div>
   );
 }
 
@@ -190,6 +227,8 @@ function VehicleCard({ vehicle }: { vehicle: PortalVehicle }) {
           )}
         </div>
       </div>
+
+      {vehicle.mileageCapAlert && <MileageCapBanner alert={vehicle.mileageCapAlert} />}
 
       <div className="p-5">
         <p className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted">

@@ -30,6 +30,13 @@ export interface PortalVehicleEvent {
   severity: string | null;
 }
 
+export interface PortalMileageCapAlert {
+  capKm: number;
+  currentKm: number;
+  projectedKm: number;
+  exceeded: boolean;
+}
+
 export interface PortalVehicle {
   id: string;
   make: string;
@@ -39,6 +46,7 @@ export interface PortalVehicle {
   currentMileage: number;
   mileageUpdatedAt: string;
   upcomingEvents: PortalVehicleEvent[];
+  mileageCapAlert: PortalMileageCapAlert | null;
 }
 
 export const portalApi = {
