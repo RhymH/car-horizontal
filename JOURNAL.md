@@ -22,7 +22,15 @@ Comptes clients finaux, en réutilisant ASP.NET Identity. Un compte est de type 
 **Endpoints client (livrés)**
 - `GET /api/portal/me` (profil du client) et `GET /api/portal/vehicles` (ses véhicules + prochaines échéances timeline). **Scopés par le `customer_id` du token** (jamais un id fourni), gardés par la policy `CustomerOnly`. Validé : données du client OK, token staff → 403.
 
-**Reste (Phase 3)** : l'app **`apps/client`** (login + acceptation d'invitation + dashboard) — nouvelle application front.
+**App client (livrée)** — nouvelle app **`apps/client`** (Next.js 16, port **3001**) :
+- Pages **login** (email+mdp), **accept-invite** (définition du mot de passe via le lien d'invitation), **dashboard** (profil + véhicules + prochaines échéances), redirection d'accueil selon la session.
+- Session persistée en localStorage (accès permanent), refresh transparent à 401, design simple/premium.
+- CORS API étendu à `http://localhost:3001`.
+- Validé navigateur : login `alice@example.com` → dashboard avec sa Renault Clio IV + échéances.
+
+**Comment lancer le portail client** : `cd apps/client && npm install && npm run dev` → http://localhost:3001. (API sur :5080 requise.)
+
+**Phase 3 — Portail client : terminée** (identité + auth + endpoints + app).
 
 ---
 
