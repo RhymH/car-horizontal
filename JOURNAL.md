@@ -19,7 +19,10 @@ Comptes clients finaux, en réutilisant ASP.NET Identity. Un compte est de type 
 - JWT client : `user_type=Customer` + `customer_id`, **sans** `org_id` ni rôle.
 - **Policy par défaut durcie** : toute route staff `[Authorize]` **refuse** un token client (403). Policy `CustomerOnly` pour les futures routes `/api/portal/*`. Validé : token client → 403 sur `/api/vehicles`, `/api/customers`, `/api/leasing-contracts`.
 
-**Reste (Phase 3)** : endpoints client `/api/portal/*` (ses véhicules + état), puis l'app `apps/client` (login + dashboard).
+**Endpoints client (livrés)**
+- `GET /api/portal/me` (profil du client) et `GET /api/portal/vehicles` (ses véhicules + prochaines échéances timeline). **Scopés par le `customer_id` du token** (jamais un id fourni), gardés par la policy `CustomerOnly`. Validé : données du client OK, token staff → 403.
+
+**Reste (Phase 3)** : l'app **`apps/client`** (login + acceptation d'invitation + dashboard) — nouvelle application front.
 
 ---
 
