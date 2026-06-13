@@ -1,12 +1,20 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { tokenStore } from "@/lib/auth/tokens";
+
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace(tokenStore.getAccessToken() ? "/dashboard" : "/login");
+  }, [router]);
+
   return (
-    <main className="flex min-h-svh items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
-        <h1 className="text-xl font-semibold">Mon véhicule</h1>
-        <p className="mt-2 text-sm text-muted">
-          Le portail de suivi de votre véhicule arrive bientôt.
-        </p>
-      </div>
+    <main className="flex min-h-svh items-center justify-center">
+      <Loader2 className="h-5 w-5 animate-spin text-muted" />
     </main>
   );
 }
