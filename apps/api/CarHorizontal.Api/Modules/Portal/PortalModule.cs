@@ -5,6 +5,7 @@ public static class PortalModule
     public static IServiceCollection AddCarHorizontalPortal(this IServiceCollection services)
     {
         services.AddScoped<IPortalAuthService, PortalAuthService>();
+        services.AddScoped<IPortalService, PortalService>();
         return services;
     }
 }

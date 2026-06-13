@@ -9,6 +9,7 @@ internal class DesignTimeCurrentUserService : ICurrentUserService
     public Guid? OrganizationId => null;
     public string? Role => null;
     public bool IsAuthenticated => false;
+    public Guid? CustomerId => null;
 }
 
 public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>

@@ -6,4 +6,7 @@ public interface ICurrentUserService
     Guid? OrganizationId { get; }
     string? Role { get; }
     bool IsAuthenticated { get; }
+
+    /// <summary>Fiche client liée au compte (présent uniquement pour un token de type Customer).</summary>
+    Guid? CustomerId { get; }
 }

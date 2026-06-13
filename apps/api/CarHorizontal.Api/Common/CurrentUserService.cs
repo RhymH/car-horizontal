@@ -56,4 +56,13 @@ public class CurrentUserService : ICurrentUserService
     }
 
     public bool IsAuthenticated => _accessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+
+    public Guid? CustomerId
+    {
+        get
+        {
+            var raw = _accessor.HttpContext?.User?.FindFirstValue("customer_id");
+            return Guid.TryParse(raw, out var id) ? id : null;
+        }
+    }
 }
