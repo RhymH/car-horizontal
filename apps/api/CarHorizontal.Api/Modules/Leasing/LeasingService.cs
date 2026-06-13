@@ -1,6 +1,7 @@
 using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Leasing.Dtos;
 using CarHorizontal.Domain.Entities.Leasing;
+using CarHorizontal.Domain.Entities.Timeline;
 using CarHorizontal.Infrastructure.Persistence;
 using CarHorizontal.Infrastructure.Timeline;
 using Microsoft.EntityFrameworkCore;
@@ -93,6 +94,7 @@ public class LeasingService : ILeasingService
         // Régénère la timeline du véhicule pour faire apparaître aussitôt les
         // échéances leasing (fin de contrat, risque km) — comme MaintenanceService.
         await _timeline.RunForVehicleAsync(entity.VehicleId, ct);
+        await ReconcileLeasingEventsAsync(entity.VehicleId, ct);
 
         return await GetAsync(entity.Id, ct);
     }
@@ -122,6 +124,7 @@ public class LeasingService : ILeasingService
 
         await _db.SaveChangesAsync(ct);
         await _timeline.RunForVehicleAsync(entity.VehicleId, ct);
+        await ReconcileLeasingEventsAsync(entity.VehicleId, ct);
 
         return await GetAsync(entity.Id, ct);
     }
@@ -134,6 +137,9 @@ public class LeasingService : ILeasingService
         // Soft delete : l'intercepteur convertit le Remove en DeletedAt non nul.
         _db.LeasingContracts.Remove(entity);
         await _db.SaveChangesAsync(ct);
+
+        // Le contrat n'est plus actif → ses échéances timeline ne doivent plus apparaître.
+        await ReconcileLeasingEventsAsync(entity.VehicleId, ct);
     }
 
     // --- Helpers --------------------------------------------------------
@@ -212,6 +218,38 @@ public class LeasingService : ILeasingService
             throw new ConflictException(
                 "Un contrat de leasing actif existe déjà sur ce véhicule pour cette période.");
         }
+    }
+
+    /// <summary>
+    /// Marque <c>Skipped</c> les échéances leasing (LeaseEnd / MileageCapRisk) en
+    /// attente du véhicule qui ne correspondent plus à un contrat <b>actif</b>.
+    /// Évite les échéances « fantômes » après suppression/clôture/changement de date.
+    /// </summary>
+    private async Task ReconcileLeasingEventsAsync(Guid vehicleId, CancellationToken ct)
+    {
+        var activeEndDates = await _db.LeasingContracts
+            .Where(c => c.VehicleId == vehicleId && c.Status == LeasingContractStatus.Active)
+            .Select(c => c.EndDate)
+            .ToListAsync(ct);
+        var valid = activeEndDates.ToHashSet();
+
+        var events = await _db.TimelineEvents
+            .Where(t => t.VehicleId == vehicleId
+                && (t.Kind == TimelineEventKind.LeaseEnd || t.Kind == TimelineEventKind.MileageCapRisk)
+                && (t.Status == TimelineEventStatus.Pending || t.Status == TimelineEventStatus.Triggered))
+            .ToListAsync(ct);
+
+        var changed = false;
+        foreach (var e in events)
+        {
+            if (e.DueAt is null || !valid.Contains(e.DueAt.Value))
+            {
+                e.Status = TimelineEventStatus.Skipped;
+                changed = true;
+            }
+        }
+
+        if (changed) await _db.SaveChangesAsync(ct);
     }
 
     private static string? NormalizeOptional(string? value)
