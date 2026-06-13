@@ -13,6 +13,8 @@ Le client met à jour le kilométrage de **son** véhicule depuis son dashboard 
 
 **Comment y accéder** : portail client (:3001) → dashboard → carte véhicule → « Mettre à jour ».
 
+**Alerte dépassement plafond (leasing)** : si le véhicule dépasse — ou va dépasser (projection à l'échéance) — le plafond km de son contrat de leasing actif, le dashboard client affiche une **bannière claire** (« Vous avez/allez dépasser… contactez votre garage pour éviter des frais »). Exposé par `PortalVehicle.mileageCapAlert` (calcul contrat actif + estimation). Le risque km n'est plus un item de liste (remplacé par la bannière). C'est la mise à jour du km par le client qui déclenche/rafraîchit l'alerte.
+
 **Au passage** : correction d'une erreur d'hydratation côté client (lecture du localStorage déplacée hors du rendu).
 
 ---
