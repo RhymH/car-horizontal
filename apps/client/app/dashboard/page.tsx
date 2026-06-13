@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { Loader2, LogOut, Car, CalendarClock, Gauge } from "lucide-react";
-import { portalApi, type PortalVehicle } from "@/lib/api/portal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2, LogOut, Car, CalendarClock, Gauge, Check, X } from "lucide-react";
+import { portalApi, apiErrorMessage, type PortalVehicle } from "@/lib/api/portal";
 import { tokenStore } from "@/lib/auth/tokens";
 import { cn } from "@/lib/utils";
 
@@ -19,23 +19,35 @@ const SEVERITY_DOT: Record<string, string> = {
 
 export default function DashboardPage() {
   const router = useRouter();
-
+  // Garde de montage : évite tout mismatch d'hydratation lié au localStorage.
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    setMounted(true);
     if (!tokenStore.getAccessToken()) router.replace("/login");
   }, [router]);
 
   const profile = useQuery({
     queryKey: ["portal", "me"],
     queryFn: ({ signal }) => portalApi.getProfile(signal),
+    enabled: mounted,
   });
   const vehicles = useQuery({
     queryKey: ["portal", "vehicles"],
     queryFn: ({ signal }) => portalApi.getVehicles(signal),
+    enabled: mounted,
   });
 
   function logout() {
     tokenStore.clear();
     router.replace("/login");
+  }
+
+  if (!mounted) {
+    return (
+      <main className="flex min-h-svh items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-muted" />
+      </main>
+    );
   }
 
   return (
@@ -44,7 +56,7 @@ export default function DashboardPage() {
         <div>
           <p className="text-sm text-muted">Bonjour</p>
           <h1 className="text-xl font-semibold tracking-tight">
-            {profile.data?.fullName ?? tokenStore.get()?.fullName ?? "…"}
+            {profile.data?.fullName ?? "…"}
           </h1>
         </div>
         <button
@@ -81,6 +93,30 @@ export default function DashboardPage() {
 }
 
 function VehicleCard({ vehicle }: { vehicle: PortalVehicle }) {
+  const queryClient = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(String(vehicle.currentMileage));
+  const [error, setError] = useState<string | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: (km: number) => portalApi.submitMileage(vehicle.id, km),
+    onSuccess: async () => {
+      setEditing(false);
+      setError(null);
+      await queryClient.invalidateQueries({ queryKey: ["portal", "vehicles"] });
+    },
+    onError: (e) => setError(apiErrorMessage(e, "Mise à jour impossible.")),
+  });
+
+  function save() {
+    const km = Number(value);
+    if (!Number.isFinite(km) || km <= 0) {
+      setError("Saisissez un kilométrage valide.");
+      return;
+    }
+    mutation.mutate(km);
+  }
+
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       <div className="flex items-start justify-between gap-3 border-b border-border p-5">
@@ -98,11 +134,60 @@ function VehicleCard({ vehicle }: { vehicle: PortalVehicle }) {
             )}
           </div>
         </div>
+
         <div className="text-right">
-          <div className="flex items-center justify-end gap-1 text-sm font-medium">
-            <Gauge className="h-4 w-4 text-muted" />
-            {numberFmt.format(vehicle.currentMileage)} km
-          </div>
+          {editing ? (
+            <div className="flex flex-col items-end gap-1.5">
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  autoFocus
+                  min={vehicle.currentMileage}
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+                <span className="text-sm text-muted">km</span>
+                <button
+                  onClick={save}
+                  disabled={mutation.isPending}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-60"
+                  aria-label="Enregistrer"
+                >
+                  {mutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4" />
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setEditing(false);
+                    setError(null);
+                    setValue(String(vehicle.currentMileage));
+                  }}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-border text-muted"
+                  aria-label="Annuler"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {error && <span className="max-w-[12rem] text-xs text-destructive">{error}</span>}
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-end gap-1 text-sm font-medium">
+                <Gauge className="h-4 w-4 text-muted" />
+                {numberFmt.format(vehicle.currentMileage)} km
+              </div>
+              <button
+                onClick={() => setEditing(true)}
+                className="mt-1 text-xs text-primary hover:underline"
+              >
+                Mettre à jour
+              </button>
+            </>
+          )}
         </div>
       </div>
 

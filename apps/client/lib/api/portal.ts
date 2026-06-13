@@ -68,6 +68,10 @@ export const portalApi = {
     const { data } = await apiClient.get<PortalVehicle[]>("/api/portal/vehicles", { signal });
     return data;
   },
+
+  async submitMileage(vehicleId: string, mileage: number): Promise<void> {
+    await apiClient.post(`/api/portal/vehicles/${vehicleId}/mileage`, { mileage });
+  },
 };
 
 /** Extrait un message lisible d'une erreur API (problem+json) ou renvoie le fallback. */
