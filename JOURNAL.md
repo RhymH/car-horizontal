@@ -6,6 +6,23 @@
 
 ---
 
+## 2026-06-13 — Phase 3 (en cours) : Portail client — auth
+
+**Fonctionnalité (livrée)**
+Comptes clients finaux, en réutilisant ASP.NET Identity. Un compte est de type `Customer` (vs `Staff`) et rattaché à une fiche `Customer` (`AppUser.CustomerId`). Création **par invitation du garage** (pas d'auto-inscription).
+
+**Flux**
+- Staff : `POST /api/customers/{id}/portal-invite` → crée/ré-invite le compte client + génère un token (email via dispatcher P0-A ; lien renvoyé pour le dev).
+- Client : `POST /api/portal/auth/accept-invite` (définit le mot de passe via le token) → session ; `POST /api/portal/auth/login` (email + mot de passe) → JWT client.
+
+**Sécurité**
+- JWT client : `user_type=Customer` + `customer_id`, **sans** `org_id` ni rôle.
+- **Policy par défaut durcie** : toute route staff `[Authorize]` **refuse** un token client (403). Policy `CustomerOnly` pour les futures routes `/api/portal/*`. Validé : token client → 403 sur `/api/vehicles`, `/api/customers`, `/api/leasing-contracts`.
+
+**Reste (Phase 3)** : endpoints client `/api/portal/*` (ses véhicules + état), puis l'app `apps/client` (login + dashboard).
+
+---
+
 ## 2026-06-12 — Réglages plugins (UI)
 
 **Fonctionnalité**
