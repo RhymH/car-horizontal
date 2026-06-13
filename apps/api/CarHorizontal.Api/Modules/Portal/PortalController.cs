@@ -24,4 +24,13 @@ public class PortalController : ControllerBase
     [HttpGet("vehicles")]
     public async Task<ActionResult<List<PortalVehicleDto>>> Vehicles(CancellationToken ct)
         => Ok(await _service.GetVehiclesAsync(ct));
+
+    /// <summary>Le client déclare le kilométrage actuel de son véhicule.</summary>
+    [HttpPost("vehicles/{id:guid}/mileage")]
+    public async Task<IActionResult> SubmitMileage(
+        Guid id, [FromBody] SubmitMileageRequestDto request, CancellationToken ct)
+    {
+        await _service.SubmitMileageAsync(id, request.Mileage, ct);
+        return NoContent();
+    }
 }

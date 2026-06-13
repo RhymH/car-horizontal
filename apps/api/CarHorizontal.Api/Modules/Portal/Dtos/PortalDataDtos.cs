@@ -19,6 +19,12 @@ public class PortalVehicleEventDto
     public string? Severity { get; set; }
 }
 
+/// <summary>Saisie du kilométrage par le client.</summary>
+public class SubmitMileageRequestDto
+{
+    public int Mileage { get; set; }
+}
+
 /// <summary>Un véhicule du client + ses prochaines échéances (dashboard).</summary>
 public class PortalVehicleDto
 {
