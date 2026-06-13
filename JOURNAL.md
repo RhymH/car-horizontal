@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-06-13 — Correctif : échéances leasing fantômes
+
+Supprimer/terminer un contrat de leasing laissait son échéance « Fin de contrat » dans la timeline (donc visible côté client). Désormais, chaque création/màj/suppression **réconcilie** les événements `LeaseEnd`/`MileageCapRisk` du véhicule : ceux qui ne correspondent plus à un contrat **actif** passent en `Skipped`. Validé : le dashboard client n'affiche plus qu'une seule fin de leasing (celle du contrat actif).
+
+---
+
 ## 2026-06-13 — Phase 3 (en cours) : Portail client — auth
 
 **Fonctionnalité (livrée)**
