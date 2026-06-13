@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-06-13 — Saisie kilométrage par le client (portail)
+
+**Fonctionnalité**
+Le client met à jour le kilométrage de **son** véhicule depuis son dashboard (bouton « Mettre à jour »). Backend `POST /api/portal/vehicles/{id}/mileage` (scopé `customer_id`) : enregistre un relevé `CustomerSelfReport`, met à jour le véhicule, **invalide l'estimation et régénère la timeline** → les échéances (ex. risque de dépassement du plafond km) se recalculent en direct. Garde-fous : km invalide/en recul → 409, véhicule d'un autre client → 404.
+
+**Comment y accéder** : portail client (:3001) → dashboard → carte véhicule → « Mettre à jour ».
+
+**Au passage** : correction d'une erreur d'hydratation côté client (lecture du localStorage déplacée hors du rendu).
+
+---
+
 ## 2026-06-13 — Correctif : échéances leasing fantômes
 
 Supprimer/terminer un contrat de leasing laissait son échéance « Fin de contrat » dans la timeline (donc visible côté client). Désormais, chaque création/màj/suppression **réconcilie** les événements `LeaseEnd`/`MileageCapRisk` du véhicule : ceux qui ne correspondent plus à un contrat **actif** passent en `Skipped`. Validé : le dashboard client n'affiche plus qu'une seule fin de leasing (celle du contrat actif).
