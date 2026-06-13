@@ -52,8 +52,15 @@ public class JwtTokenService : IJwtTokenService
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Jti, jti),
-            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty)
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            // Distingue staff et client final ; exploité par les policies StaffOnly/CustomerOnly.
+            new("user_type", user.UserType.ToString())
         };
+
+        if (user.CustomerId.HasValue)
+        {
+            claims.Add(new Claim("customer_id", user.CustomerId.Value.ToString()));
+        }
 
         if (organizationId.HasValue)
         {

@@ -3,6 +3,7 @@ using CarHorizontal.Api.Modules.Organizations;
 using CarHorizontal.Domain.Entities.Identity;
 using CarHorizontal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -78,7 +79,25 @@ public static class AuthModule
                 };
             });
 
-        services.AddAuthorization();
+        var customerType = UserType.Customer.ToString();
+        services.AddAuthorization(options =>
+        {
+            // Policy par défaut (tout [Authorize] sans policy nommée) : authentifié
+            // ET pas un compte client → protège l'ensemble des routes staff
+            // existantes d'un token client, sans toucher chaque contrôleur.
+            options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .RequireAssertion(ctx => ctx.User.FindFirst("user_type")?.Value != customerType)
+                .Build();
+
+            options.AddPolicy(AuthPolicies.StaffOnly, p => p
+                .RequireAuthenticatedUser()
+                .RequireAssertion(ctx => ctx.User.FindFirst("user_type")?.Value != customerType));
+
+            options.AddPolicy(AuthPolicies.CustomerOnly, p => p
+                .RequireAuthenticatedUser()
+                .RequireAssertion(ctx => ctx.User.FindFirst("user_type")?.Value == customerType));
+        });
 
         return services;
     }
