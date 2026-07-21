@@ -15,6 +15,11 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
         builder.Property(o => o.DefaultLocale).HasMaxLength(10);
         builder.Property(o => o.Timezone).HasMaxLength(60);
         builder.Property(o => o.PhoneCountryCode).HasMaxLength(8);
+        builder.Property(o => o.BrandPrimaryColor).HasMaxLength(9);
+        builder.Property(o => o.BrandLogoUrl).HasMaxLength(500);
+        builder.Property(o => o.BrandCoverImageUrl).HasMaxLength(500);
+        builder.Property(o => o.BrandTagline).HasMaxLength(200);
+        builder.Property(o => o.ContactPhone).HasMaxLength(30);
         builder.HasIndex(o => o.Slug).IsUnique();
     }
 }
