@@ -99,9 +99,14 @@ export function AddInteractionDialog({
       }),
     onSuccess: async () => {
       toast.success("Interaction ajoutée");
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.customers.detail(customerId),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.customers.detail(customerId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.leads.detail(customerId),
+        }),
+      ]);
       onOpenChange(false);
     },
     onError: (error) =>

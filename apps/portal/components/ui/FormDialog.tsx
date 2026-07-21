@@ -37,7 +37,7 @@ export function FormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={size === "lg" ? "sm:max-w-lg" : "sm:max-w-md"}
+        className={size === "lg" ? "sm:max-w-xl" : "sm:max-w-lg"}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
