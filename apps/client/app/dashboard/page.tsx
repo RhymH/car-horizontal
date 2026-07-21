@@ -3,27 +3,38 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, LogOut, Car, CalendarClock, Gauge, Check, X, AlertTriangle } from "lucide-react";
+import {
+  Loader2,
+  LogOut,
+  Car,
+  Phone,
+  CalendarClock,
+  Pencil,
+  Info,
+} from "lucide-react";
 import {
   portalApi,
   apiErrorMessage,
   type PortalVehicle,
   type PortalMileageCapAlert,
+  type PortalVehicleEvent,
 } from "@/lib/api/portal";
 import { tokenStore } from "@/lib/auth/tokens";
+import { useBranding } from "@/lib/branding";
+import { BrandMark, Button, GhostButton, Modal, SplashScreen } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
-const dateFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+const shortDateFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" });
 const numberFmt = new Intl.NumberFormat("fr-FR");
 
 const SEVERITY_DOT: Record<string, string> = {
-  Critical: "bg-destructive",
+  Critical: "bg-danger",
   Recommended: "bg-warning",
-  Optional: "bg-muted",
 };
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { branding } = useBranding();
   // Garde de montage : évite tout mismatch d'hydratation lié au localStorage.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -47,99 +58,161 @@ export default function DashboardPage() {
     router.replace("/login");
   }
 
-  if (!mounted) {
-    return (
-      <main className="flex min-h-svh items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin text-muted" />
-      </main>
-    );
-  }
+  if (!mounted) return <SplashScreen />;
+
+  const firstName = profile.data?.fullName?.split(" ")[0];
 
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-2xl flex-col gap-6 p-5">
-      <header className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted">Bonjour</p>
-          <h1 className="text-xl font-semibold tracking-tight">
-            {profile.data?.fullName ?? "…"}
-          </h1>
-        </div>
-        <button
-          onClick={logout}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-muted hover:text-foreground"
-        >
+    <div className="mx-auto flex min-h-svh w-full max-w-3xl flex-col px-5 pb-16 pt-8 sm:px-8">
+      <header className="rise flex items-center justify-between">
+        <BrandMark />
+        <GhostButton onClick={logout} aria-label="Déconnexion">
           <LogOut className="h-4 w-4" />
-          Déconnexion
-        </button>
+          <span className="hidden sm:inline">Déconnexion</span>
+        </GhostButton>
       </header>
 
-      {vehicles.isLoading ? (
-        <div className="flex h-40 items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-muted" />
-        </div>
-      ) : vehicles.isError ? (
-        <p className="rounded-xl border border-border bg-card p-5 text-sm text-destructive">
-          Impossible de charger vos véhicules pour le moment.
+      <section className="mt-12">
+        <p className="micro-label rise" style={{ "--d": "80ms" } as React.CSSProperties}>
+          Votre espace personnel
         </p>
-      ) : (vehicles.data?.length ?? 0) === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted">
-          <Car className="mx-auto mb-2 h-6 w-6" />
-          Aucun véhicule associé à votre compte pour l'instant.
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {vehicles.data!.map((v) => (
-            <VehicleCard key={v.id} vehicle={v} />
-          ))}
-        </div>
-      )}
-    </main>
-  );
-}
+        <h1
+          className="rise mt-3 font-display text-4xl text-ink sm:text-5xl"
+          style={{ "--d": "160ms" } as React.CSSProperties}
+        >
+          Bonjour{firstName ? `, ${firstName}` : ""}
+        </h1>
+        <p
+          className="rise mt-3 text-base text-ink-mute"
+          style={{ "--d": "240ms" } as React.CSSProperties}
+        >
+          Voici l'état de {vehicles.data && vehicles.data.length > 1 ? "vos véhicules" : "votre véhicule"},
+          suivi par {branding?.garageName ?? "votre garage"}.
+        </p>
+      </section>
 
-function MileageCapBanner({ alert }: { alert: PortalMileageCapAlert }) {
-  return (
-    <div
-      className={cn(
-        "flex items-start gap-2.5 border-b border-border px-5 py-3 text-sm",
-        alert.exceeded ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning",
-      )}
-    >
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-      <p>
-        {alert.exceeded ? (
-          <>
-            Vous avez <strong>dépassé</strong> le plafond kilométrique de votre leasing (
-            {numberFmt.format(alert.currentKm)} km parcourus pour {numberFmt.format(alert.capKm)} km
-            autorisés).{" "}
-          </>
+      <section className="mt-10 flex flex-col gap-6">
+        {vehicles.isLoading ? (
+          <div className="flex h-48 items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-ink-faint" />
+          </div>
+        ) : vehicles.isError ? (
+          <p className="panel rise p-6 text-sm text-danger">
+            Impossible de charger vos véhicules pour le moment.
+          </p>
+        ) : (vehicles.data?.length ?? 0) === 0 ? (
+          <div className="panel rise flex flex-col items-center gap-3 p-12 text-center">
+            <Car className="h-6 w-6 text-ink-faint" />
+            <p className="text-base text-ink-mute">
+              Aucun véhicule associé à votre compte pour l'instant.
+            </p>
+          </div>
         ) : (
-          <>
-            À ce rythme, vous allez <strong>dépasser</strong> le plafond km de votre leasing (≈
-            {" "}
-            {numberFmt.format(alert.projectedKm)} km projetés pour {numberFmt.format(alert.capKm)} km
-            autorisés).{" "}
-          </>
+          vehicles.data!.map((v, i) => <VehicleCard key={v.id} vehicle={v} index={i} />)
         )}
-        <span className="font-medium">
-          Contactez votre garage pour en discuter et éviter des frais de dépassement.
-        </span>
-      </p>
+      </section>
+
+      <ContactCard />
+
+      <footer className="rise mt-14 text-center text-xs tracking-wide text-ink-faint">
+        Espace client propulsé par CarHorizontal
+      </footer>
     </div>
   );
 }
 
-function VehicleCard({ vehicle }: { vehicle: PortalVehicle }) {
+/* ------------------------------------------------------------------ */
+/*  Carte véhicule                                                     */
+/* ------------------------------------------------------------------ */
+
+function VehicleCard({ vehicle, index }: { vehicle: PortalVehicle; index: number }) {
+  return (
+    <article
+      className="panel rise overflow-hidden"
+      style={{ "--d": `${320 + index * 110}ms` } as React.CSSProperties}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-5 p-6 sm:p-8">
+        <div className="min-w-0">
+          <p className="micro-label">Véhicule</p>
+          <h2 className="mt-2 font-display text-3xl text-ink">
+            {vehicle.make} <span className="text-ink-mute">{vehicle.model}</span>
+          </h2>
+          <div className="mt-3 flex flex-wrap items-center gap-2.5">
+            {vehicle.licensePlate && <PlateChip plate={vehicle.licensePlate} />}
+            {vehicle.year && (
+              <span className="text-xs tracking-wide text-ink-mute">{vehicle.year}</span>
+            )}
+          </div>
+        </div>
+
+        <MileagePanel vehicle={vehicle} />
+      </div>
+
+      {vehicle.mileageCapAlert && <MileageCapSection alert={vehicle.mileageCapAlert} />}
+
+      <UpcomingEvents events={vehicle.upcomingEvents} />
+    </article>
+  );
+}
+
+/** Plaque d'immatriculation stylisée, clin d'œil aux plaques françaises. */
+function PlateChip({ plate }: { plate: string }) {
+  return (
+    <span className="inline-flex items-stretch overflow-hidden rounded-md border border-line text-[11px] font-semibold tracking-[0.14em]">
+      <span className="w-1.5 bg-brand/70" aria-hidden />
+      <span className="bg-panel-soft px-2.5 py-1 uppercase text-ink">{plate}</span>
+    </span>
+  );
+}
+
+function MileagePanel({ vehicle }: { vehicle: PortalVehicle }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="text-right">
+      <p className="micro-label">Kilométrage</p>
+      <p className="tnum mt-1 font-display text-3xl text-ink">
+        {numberFmt.format(vehicle.currentMileage)}
+        <span className="ml-1.5 text-base text-ink-mute">km</span>
+      </p>
+      <button
+        onClick={() => setOpen(true)}
+        className="mt-1.5 inline-flex items-center gap-1.5 text-sm text-brand transition-opacity hover:opacity-75"
+      >
+        <Pencil className="h-3.5 w-3.5" />
+        Mettre à jour
+      </button>
+      <MileageDialog vehicle={vehicle} open={open} onClose={() => setOpen(false)} />
+    </div>
+  );
+}
+
+/** Modale de déclaration du kilométrage, avec le pourquoi de la démarche. */
+function MileageDialog({
+  vehicle,
+  open,
+  onClose,
+}: {
+  vehicle: PortalVehicle;
+  open: boolean;
+  onClose: () => void;
+}) {
   const queryClient = useQueryClient();
-  const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(String(vehicle.currentMileage));
   const [error, setError] = useState<string | null>(null);
+
+  // Repart d'un état propre à chaque ouverture.
+  useEffect(() => {
+    if (open) {
+      setValue(String(vehicle.currentMileage));
+      setError(null);
+    }
+  }, [open, vehicle.currentMileage]);
 
   const mutation = useMutation({
     mutationFn: (km: number) => portalApi.submitMileage(vehicle.id, km),
     onSuccess: async () => {
-      setEditing(false);
-      setError(null);
+      onClose();
       await queryClient.invalidateQueries({ queryKey: ["portal", "vehicles"] });
     },
     onError: (e) => setError(apiErrorMessage(e, "Mise à jour impossible.")),
@@ -155,111 +228,184 @@ function VehicleCard({ vehicle }: { vehicle: PortalVehicle }) {
   }
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-      <div className="flex items-start justify-between gap-3 border-b border-border p-5">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Car className="h-5 w-5" />
-          </span>
-          <div>
-            <h2 className="font-semibold">
-              {vehicle.make} {vehicle.model}
-              {vehicle.year ? <span className="text-muted"> · {vehicle.year}</span> : null}
-            </h2>
-            {vehicle.licensePlate && (
-              <p className="text-xs uppercase tracking-wide text-muted">{vehicle.licensePlate}</p>
-            )}
-          </div>
-        </div>
+    <Modal open={open} onClose={onClose} title="Mettre à jour le kilométrage">
+      <p className="text-base text-ink-mute">
+        {vehicle.make} {vehicle.model}
+        {vehicle.licensePlate ? ` · ${vehicle.licensePlate}` : ""}
+      </p>
 
-        <div className="text-right">
-          {editing ? (
-            <div className="flex flex-col items-end gap-1.5">
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="number"
-                  autoFocus
-                  min={vehicle.currentMileage}
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-                <span className="text-sm text-muted">km</span>
-                <button
-                  onClick={save}
-                  disabled={mutation.isPending}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-60"
-                  aria-label="Enregistrer"
-                >
-                  {mutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Check className="h-4 w-4" />
-                  )}
-                </button>
-                <button
-                  onClick={() => {
-                    setEditing(false);
-                    setError(null);
-                    setValue(String(vehicle.currentMileage));
-                  }}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-border text-muted"
-                  aria-label="Annuler"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              {error && <span className="max-w-[12rem] text-xs text-destructive">{error}</span>}
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-end gap-1 text-sm font-medium">
-                <Gauge className="h-4 w-4 text-muted" />
-                {numberFmt.format(vehicle.currentMileage)} km
-              </div>
-              <button
-                onClick={() => setEditing(true)}
-                className="mt-1 text-xs text-primary hover:underline"
-              >
-                Mettre à jour
-              </button>
-            </>
-          )}
-        </div>
+      <div className="mt-4 flex gap-3 rounded-xl border border-brand/25 bg-brand/10 p-4 text-left">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+        <p className="text-sm leading-relaxed text-ink-mute">
+          <span className="font-semibold text-ink">Pourquoi le déclarer ?</span>{" "}
+          Un kilométrage à jour permet à votre garage de planifier vos entretiens
+          au bon moment (vidange, pneus, révision) et de suivre le plafond de
+          votre contrat de leasing — pour vous éviter des réparations évitables
+          et des frais de dépassement.
+        </p>
       </div>
 
-      {vehicle.mileageCapAlert && <MileageCapBanner alert={vehicle.mileageCapAlert} />}
+      <label className="mt-5 block text-left">
+        <span className="micro-label mb-2 block">Kilométrage actuel</span>
+        <div className="relative">
+          <input
+            type="number"
+            autoFocus
+            min={vehicle.currentMileage}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && save()}
+            className={cn(
+              "tnum w-full rounded-xl border border-line bg-panel-soft px-4 py-3 pr-14 text-lg text-ink",
+              "outline-none transition-[border-color,box-shadow] duration-200",
+              "focus:border-brand/60 focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--brand)_18%,transparent)]",
+            )}
+          />
+          <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-base text-ink-mute">
+            km
+          </span>
+        </div>
+        <span className="mt-2 block text-sm text-ink-faint">
+          Dernière valeur connue : {numberFmt.format(vehicle.currentMileage)} km
+          (le compteur ne peut pas reculer).
+        </span>
+      </label>
 
-      <div className="p-5">
-        <p className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted">
-          <CalendarClock className="h-3.5 w-3.5" />
-          Prochaines échéances
+      {error && <p className="mt-3 text-left text-sm text-danger">{error}</p>}
+
+      <div className="mt-6 flex gap-3">
+        <GhostButton onClick={onClose} className="flex-1 justify-center py-3">
+          Annuler
+        </GhostButton>
+        <Button onClick={save} pending={mutation.isPending} className="flex-1">
+          Enregistrer
+        </Button>
+      </div>
+    </Modal>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Forfait kilométrique (leasing)                                     */
+/* ------------------------------------------------------------------ */
+
+function MileageCapSection({ alert }: { alert: PortalMileageCapAlert }) {
+  const ratio = Math.min(1, alert.currentKm / alert.capKm);
+  const tone = alert.exceeded ? "var(--color-danger)" : "var(--color-warning)";
+
+  return (
+    <div className="border-t border-line-soft px-6 py-5 sm:px-8">
+      <div className="flex items-baseline justify-between gap-4">
+        <p className="micro-label">Forfait kilométrique — leasing</p>
+        <p className="tnum text-sm text-ink-mute">
+          <span style={{ color: tone }} className="font-semibold">
+            {numberFmt.format(alert.currentKm)}
+          </span>{" "}
+          / {numberFmt.format(alert.capKm)} km
         </p>
-        {vehicle.upcomingEvents.length === 0 ? (
-          <p className="text-sm text-muted">Rien de prévu — tout est à jour ✅</p>
+      </div>
+      <div className="mt-3 h-1 overflow-hidden rounded-full bg-line-soft">
+        <div
+          className="h-full rounded-full transition-[width] duration-700"
+          style={{ width: `${Math.round(ratio * 100)}%`, backgroundColor: tone }}
+        />
+      </div>
+      <p className="mt-3 text-sm leading-relaxed text-ink-mute">
+        {alert.exceeded ? (
+          <>Le plafond de votre contrat est dépassé. </>
         ) : (
-          <ul className="flex flex-col gap-2.5">
-            {vehicle.upcomingEvents.map((e, i) => (
-              <li key={i} className="flex items-center justify-between gap-3">
-                <span className="flex items-center gap-2 text-sm">
-                  <span
-                    className={cn(
-                      "h-2 w-2 shrink-0 rounded-full",
-                      SEVERITY_DOT[e.severity ?? ""] ?? "bg-primary",
-                    )}
-                  />
-                  {e.title}
-                </span>
-                {e.dueAt && (
-                  <span className="shrink-0 text-xs text-muted">
-                    {dateFmt.format(new Date(e.dueAt))}
+          <>
+            À ce rythme, ≈ {numberFmt.format(alert.projectedKm)} km sont projetés à
+            l'échéance du contrat.{" "}
+          </>
+        )}
+        <span className="text-ink">
+          Parlez-en à votre garage pour éviter des frais de dépassement.
+        </span>
+      </p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Échéances                                                          */
+/* ------------------------------------------------------------------ */
+
+function UpcomingEvents({ events }: { events: PortalVehicleEvent[] }) {
+  return (
+    <div className="border-t border-line-soft px-6 py-5 sm:px-8">
+      <p className="micro-label flex items-center gap-2">
+        <CalendarClock className="h-3.5 w-3.5" />
+        Prochaines échéances
+      </p>
+      {events.length === 0 ? (
+        <p className="mt-3 text-base text-ink-mute">
+          Tout est à jour — aucun entretien à prévoir.
+        </p>
+      ) : (
+        <ul className="mt-3 divide-y divide-line-soft">
+          {events.map((e, i) => (
+            <li key={i} className="flex items-center justify-between gap-4 py-2.5">
+              <span className="flex min-w-0 items-center gap-3 text-base text-ink">
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 shrink-0 rounded-full",
+                    SEVERITY_DOT[e.severity ?? ""] ?? "bg-brand",
+                  )}
+                />
+                <span className="truncate">{e.title}</span>
+              </span>
+              {e.dueAt && (
+                <time className="shrink-0 text-sm tracking-wide text-ink-mute">
+                  {shortDateFmt.format(new Date(e.dueAt))}
+                  <span className="text-ink-faint">
+                    {" "}
+                    {new Date(e.dueAt).getFullYear()}
                   </span>
-                )}
-              </li>
-            ))}
-          </ul>
+                </time>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Contact garage                                                     */
+/* ------------------------------------------------------------------ */
+
+function ContactCard() {
+  const { branding } = useBranding();
+
+  return (
+    <section
+      className="panel rise mt-10 flex flex-wrap items-center justify-between gap-5 p-6 sm:p-8"
+      style={{ "--d": "560ms" } as React.CSSProperties}
+    >
+      <div className="min-w-0">
+        <p className="micro-label">À votre service</p>
+        <p className="mt-2 font-display text-xl text-ink">
+          Une question ? {branding?.garageName ?? "Votre garage"} vous répond.
+        </p>
+        {branding?.tagline && (
+          <p className="mt-1 text-sm text-ink-mute">{branding.tagline}</p>
         )}
       </div>
-    </article>
+      {branding?.contactPhone && (
+        <a
+          href={`tel:${branding.contactPhone.replace(/\s/g, "")}`}
+          className={cn(
+            "inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-brand-ink",
+            "transition-[transform,filter,box-shadow] duration-200 hover:-translate-y-px hover:brightness-110",
+            "hover:shadow-[0_10px_28px_-10px_color-mix(in_oklab,var(--brand)_60%,transparent)]",
+          )}
+        >
+          <Phone className="h-4 w-4" />
+          {branding.contactPhone}
+        </a>
+      )}
+    </section>
   );
 }

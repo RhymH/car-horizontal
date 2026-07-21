@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { SplashScreen } from "@/components/ui";
 import { tokenStore } from "@/lib/auth/tokens";
 
 export default function Home() {
@@ -12,9 +12,5 @@ export default function Home() {
     router.replace(tokenStore.getAccessToken() ? "/dashboard" : "/login");
   }, [router]);
 
-  return (
-    <main className="flex min-h-svh items-center justify-center">
-      <Loader2 className="h-5 w-5 animate-spin text-muted" />
-    </main>
-  );
+  return <SplashScreen />;
 }

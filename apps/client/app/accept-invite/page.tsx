@@ -5,10 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AuthShell, TextField, Button, FormError } from "@/components/ui";
 import { portalApi, apiErrorMessage } from "@/lib/api/portal";
 import { tokenStore } from "@/lib/auth/tokens";
+import { useBranding } from "@/lib/branding";
 
 function AcceptInviteForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const { refresh } = useBranding();
   const email = params.get("email") ?? "";
   const token = params.get("token") ?? "";
 
@@ -34,6 +36,8 @@ function AcceptInviteForm() {
         customerId: session.customerId,
         fullName: session.fullName,
       });
+      // Adopte la marque blanche du garage qui a invité ce client.
+      void refresh();
       router.replace("/dashboard");
     } catch (err) {
       setError(apiErrorMessage(err, "Lien d'invitation invalide ou expiré."));
@@ -51,8 +55,11 @@ function AcceptInviteForm() {
   }
 
   return (
-    <AuthShell title="Activer mon accès" subtitle={`Définissez votre mot de passe pour ${email}.`}>
-      <form onSubmit={submit} className="flex flex-col gap-4">
+    <AuthShell
+      title="Bienvenue dans votre espace"
+      subtitle={`Définissez votre mot de passe pour ${email}.`}
+    >
+      <form onSubmit={submit} className="flex flex-col gap-5">
         <TextField
           label="Mot de passe"
           type="password"
@@ -71,7 +78,7 @@ function AcceptInviteForm() {
         />
         <FormError message={error} />
         <Button type="submit" pending={pending}>
-          Activer mon compte
+          Activer mon espace
         </Button>
       </form>
     </AuthShell>

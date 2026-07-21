@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { AuthShell, TextField, Button, FormError } from "@/components/ui";
 import { portalApi, apiErrorMessage } from "@/lib/api/portal";
 import { tokenStore } from "@/lib/auth/tokens";
+import { useBranding } from "@/lib/branding";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { branding, refresh } = useBranding();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +26,8 @@ export default function LoginPage() {
         customerId: session.customerId,
         fullName: session.fullName,
       });
+      // Adopte la marque blanche du garage du client fraîchement connecté.
+      void refresh();
       router.replace("/dashboard");
     } catch (err) {
       setError(apiErrorMessage(err, "Email ou mot de passe incorrect."));
@@ -33,8 +37,15 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthShell title="Mon véhicule" subtitle="Connectez-vous pour suivre votre véhicule.">
-      <form onSubmit={submit} className="flex flex-col gap-4">
+    <AuthShell
+      title="Bon retour parmi nous"
+      subtitle={
+        branding
+          ? `Connectez-vous à votre espace ${branding.garageName}.`
+          : "Connectez-vous pour suivre votre véhicule."
+      }
+    >
+      <form onSubmit={submit} className="flex flex-col gap-5">
         <TextField
           label="Adresse e-mail"
           type="email"
@@ -54,7 +65,7 @@ export default function LoginPage() {
         />
         <FormError message={error} />
         <Button type="submit" pending={pending}>
-          Se connecter
+          Accéder à mon espace
         </Button>
       </form>
     </AuthShell>

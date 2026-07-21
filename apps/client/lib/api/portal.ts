@@ -15,6 +15,17 @@ export interface PortalSession {
   tokens: AuthTokens;
 }
 
+/** Identité marque blanche du garage — pilote le theming de tout le portail. */
+export interface PortalBranding {
+  garageName: string;
+  slug: string;
+  primaryColor: string | null;
+  logoUrl: string | null;
+  coverImageUrl: string | null;
+  tagline: string | null;
+  contactPhone: string | null;
+}
+
 export interface PortalProfile {
   customerId: string;
   fullName: string;
@@ -64,6 +75,21 @@ export const portalApi = {
       token,
       newPassword,
     });
+    return data;
+  },
+
+  /** Marque blanche du garage du client connecté. */
+  async getBranding(signal?: AbortSignal): Promise<PortalBranding> {
+    const { data } = await apiClient.get<PortalBranding>("/api/portal/branding", { signal });
+    return data;
+  },
+
+  /** Marque blanche par slug de garage (écrans publics : connexion, invitation). */
+  async getBrandingBySlug(slug: string, signal?: AbortSignal): Promise<PortalBranding> {
+    const { data } = await apiClient.get<PortalBranding>(
+      `/api/portal/branding/${encodeURIComponent(slug)}`,
+      { signal },
+    );
     return data;
   },
 

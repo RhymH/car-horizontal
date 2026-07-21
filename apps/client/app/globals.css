@@ -1,20 +1,37 @@
 @import "tailwindcss";
 
-/* Theme client — simple, premium, clair. Les cles color generent les
-   utilitaires bg, text et border correspondants. */
+/*
+ * Thème « conciergerie automobile » — noir profond, hairlines, serif de
+ * caractère, accent dynamique par garage (marque blanche).
+ *
+ * --brand / --brand-ink sont posées sur <html> par le BrandingProvider ;
+ * tout le thème en découle (utilitaires brand / brand-ink).
+ */
+
 @theme {
-  --color-background: #f6f7f9;
-  --color-foreground: #0f172a;
-  --color-card: #ffffff;
-  --color-muted: #64748b;
-  --color-muted-soft: #f1f5f9;
-  --color-border: #e2e8f0;
-  --color-primary: #2563eb;
-  --color-primary-foreground: #ffffff;
-  --color-success: #059669;
-  --color-warning: #d97706;
-  --color-destructive: #dc2626;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-night: #0d0e13;
+  --color-abyss: #08090c;
+  --color-panel: #14161d;
+  --color-panel-soft: #1b1e27;
+  --color-line: #2b2f3a;
+  --color-line-soft: #21242e;
+  --color-ink: #f2efe8;
+  --color-ink-mute: #b4b1a8;
+  --color-ink-faint: #8b8880;
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-success: #7fae7f;
+  --color-warning: #d9a441;
+  --color-danger: #d96a5c;
+
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), Georgia, "Times New Roman", serif;
+}
+
+/* Défauts avant que le BrandingProvider ne résolve la marque du garage. */
+:root {
+  --brand: #c9a227;
+  --brand-ink: #0d0e11;
 }
 
 html,
@@ -22,7 +39,89 @@ body {
   min-height: 100%;
 }
 
+/* Base légèrement agrandie : tout le rythme typographique (rem) en profite. */
+html {
+  font-size: 17px;
+}
+
 body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+  color: var(--color-ink);
+  background-color: var(--color-night);
+  /* Halo discret de la couleur du garage + assombrissement vers le bas. */
+  background-image:
+    radial-gradient(
+      70rem 42rem at 50% -12rem,
+      color-mix(in oklab, var(--brand) 9%, transparent),
+      transparent 65%
+    ),
+    linear-gradient(to bottom, var(--color-night), var(--color-abyss));
+  background-attachment: fixed;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--brand) 80%, transparent);
+  color: var(--brand-ink);
+}
+
+@layer components {
+  /* Carte premium : fond légèrement dégradé + hairline. */
+  .panel {
+    border: 1px solid var(--color-line);
+    border-radius: 1.25rem;
+    background:
+      linear-gradient(
+        160deg,
+        color-mix(in oklab, var(--brand) 4%, var(--color-panel)),
+        var(--color-panel) 40%
+      );
+    box-shadow: 0 24px 48px -32px rgb(0 0 0 / 0.8);
+  }
+
+  /* Micro-label capitales espacées — signature typographique du portail. */
+  .micro-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint);
+  }
+
+  /* Entrée en scène : fondu + élévation, décalée via --d. */
+  .rise {
+    opacity: 0;
+    animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--d, 0ms);
+  }
+
+  /* Grain photographique très léger (volet ambiance). */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+    opacity: 1;
+  }
 }
