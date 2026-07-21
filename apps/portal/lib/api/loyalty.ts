@@ -53,6 +53,28 @@ export interface LoyaltyCustomerList {
   total: number;
 }
 
+export interface LoyaltyRetentionBucket {
+  period: string;
+  label: string;
+}
+
+export interface LoyaltyRetentionCohort {
+  key: string;
+  label: string;
+  isEarlier: boolean;
+  cohortSize: number;
+  values: number[];
+}
+
+export interface LoyaltyRetentionCurve {
+  from: string;
+  to: string;
+  granularity: "day" | "month";
+  churnHorizonDays: number;
+  buckets: LoyaltyRetentionBucket[];
+  cohorts: LoyaltyRetentionCohort[];
+}
+
 export const loyaltyApi = {
   async overview(signal?: AbortSignal): Promise<LoyaltyOverview> {
     const res = await apiClient.get<LoyaltyOverview>("/api/loyalty/overview", {
@@ -64,6 +86,16 @@ export const loyaltyApi = {
     const res = await apiClient.get<LoyaltyCohorts>("/api/loyalty/cohorts", {
       signal,
     });
+    return res.data;
+  },
+  async retentionCurve(
+    params: { from?: string; to?: string } = {},
+    signal?: AbortSignal,
+  ): Promise<LoyaltyRetentionCurve> {
+    const res = await apiClient.get<LoyaltyRetentionCurve>(
+      "/api/loyalty/retention-curve",
+      { signal, params },
+    );
     return res.data;
   },
   async atRisk(limit?: number, signal?: AbortSignal): Promise<LoyaltyCustomerList> {

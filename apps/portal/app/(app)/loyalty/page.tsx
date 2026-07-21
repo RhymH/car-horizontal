@@ -14,7 +14,7 @@ import {
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { KpiCard } from "@/components/dashboard/KpiCard";
-import { CohortHeatmap } from "@/components/loyalty/CohortHeatmap";
+import { RetentionCurveChart } from "@/components/loyalty/RetentionCurveChart";
 import { RetentionTrendChart } from "@/components/loyalty/RetentionTrendChart";
 import { AtRiskList } from "@/components/loyalty/AtRiskList";
 import { LostCustomersList } from "@/components/loyalty/LostCustomersList";
@@ -29,11 +29,6 @@ export default function LoyaltyPage() {
   const overview = useQuery({
     queryKey: queryKeys.loyalty.overview(),
     queryFn: ({ signal }) => loyaltyApi.overview(signal),
-    refetchOnWindowFocus: false,
-  });
-  const cohorts = useQuery({
-    queryKey: queryKeys.loyalty.cohorts(),
-    queryFn: ({ signal }) => loyaltyApi.cohorts(signal),
     refetchOnWindowFocus: false,
   });
   const atRisk = useQuery({
@@ -68,7 +63,6 @@ export default function LoyaltyPage() {
 
   const refetchAll = () => {
     void overview.refetch();
-    void cohorts.refetch();
     void atRisk.refetch();
     void lost.refetch();
   };
@@ -139,10 +133,9 @@ export default function LoyaltyPage() {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <RetentionTrendChart series={trend} loading={overview.isLoading} />
-        <CohortHeatmap data={cohorts.data} loading={cohorts.isLoading} />
-      </div>
+      <RetentionCurveChart />
+
+      <RetentionTrendChart series={trend} loading={overview.isLoading} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <AtRiskList

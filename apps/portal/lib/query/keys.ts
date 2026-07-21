@@ -67,6 +67,8 @@ export const queryKeys = {
   loyalty: {
     overview: () => ["loyalty", "overview"] as const,
     cohorts: () => ["loyalty", "cohorts"] as const,
+    retentionCurve: (filters?: Record<string, unknown>) =>
+      ["loyalty", "retention-curve", filters ?? {}] as const,
     atRisk: (limit?: number) => ["loyalty", "at-risk", limit ?? null] as const,
     lost: (limit?: number) => ["loyalty", "lost", limit ?? null] as const,
   },
