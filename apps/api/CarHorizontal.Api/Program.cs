@@ -12,6 +12,7 @@ using CarHorizontal.Api.Modules.Maintenance;
 using CarHorizontal.Api.Modules.MileageCheck;
 using CarHorizontal.Api.Modules.Appointments;
 using CarHorizontal.Api.Modules.Notifications;
+using CarHorizontal.Api.Modules.Organizations;
 using CarHorizontal.Api.Modules.Portal;
 using CarHorizontal.Api.Modules.Reminders;
 using CarHorizontal.Api.Modules.Timeline;
@@ -91,6 +92,7 @@ builder.Services.AddCarHorizontalLoyalty();
 builder.Services.AddCarHorizontalNotifications();
 builder.Services.AddCarHorizontalCapabilities();
 builder.Services.AddCarHorizontalLeasing();
+builder.Services.AddCarHorizontalOrganizations();
 builder.Services.AddCarHorizontalPortal();
 
 builder.Services.AddCarHorizontalHangfire(builder.Configuration);
@@ -126,7 +128,8 @@ if (builder.Configuration.GetValue<bool>("Database:RunMigrationsOnStartup"))
     {
         var seeder = scope.ServiceProvider.GetRequiredService<DevSeeder>();
         var demoPassword = builder.Configuration["Seed:DemoUserPassword"] ?? "DemoUser!2026";
-        await seeder.SeedAsync(demoPassword);
+        var clientPassword = builder.Configuration["Seed:ClientUserPassword"] ?? "ClientPass!2026";
+        await seeder.SeedAsync(demoPassword, clientPassword);
     }
 }
 

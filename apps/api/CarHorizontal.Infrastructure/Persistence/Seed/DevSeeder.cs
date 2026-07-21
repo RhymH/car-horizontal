@@ -23,14 +23,41 @@ public class DevSeeder
         _logger = logger;
     }
 
-    public async Task SeedAsync(string demoPassword, CancellationToken ct = default)
+    /// <summary>Email de la fiche client utilisée pour la démo du portail client.</summary>
+    private const string ClientPortalDemoEmail = "alice@example.com";
+
+    public async Task SeedAsync(string demoPassword, string clientPassword, CancellationToken ct = default)
     {
         if (await _db.Organizations.IgnoreQueryFilters().AnyAsync(ct))
-        {
             _logger.LogInformation("Dev seed skipped — data already present.");
-            return;
-        }
+        else
+            await SeedGarageAsync(demoPassword, ct);
 
+        await EnsureDemoBrandingAsync(ct);
+        await SeedClientPortalUserAsync(clientPassword, ct);
+    }
+
+    /// <summary>
+    /// Backfill idempotent de la marque blanche du garage de démo (placeholders),
+    /// pour les bases dev créées avant l'arrivée du theming portail client.
+    /// </summary>
+    private async Task EnsureDemoBrandingAsync(CancellationToken ct)
+    {
+        var org = await _db.Organizations.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(o => o.Slug == "garage-demo" && o.DeletedAt == null, ct);
+        if (org is null || org.BrandPrimaryColor is not null) return;
+
+        org.BrandPrimaryColor = "#c9a227";
+        org.BrandLogoUrl = "https://placehold.co/320x96/0b0d10/c9a227.png?text=GARAGE+DEMO&font=playfair-display";
+        org.BrandCoverImageUrl = "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1920&auto=format&fit=crop";
+        org.BrandTagline = "L'excellence automobile, à votre service depuis 1987";
+        org.ContactPhone = "+33 3 89 00 00 00";
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Dev seed: branding placeholders appliqués au garage de démo.");
+    }
+
+    private async Task SeedGarageAsync(string demoPassword, CancellationToken ct)
+    {
         _logger.LogInformation("Seeding dev data…");
 
         var org = new Organization
@@ -129,5 +156,42 @@ public class DevSeeder
         await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Dev seed complete: 1 org, 1 owner, {CustomerCount} customers, {VehicleCount} vehicles.",
             customers.Length, vehicles.Length);
+    }
+
+    /// <summary>
+    /// Crée le compte de connexion du portail client pour la fiche démo, sans passer par
+    /// le flux d'invitation. Idempotent : ré-exécuté à chaque démarrage, y compris sur une
+    /// base déjà seedée avant l'existence du portail client.
+    /// </summary>
+    private async Task SeedClientPortalUserAsync(string clientPassword, CancellationToken ct)
+    {
+        if (await _userManager.FindByEmailAsync(ClientPortalDemoEmail) is not null)
+            return;
+
+        var customer = await _db.Customers.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(c => c.Email == ClientPortalDemoEmail && c.DeletedAt == null, ct);
+        if (customer is null)
+        {
+            _logger.LogWarning("Client portal seed skipped — no customer with email {Email}.", ClientPortalDemoEmail);
+            return;
+        }
+
+        var user = new AppUser
+        {
+            UserName = ClientPortalDemoEmail,
+            Email = ClientPortalDemoEmail,
+            EmailConfirmed = true,
+            FullName = customer.FullName,
+            UserType = UserType.Customer,
+            CustomerId = customer.Id
+        };
+        var createResult = await _userManager.CreateAsync(user, clientPassword);
+        if (!createResult.Succeeded)
+        {
+            var errors = string.Join("; ", createResult.Errors.Select(e => $"{e.Code}: {e.Description}"));
+            throw new InvalidOperationException($"Failed to create client portal user: {errors}");
+        }
+
+        _logger.LogInformation("Client portal demo user created: {Email}.", ClientPortalDemoEmail);
     }
 }
