@@ -75,6 +75,9 @@ export const queryKeys = {
     all: () => ["capabilities"] as const,
     list: () => ["capabilities", "list"] as const,
   },
+  organization: {
+    branding: () => ["organization", "branding"] as const,
+  },
   leasing: {
     all: () => ["leasing"] as const,
     byVehicle: (vehicleId: string) => ["leasing", "by-vehicle", vehicleId] as const,
