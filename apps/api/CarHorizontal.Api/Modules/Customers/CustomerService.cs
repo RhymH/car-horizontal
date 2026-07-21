@@ -49,6 +49,11 @@ public class CustomerService : ICustomerService
             query = query.Where(c => c.Status == statusEnum);
         }
 
+        if (request.ExcludeProspects)
+        {
+            query = query.Where(c => c.Status != CustomerStatus.Prospect);
+        }
+
         var total = await query.CountAsync(ct);
 
         var sortDir = string.Equals(request.SortDir, "desc", StringComparison.OrdinalIgnoreCase) ? "desc" : "asc";
