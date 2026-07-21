@@ -192,6 +192,77 @@ export interface LeadImportResult {
   rows: LeadImportRowResult[];
 }
 
+export interface LeadStatsParams {
+  from?: string;
+  to?: string;
+  source?: LeadSourceApi | "All";
+  tag?: string;
+  assignedToUserId?: string;
+}
+
+export interface LeadStatsKpis {
+  newLeads: number;
+  newLeadsPrev: number;
+  won: number;
+  wonPrev: number;
+  lost: number;
+  lostPrev: number;
+  conversionRate: number | null;
+  conversionRatePrev: number | null;
+  avgDaysToConvert: number | null;
+  avgDaysToConvertPrev: number | null;
+  interactions: number;
+  interactionsPrev: number;
+  followUpsCompleted: number;
+  followUpsCompletedPrev: number;
+  openPipeline: number;
+  overdueFollowUps: number;
+}
+
+export interface LeadStatsTimePoint {
+  period: string;
+  newLeads: number;
+  won: number;
+  lost: number;
+  interactions: number;
+}
+
+export interface LeadStatsFunnelStep {
+  stage: LeadStageApi;
+  count: number;
+}
+
+export interface LeadStatsBreakdown {
+  key: string;
+  created: number;
+  won: number;
+  lost: number;
+  open: number;
+}
+
+export interface LeadStatsUser {
+  userId: string;
+  name: string;
+  won: number;
+  open: number;
+  overdueFollowUps: number;
+  interactions: number;
+}
+
+export interface LeadStats {
+  from: string;
+  to: string;
+  granularity: "day" | "week" | "month";
+  kpis: LeadStatsKpis;
+  timeline: LeadStatsTimePoint[];
+  funnel: LeadStatsFunnelStep[];
+  bySource: LeadStatsBreakdown[];
+  byTag: LeadStatsBreakdown[];
+  byUser: LeadStatsUser[];
+  lostReasons: { reason: string; count: number }[];
+  availableTags: string[];
+}
+
 export const leadsApi = {
   async list(
     params: LeadsListParams = {},
@@ -254,6 +325,20 @@ export const leadsApi = {
       `/api/leads/follow-ups/${followUpId}/cancel`,
       {},
     );
+    return data;
+  },
+
+  async stats(
+    params: LeadStatsParams = {},
+    signal?: AbortSignal,
+  ): Promise<LeadStats> {
+    const { source, ...rest } = params;
+    const query: Record<string, unknown> = { ...rest };
+    if (source && source !== "All") query.source = source;
+    const { data } = await apiClient.get<LeadStats>("/api/leads/stats", {
+      params: query,
+      signal,
+    });
     return data;
   },
 

@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-query";
 import {
   AlarmClock,
+  BarChart3,
   GitMerge,
   Plus,
   RotateCcw,
@@ -288,6 +289,15 @@ export function CustomersListView() {
         description="Clients et prospects de votre garage"
         actions={
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/clients/stats" />}
+            >
+              <BarChart3 />
+              Statistiques
+            </Button>
             <Button
               variant="outline"
               size="sm"
