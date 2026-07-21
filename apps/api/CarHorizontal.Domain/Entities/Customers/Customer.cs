@@ -14,4 +14,18 @@ public class Customer : OrganizationEntityBase
     public DateTime AcquiredAt { get; set; } = DateTime.UtcNow;
     public CustomerStatus Status { get; set; } = CustomerStatus.Active;
     public string[] Tags { get; set; } = Array.Empty<string>();
+
+    /// <summary>
+    /// Identity key of this record in an external source (bulk import). Unique
+    /// per organization when set — re-importing the same file updates instead
+    /// of duplicating.
+    /// </summary>
+    public string? ExternalRef { get; set; }
+
+    /// <summary>
+    /// When this record was merged into another customer (duplicate
+    /// reconciliation), the surviving customer's id. The record itself is
+    /// soft-deleted.
+    /// </summary>
+    public Guid? MergedIntoCustomerId { get; set; }
 }

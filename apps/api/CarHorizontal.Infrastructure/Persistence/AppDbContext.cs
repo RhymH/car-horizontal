@@ -4,6 +4,7 @@ using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Customers;
 using CarHorizontal.Domain.Entities.Files;
 using CarHorizontal.Domain.Entities.Identity;
+using CarHorizontal.Domain.Entities.Leads;
 using CarHorizontal.Domain.Entities.Leasing;
 using CarHorizontal.Domain.Entities.Maintenance;
 using CarHorizontal.Domain.Entities.Messaging;
@@ -36,6 +37,9 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
 
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerInteraction> CustomerInteractions => Set<CustomerInteraction>();
+    public DbSet<LeadProfile> LeadProfiles => Set<LeadProfile>();
+    public DbSet<LeadFollowUp> LeadFollowUps => Set<LeadFollowUp>();
+    public DbSet<LeadImportBatch> LeadImportBatches => Set<LeadImportBatch>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<VehicleMileageReading> VehicleMileageReadings => Set<VehicleMileageReading>();
     public DbSet<VehicleProgramOverride> VehicleProgramOverrides => Set<VehicleProgramOverride>();

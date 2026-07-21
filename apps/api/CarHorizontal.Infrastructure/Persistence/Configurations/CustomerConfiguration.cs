@@ -19,6 +19,12 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.Property(c => c.Notes).HasMaxLength(2000);
         builder.Property(c => c.Status).HasConversion<int>();
         builder.Property(c => c.Tags).HasColumnType("text[]");
+        builder.Property(c => c.ExternalRef).HasMaxLength(120);
         builder.HasIndex(c => new { c.OrganizationId, c.FullName });
+        builder.HasIndex(c => new { c.OrganizationId, c.ExternalRef })
+            .IsUnique()
+            .HasFilter("\"ExternalRef\" IS NOT NULL AND \"DeletedAt\" IS NULL");
+        builder.HasIndex(c => new { c.OrganizationId, c.Phone });
+        builder.HasIndex(c => new { c.OrganizationId, c.Email });
     }
 }
