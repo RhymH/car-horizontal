@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  AlarmClock,
-  CalendarPlus,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AlarmClock, CalendarPlus, Eye } from "lucide-react";
+import { Pagination } from "@/components/ui/Pagination";
 import { RowActions } from "@/components/ui/RowActions";
 import {
   Table,
@@ -194,39 +188,15 @@ export function LeadsTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <span>
-          {total === 0
-            ? "0 prospect"
-            : `${(page - 1) * pageSize + 1}–${Math.min(
-                page * pageSize,
-                total,
-              )} sur ${total}`}
-        </span>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={() => onPageChange(page - 1)}
-            disabled={page <= 1 || loading}
-            aria-label="Page précédente"
-          >
-            <ChevronLeft />
-          </Button>
-          <span className="px-2">
-            {page} / {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={() => onPageChange(page + 1)}
-            disabled={page >= totalPages || loading}
-            aria-label="Page suivante"
-          >
-            <ChevronRight />
-          </Button>
-        </div>
-      </div>
+      <Pagination
+        page={page}
+        pageCount={totalPages}
+        onPageChange={onPageChange}
+        total={total}
+        pageSize={pageSize}
+        itemLabel="prospect"
+        disabled={loading}
+      />
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
   type SortingState,
   type Row,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/Pagination";
 import { cn } from "@/lib/utils";
 
 export interface DataTableProps<TData> {
@@ -144,33 +144,14 @@ export function DataTable<TData>({
         </Table>
       </div>
       {table.getPageCount() > 1 && (
-        <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-          <span>
-            Page {table.getState().pagination.pageIndex + 1} sur{" "}
-            {table.getPageCount()} — {table.getFilteredRowModel().rows.length}{" "}
-            ligne(s)
-          </span>
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              aria-label="Page précédente"
-            >
-              <ChevronLeft />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              aria-label="Page suivante"
-            >
-              <ChevronRight />
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          page={table.getState().pagination.pageIndex + 1}
+          pageCount={table.getPageCount()}
+          onPageChange={(p) => table.setPageIndex(p - 1)}
+          total={table.getFilteredRowModel().rows.length}
+          pageSize={table.getState().pagination.pageSize}
+          itemLabel="ligne"
+        />
       )}
     </div>
   );
