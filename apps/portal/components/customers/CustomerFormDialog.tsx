@@ -15,7 +15,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AsyncButton } from "@/components/ui/AsyncButton";
-import { customersApi, type CustomerDetail } from "@/lib/api/customers";
+import {
+  customersApi,
+  type CustomerDetail,
+  type CustomerStatusApi,
+} from "@/lib/api/customers";
 import {
   customerFormSchema,
   emptyToUndefined,
@@ -26,7 +30,7 @@ import { CustomerForm } from "@/components/customers/CustomerForm";
 import { extractApiErrorMessage } from "@/lib/api/errors";
 
 type Mode =
-  | { kind: "create" }
+  | { kind: "create"; defaultStatus?: CustomerStatusApi }
   | { kind: "edit"; customer: CustomerDetail };
 
 export interface CustomerFormDialogProps {
@@ -36,7 +40,7 @@ export interface CustomerFormDialogProps {
   onSaved?: (customer: CustomerDetail) => void;
 }
 
-function buildDefaults(): CustomerFormValues {
+function buildDefaults(status: CustomerStatusApi = "Active"): CustomerFormValues {
   return {
     fullName: "",
     email: "",
@@ -46,7 +50,7 @@ function buildDefaults(): CustomerFormValues {
     postalCode: "",
     notes: "",
     acquiredAt: new Date().toISOString().slice(0, 10),
-    status: "Active",
+    status,
     tags: [],
   };
 }
@@ -84,7 +88,9 @@ export function CustomerFormDialog({
 
   useEffect(() => {
     if (!open) return;
-    form.reset(isEdit ? toFormValues(mode.customer) : buildDefaults());
+    form.reset(
+      isEdit ? toFormValues(mode.customer) : buildDefaults(mode.defaultStatus),
+    );
   }, [open, isEdit, mode, form]);
 
   const mutation = useMutation({
@@ -135,12 +141,18 @@ export function CustomerFormDialog({
       <DialogContent className="sm:max-w-150">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Modifier le client" : "Nouveau client"}
+            {isEdit
+              ? "Modifier le client"
+              : mode.defaultStatus === "Prospect"
+                ? "Nouveau prospect"
+                : "Nouveau client"}
           </DialogTitle>
           <DialogDescription>
             {isEdit
               ? "Mettez à jour les informations de ce client."
-              : "Ajoutez un nouveau client à votre garage."}
+              : mode.defaultStatus === "Prospect"
+                ? "Ajoutez un prospect à suivre dans votre pipeline."
+                : "Ajoutez un nouveau client à votre garage."}
           </DialogDescription>
         </DialogHeader>
         <form

@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 
-export type CustomerStatusApi = "Active" | "Inactive" | "Lost";
+export type CustomerStatusApi = "Active" | "Inactive" | "Lost" | "Prospect";
 export type InteractionTypeApi = "Call" | "Visit" | "Sms" | "Email" | "Note";
 
 export interface CustomerListItem {
@@ -63,6 +63,7 @@ export interface CustomerDetail {
 export interface CustomersListParams {
   search?: string;
   status?: CustomerStatusApi | "All";
+  excludeProspects?: boolean;
   page?: number;
   pageSize?: number;
   sortBy?: string;

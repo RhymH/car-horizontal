@@ -25,6 +25,7 @@ import { CustomerFormDialog } from "@/components/customers/CustomerFormDialog";
 import { AddInteractionDialog } from "@/components/customers/AddInteractionDialog";
 import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
 import { CustomerTimelineTab } from "@/components/customers/CustomerTimelineTab";
+import { CustomerLeadTab } from "@/components/leads/CustomerLeadTab";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "2-digit",
@@ -101,9 +102,12 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
         onAddVehicle={() => setAddVehicleOpen(true)}
       />
 
-      <Tabs defaultValue="overview">
+      <Tabs
+        defaultValue={customer.vehicles.length === 0 ? "prospect" : "overview"}
+      >
         <TabsList>
           <TabsTrigger value="overview">Aperçu</TabsTrigger>
+          <TabsTrigger value="prospect">Gestion prospect</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-6">
@@ -176,6 +180,12 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
               />
             </div>
           </div>
+        </TabsContent>
+        <TabsContent value="prospect">
+          <CustomerLeadTab
+            customerId={customer.id}
+            onAddInteraction={() => setInteractionOpen(true)}
+          />
         </TabsContent>
         <TabsContent value="timeline">
           <SectionCard

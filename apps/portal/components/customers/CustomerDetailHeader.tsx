@@ -10,10 +10,14 @@ import {
 } from "@/lib/schemas/customer";
 import type { CustomerDetail } from "@/lib/api/customers";
 
-const STATUS_TONE: Record<CustomerStatus, "success" | "neutral" | "danger"> = {
+const STATUS_TONE: Record<
+  CustomerStatus,
+  "success" | "neutral" | "danger" | "info"
+> = {
   Active: "success",
   Inactive: "neutral",
   Lost: "danger",
+  Prospect: "info",
 };
 
 export interface CustomerDetailHeaderProps {

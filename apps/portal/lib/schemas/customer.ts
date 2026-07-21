@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const customerStatuses = ["Active", "Inactive", "Lost"] as const;
+export const customerStatuses = ["Active", "Inactive", "Lost", "Prospect"] as const;
 export type CustomerStatus = (typeof customerStatuses)[number];
 
 // Tolerant phone matcher: 6–15 digits, optional leading + or 00,
@@ -54,6 +54,7 @@ export const customerStatusLabels: Record<CustomerStatus, string> = {
   Active: "Actif",
   Inactive: "Inactif",
   Lost: "Perdu",
+  Prospect: "Prospect",
 };
 
 export function emptyToUndefined(value: string | undefined): string | undefined {

@@ -24,11 +24,12 @@ import type { CustomerListItem } from "@/lib/api/customers";
 
 const STATUS_TONE: Record<
   CustomerStatus,
-  "success" | "neutral" | "danger"
+  "success" | "neutral" | "danger" | "info"
 > = {
   Active: "success",
   Inactive: "neutral",
   Lost: "danger",
+  Prospect: "info",
 };
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
