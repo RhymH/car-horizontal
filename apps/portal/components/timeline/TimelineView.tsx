@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CustomerCombobox } from "@/components/vehicles/CustomerCombobox";
 import { VehicleCombobox } from "@/components/timeline/VehicleCombobox";
 import { TimelineList } from "@/components/timeline/TimelineList";
@@ -225,23 +226,15 @@ export function TimelineView() {
 
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-card/50 p-3">
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex rounded-md border border-border bg-background p-0.5">
-            {(Object.keys(RANGE_LABELS) as RangePreset[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRange(r)}
-                className={cn(
-                  "rounded px-2.5 py-1 text-xs transition-colors",
-                  range === r
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-accent",
-                )}
-              >
-                {RANGE_LABELS[r]}
-              </button>
-            ))}
-          </div>
+          <Tabs value={range} onValueChange={(v) => v && setRange(v as RangePreset)}>
+            <TabsList size="sm">
+              {(Object.keys(RANGE_LABELS) as RangePreset[]).map((r) => (
+                <TabsTrigger key={r} value={r}>
+                  {RANGE_LABELS[r]}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
           <Select
             items={STATUS_ITEMS}
@@ -283,34 +276,22 @@ export function TimelineView() {
             </SelectContent>
           </Select>
 
-          <div className="ml-auto inline-flex rounded-md border border-border bg-background p-0.5">
-            <button
-              type="button"
-              onClick={() => setView("list")}
-              className={cn(
-                "inline-flex items-center gap-1 rounded px-2.5 py-1 text-xs",
-                view === "list"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-accent",
-              )}
-            >
-              <LayoutList className="size-3.5" />
-              Liste
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("calendar")}
-              className={cn(
-                "inline-flex items-center gap-1 rounded px-2.5 py-1 text-xs",
-                view === "calendar"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-accent",
-              )}
-            >
-              <CalendarRange className="size-3.5" />
-              Calendrier
-            </button>
-          </div>
+          <Tabs
+            value={view}
+            onValueChange={(v) => v && setView(v as "list" | "calendar")}
+            className="ml-auto"
+          >
+            <TabsList size="sm">
+              <TabsTrigger value="list">
+                <LayoutList />
+                Liste
+              </TabsTrigger>
+              <TabsTrigger value="calendar">
+                <CalendarRange />
+                Calendrier
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">

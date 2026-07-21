@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { FormDialog } from "@/components/ui/FormDialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { extractApiErrorMessage } from "@/lib/api/errors";
 import { queryKeys } from "@/lib/query/keys";
 import { remindersApi, type Reminder } from "@/lib/api/reminders";
@@ -66,22 +67,15 @@ export function SnoozeReminderDialog({
         await mutation.mutateAsync({ id: reminder.id, d: days });
       }}
     >
-      <div className="flex flex-wrap gap-2">
-        {PRESETS.map((d) => (
-          <button
-            key={d}
-            type="button"
-            className={`rounded-md border px-3 py-1 text-sm transition-colors ${
-              days === d
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border hover:bg-accent"
-            }`}
-            onClick={() => setDays(d)}
-          >
-            +{d} j
-          </button>
-        ))}
-      </div>
+      <Tabs value={String(days)} onValueChange={(v) => v && setDays(Number(v))}>
+        <TabsList size="sm" aria-label="Report rapide">
+          {PRESETS.map((d) => (
+            <TabsTrigger key={d} value={String(d)}>
+              +{d} j
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
       <div className="space-y-1">
         <Label htmlFor="snooze-days">Jours</Label>
         <Input

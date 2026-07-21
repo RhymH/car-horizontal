@@ -102,11 +102,11 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
       />
 
       <Tabs defaultValue="overview">
-        <TabsList variant="line">
+        <TabsList>
           <TabsTrigger value="overview">Aperçu</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" className="mt-4 space-y-6">
+        <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-4 lg:grid-cols-3">
             <SectionCard title="Informations" className="lg:col-span-1">
               <dl className="space-y-3 text-sm">
@@ -177,7 +177,7 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
             </div>
           </div>
         </TabsContent>
-        <TabsContent value="timeline" className="mt-4">
+        <TabsContent value="timeline">
           <SectionCard
             title="Timeline"
             description="Événements à venir et passés liés à ce client."

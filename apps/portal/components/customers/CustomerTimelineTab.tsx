@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TimelineList } from "@/components/timeline/TimelineList";
 import { TimelineEventDialog } from "@/components/timeline/TimelineEventDialog";
 import { SnoozeTimelineDialog } from "@/components/timeline/SnoozeTimelineDialog";
@@ -21,7 +22,6 @@ import {
 } from "@/lib/api/timeline";
 import { remindersApi } from "@/lib/api/reminders";
 import type { TimelineEventStatusApi } from "@/lib/api/vehicles";
-import { cn } from "@/lib/utils";
 
 type StatusPreset = "all" | "upcoming" | "overdue" | "done";
 
@@ -118,23 +118,18 @@ export function CustomerTimelineTab({ customerId }: { customerId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="inline-flex w-fit rounded-md border border-border bg-background p-0.5">
-        {(Object.keys(STATUS_LABELS) as StatusPreset[]).map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setStatusFilter(s)}
-            className={cn(
-              "rounded px-2.5 py-1 text-xs transition-colors",
-              statusFilter === s
-                ? "bg-primary text-primary-foreground"
-                : "hover:bg-accent",
-            )}
-          >
-            {STATUS_LABELS[s]}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={statusFilter}
+        onValueChange={(v) => v && setStatusFilter(v as StatusPreset)}
+      >
+        <TabsList size="sm">
+          {(Object.keys(STATUS_LABELS) as StatusPreset[]).map((s) => (
+            <TabsTrigger key={s} value={s}>
+              {STATUS_LABELS[s]}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       <TimelineList
         events={events}

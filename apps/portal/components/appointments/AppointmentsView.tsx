@@ -193,11 +193,11 @@ export function AppointmentsView() {
         >
           <TabsList>
             <TabsTrigger value="calendar">
-              <CalendarDays className="size-4" />
+              <CalendarDays />
               Calendrier
             </TabsTrigger>
             <TabsTrigger value="list">
-              <List className="size-4" />
+              <List />
               Liste
             </TabsTrigger>
           </TabsList>

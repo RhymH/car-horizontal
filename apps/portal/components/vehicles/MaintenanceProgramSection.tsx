@@ -4,7 +4,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Sparkles } from "lucide-react";
 import { SectionCard } from "@/components/ui/SectionCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsBadge,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { ProgramItemCard } from "@/components/vehicles/ProgramItemCard";
 import {
   vehiclesApi,
@@ -98,13 +104,20 @@ export function MaintenanceProgramSection({
         </p>
       ) : (
         <>
-          <Tabs value={tab} onValueChange={setTab} className="space-y-3">
+          <Tabs value={tab} onValueChange={setTab}>
             <TabsList>
               <TabsTrigger value="upcoming">
-                À faire bientôt ({upcoming.length})
+                À faire bientôt
+                <TabsBadge>{upcoming.length}</TabsBadge>
               </TabsTrigger>
-              <TabsTrigger value="all">Tout le programme ({items.length})</TabsTrigger>
-              <TabsTrigger value="history">Historique ({done.length})</TabsTrigger>
+              <TabsTrigger value="all">
+                Tout le programme
+                <TabsBadge>{items.length}</TabsBadge>
+              </TabsTrigger>
+              <TabsTrigger value="history">
+                Historique
+                <TabsBadge>{done.length}</TabsBadge>
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="upcoming" className="space-y-2">
               {upcoming.length === 0 ? (

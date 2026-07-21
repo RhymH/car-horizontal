@@ -6,9 +6,12 @@ import { toast } from "sonner";
 import { FormDialog } from "@/components/ui/FormDialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { extractApiErrorMessage } from "@/lib/api/errors";
 import { queryKeys } from "@/lib/query/keys";
 import { timelineApi } from "@/lib/api/timeline";
+
+const PRESETS = [3, 7, 14, 30];
 
 export interface SnoozeTimelineDialogProps {
   open: boolean;
@@ -71,6 +74,15 @@ export function SnoozeTimelineDialog({
       onSubmit={submit}
       submitLabel="Reporter"
     >
+      <Tabs value={String(days)} onValueChange={(v) => v && setDays(Number(v))}>
+        <TabsList size="sm" aria-label="Report rapide">
+          {PRESETS.map((d) => (
+            <TabsTrigger key={d} value={String(d)}>
+              +{d} j
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
       <div className="space-y-1">
         <Label htmlFor="snooze-days">Nombre de jours</Label>
         <Input
@@ -81,18 +93,6 @@ export function SnoozeTimelineDialog({
           value={days}
           onChange={(e) => setDays(Number(e.target.value))}
         />
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {[3, 7, 14, 30].map((d) => (
-          <button
-            key={d}
-            type="button"
-            onClick={() => setDays(d)}
-            className="rounded-md border border-border bg-background px-2.5 py-1 text-xs hover:bg-accent"
-          >
-            +{d} j
-          </button>
-        ))}
       </div>
     </FormDialog>
   );
