@@ -15,6 +15,24 @@ public class PortalController : ControllerBase
 
     public PortalController(IPortalService service) => _service = service;
 
+    /// <summary>Marque blanche du garage du client connecté (theming du portail).</summary>
+    [HttpGet("branding")]
+    public async Task<ActionResult<PortalBrandingDto>> Branding(CancellationToken ct)
+        => Ok(await _service.GetBrandingAsync(ct));
+
+    /// <summary>
+    /// Marque blanche par slug de garage, accessible sans authentification pour
+    /// thémer les écrans de connexion et d'invitation. Ne renvoie que des
+    /// données d'affichage publiques.
+    /// </summary>
+    [HttpGet("branding/{slug}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<PortalBrandingDto>> BrandingBySlug(string slug, CancellationToken ct)
+    {
+        var branding = await _service.GetBrandingBySlugAsync(slug, ct);
+        return branding is null ? NotFound() : Ok(branding);
+    }
+
     /// <summary>Profil du client connecté.</summary>
     [HttpGet("me")]
     public async Task<ActionResult<PortalProfileDto>> Me(CancellationToken ct)

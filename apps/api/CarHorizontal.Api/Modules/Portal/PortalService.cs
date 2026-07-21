@@ -50,6 +50,44 @@ public class PortalService : IPortalService
         };
     }
 
+    public async Task<PortalBrandingDto> GetBrandingAsync(CancellationToken ct = default)
+    {
+        var customerId = RequireCustomer();
+
+        var orgId = await _db.Customers.AsNoTracking()
+            .Where(c => c.Id == customerId)
+            .Select(c => (Guid?)c.OrganizationId)
+            .FirstOrDefaultAsync(ct)
+            ?? throw new KeyNotFoundException("Fiche client introuvable.");
+
+        var org = await _db.Organizations.AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Id == orgId, ct)
+            ?? throw new KeyNotFoundException("Garage introuvable.");
+
+        return ToBrandingDto(org);
+    }
+
+    public async Task<PortalBrandingDto?> GetBrandingBySlugAsync(string slug, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(slug)) return null;
+
+        var org = await _db.Organizations.AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Slug == slug.Trim().ToLowerInvariant(), ct);
+
+        return org is null ? null : ToBrandingDto(org);
+    }
+
+    private static PortalBrandingDto ToBrandingDto(Domain.Entities.Organizations.Organization org) => new()
+    {
+        GarageName = org.Name,
+        Slug = org.Slug,
+        PrimaryColor = org.BrandPrimaryColor,
+        LogoUrl = org.BrandLogoUrl,
+        CoverImageUrl = org.BrandCoverImageUrl,
+        Tagline = org.BrandTagline,
+        ContactPhone = org.ContactPhone
+    };
+
     public async Task<List<PortalVehicleDto>> GetVehiclesAsync(CancellationToken ct = default)
     {
         var customerId = RequireCustomer();

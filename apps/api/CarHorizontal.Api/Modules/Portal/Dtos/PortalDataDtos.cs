@@ -10,6 +10,21 @@ public class PortalProfileDto
     public string? City { get; set; }
 }
 
+/// <summary>
+/// Identité marque blanche du garage, consommée par le portail client pour
+/// se thémer (couleur d'accent, logo, image d'ambiance, signature, contact).
+/// </summary>
+public class PortalBrandingDto
+{
+    public string GarageName { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
+    public string? PrimaryColor { get; set; }
+    public string? LogoUrl { get; set; }
+    public string? CoverImageUrl { get; set; }
+    public string? Tagline { get; set; }
+    public string? ContactPhone { get; set; }
+}
+
 /// <summary>Échéance à venir d'un véhicule (jalon timeline).</summary>
 public class PortalVehicleEventDto
 {
