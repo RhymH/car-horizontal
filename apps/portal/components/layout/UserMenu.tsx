@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuLinkItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -53,14 +54,14 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link href="/settings/profile" />}>
+        <DropdownMenuLinkItem render={<Link href="/settings/profile" />}>
           <UserCircle />
           Profil
-        </DropdownMenuItem>
-        <DropdownMenuItem render={<Link href="/settings" />}>
+        </DropdownMenuLinkItem>
+        <DropdownMenuLinkItem render={<Link href="/settings" />}>
           <Settings />
           Paramètres
-        </DropdownMenuItem>
+        </DropdownMenuLinkItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={() => void logout()}>
           <LogOut />

@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuGroupLabel,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -34,24 +35,26 @@ export function QuickActions() {
           }
         />
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Créer</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => setCustomerOpen(true)}>
-            <UserPlus />
-            Nouveau client
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setVehicleOpen(true)}>
-            <Car />
-            Nouveau véhicule
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setReminderOpen(true)}>
-            <Bell />
-            Rappel manuel
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => router.push("/appointments")}>
-            <CalendarPlus />
-            Rendez-vous
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuGroupLabel>Créer</DropdownMenuGroupLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setCustomerOpen(true)}>
+              <UserPlus />
+              Nouveau client
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setVehicleOpen(true)}>
+              <Car />
+              Nouveau véhicule
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setReminderOpen(true)}>
+              <Bell />
+              Rappel manuel
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/appointments")}>
+              <CalendarPlus />
+              Rendez-vous
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
 
