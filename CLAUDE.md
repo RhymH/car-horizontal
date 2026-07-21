@@ -168,6 +168,12 @@ purges.
   toast info en cours).
 - Tables : `<DataTable>` générique basé sur `@tanstack/react-table` + shadcn.
 - Drawer (sheet) pour lecture détaillée, modale (dialog) pour édition.
+- **Sélecteurs / onglets / filtres segmentés : toujours `components/ui/tabs.tsx`.**
+  Jamais de `<button>` maison stylé en onglet. Deux tailles seulement :
+  `<TabsList>` (défaut) pour la navigation principale d'une page ou d'une
+  section, `<TabsList size="sm">` pour les filtres secondaires (barres de
+  filtres, dialogs). Compteurs via `<TabsBadge>`, pas de `(12)` dans le label.
+  Pas de `className` d'espacement sur `<Tabs>` : la racine gère déjà le `gap`.
 - Skeletons pendant chargement, EmptyState avec CTA quand collection vide.
 - API client : un module par feature dans `lib/api/<entity>.ts`,
   TanStack Query pour le cache.

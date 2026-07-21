@@ -156,7 +156,12 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-lg! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 data-selected:bg-muted data-selected:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:*:[svg]:text-foreground",
+        "group/command-item relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-lg! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // Surbrillance de l'élément actif (clavier ou survol) : fond bleu clair +
+        // bordure inset contrastée, pour rester lisible en basse vision et ne pas
+        // reposer uniquement sur une nuance de gris.
+        "data-selected:bg-blue-50 data-selected:text-blue-950 data-selected:inset-ring-2 data-selected:inset-ring-blue-600 data-selected:*:[svg]:text-blue-700",
+        "dark:data-selected:bg-blue-950 dark:data-selected:text-blue-50 dark:data-selected:inset-ring-blue-400 dark:data-selected:*:[svg]:text-blue-300",
         className
       )}
       {...props}

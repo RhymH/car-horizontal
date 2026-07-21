@@ -59,9 +59,10 @@
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.96 0.01 250);
   --secondary-foreground: oklch(0.25 0.04 250);
-  --muted: oklch(0.97 0.005 250);
+  --muted: oklch(0.965 0.005 250);
   --muted-foreground: oklch(0.5 0.02 250);
-  --accent: oklch(0.95 0.03 245);
+  /* Assez contrasté pour que le survol se voie sur fond blanc. */
+  --accent: oklch(0.935 0.028 245);
   --accent-foreground: oklch(0.3 0.08 250);
   --destructive: oklch(0.6 0.22 27);
   --border: oklch(0.92 0.01 250);
@@ -96,7 +97,7 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --accent: oklch(0.32 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
@@ -126,5 +127,22 @@
   }
   html {
     @apply font-sans;
+  }
+
+  /*
+   * Tailwind v4 remet `cursor: default` sur les <button>. On restaure le
+   * curseur attendu par les utilisateurs, y compris sur les boutons bruts
+   * qui ne passent pas par <Button>.
+   */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary {
+    cursor: pointer;
+  }
+
+  :disabled,
+  [aria-disabled="true"],
+  [data-disabled] {
+    cursor: not-allowed;
   }
 }
