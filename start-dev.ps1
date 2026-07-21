@@ -1,6 +1,6 @@
-# Start CarHorizontal in dev mode (PostgreSQL + API + Portal)
+# Start CarHorizontal in dev mode (PostgreSQL + API + Portal + Client portal)
 # Requires: dotnet SDK, node/npm, Docker Desktop
-# Opens separate console windows for API and portal.
+# Opens separate console windows for API, portal and client portal.
 #
 # Usage:
 #   ./start-dev.ps1
@@ -44,6 +44,11 @@ Write-Host "Starting portal (next dev) in new console..." -ForegroundColor Yello
 $Portal = "$Root\apps\portal"
 Start-Process cmd -ArgumentList "/k", "title CarHorizontal Portal && cd /d `"$Portal`" && npm run dev"
 
+# -- Start Next.js client portal ---------------------------------------
+Write-Host "Starting client portal (next dev) in new console..." -ForegroundColor Yellow
+$Client = "$Root\apps\client"
+Start-Process cmd -ArgumentList "/k", "title CarHorizontal Client && cd /d `"$Client`" && npm run dev"
+
 # -- Summary -----------------------------------------------------------
 Write-Host ""
 Write-Host "=== CarHorizontal Dev Mode ===" -ForegroundColor Green
@@ -52,8 +57,9 @@ Write-Host "  API:      $ApiUrl" -ForegroundColor White
 Write-Host "  Swagger:  $ApiUrl/swagger" -ForegroundColor White
 Write-Host "  Hangfire: $ApiUrl/hangfire" -ForegroundColor White
 Write-Host "  Portal:   http://localhost:3000" -ForegroundColor White
+Write-Host "  Client:   http://localhost:3001" -ForegroundColor White
 Write-Host "==============================" -ForegroundColor Green
 Write-Host ""
-Write-Host "Two console windows have been opened for API and portal." -ForegroundColor Yellow
+Write-Host "Three console windows have been opened for API, portal and client." -ForegroundColor Yellow
 Write-Host "Close them manually to stop the services." -ForegroundColor Yellow
 Write-Host "PostgreSQL keeps running in Docker (use 'docker-compose -f apps/api/docker-compose.yml down' to stop it)." -ForegroundColor Yellow

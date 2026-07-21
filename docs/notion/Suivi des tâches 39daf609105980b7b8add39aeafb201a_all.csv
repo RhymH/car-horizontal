@@ -1,0 +1,17 @@
+﻿Nom de la tâche,Date d’échéance,Description,Niveau d’effort,Personne assignée,Priorité,Type de tâche,État
+[FEATURE] - Immatriculation du véhicule,,"Lorsqu’on tape l’immatriculation, rajouter les tirets automatiquement",Faible,,Faible,Fonctionnalité,Pas commencé
+[TEST] - Alertes et notifications,,"Recenser les alertes présentes dans l’application (fin de leasing, entretien à venir, …)",Faible,,Moyenne,TEST,Pas commencé
+[TEST] - Alertes et notifications test,,"Tester les alertes de l’applications, déclencher une fin de leasing",Moyenne,,Moyenne,TEST,Pas commencé
+[TASK] - modules timeline et notification,,"Vérifier la différence entre le module timeLine et le module de notifications, voir pour simplifier l’un des deux",Faible,,Élevée,Tâche,Pas commencé
+[FEATURE] - échéance d’entretien,,"Actuellement une vidange est estimée selon le kilmétrage, ca serait plutôt à une date anniversaire chaque année",Faible,,Faible,Fonctionnalité,Pas commencé
+[FEATURE] - Evènements manuels,,"Dans évènement manuel, rajouter dans la liste de sélection des véhicules les véhicules déjà enregistrés dans l’outil",Faible,,Faible,Fonctionnalité,Pas commencé
+[TASK] - Import de données,,Proposer un format de fichier pour importer des fiches de véhicules clients déjà existants (réfléchir sur la proposition),Moyenne,,Faible,Tâche,Pas commencé
+[FEATURE] - Notifications,,"Dans les notifications, au lieu de la planification d’un rendez-vous, il faudrait programmer un rappel pour le client",Faible,,Moyenne,Fonctionnalité,Pas commencé
+[TASK] - Entretien véhicules,,"Vérifier la pertinence des entretiens nécessaires et pré enregistrés dans l’application (les véhicules élec, diesels, essences n’ont pas les mêmes types ou échéances d’entretien)",Moyenne,,Moyenne,Tâche,Pas commencé
+[FEATURE] - Enregistrement véhicule,,Retravailler le pré-remplissage des informations avec le VIN,Faible,,Faible,Fonctionnalité,Pas commencé
+[FEATURE] - plugin client - Infos voiture,,"informations sur la voiture (infos sur chaque voyant, que faire dans chaque cas, aide précise pour le client sur son environnement en ligne)",Moyenne,,Moyenne,Fonctionnalité,Pas commencé
+[FEATURE] - toggle notification côté client,,le client devrait avoir quelques toggles pour activer / désactiver les notifications ou offres commerciales mails et tel,Faible,,Faible,Fonctionnalité,Pas commencé
+[FEATURE] - LOA - outils LOA,,dans un LOA il est toujours possible de revoir la limite kilométrique à la hausse et ca devrait être simplifié et informé au client,Faible,,Moyenne,Fonctionnalité,Pas commencé
+[FEATURE] - entretien véhicule - échéances pneus,,"rajouter des échéances pour la pose de pneus hiver ou été, ca permettra de programmer en avance ces poses ",Faible,,Moyenne,Fonctionnalité,Pas commencé
+[FEATURE] - CHATBOT,,"côté client, le chatbot est là pour aider à la prise de rendez-vous sur tous les terrains (entretiens, pneus, fin de leasing, essai de véhicule, etc) et côté commercial, les notifications peuvent être labellisés chatbot pour préciser que le client a utilisé cet outil et la notification peut être concise et aller directement au point.",Élevé,,Moyenne,Fonctionnalité,Pas commencé
+,,,,,,,Pas commencé
