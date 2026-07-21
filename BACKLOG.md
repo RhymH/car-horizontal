@@ -12,9 +12,9 @@
 - **Portail client** (`apps/client`, Next 16, port **3001**) : comptes client **par invitation du garage** (`AppUser.UserType=Customer`+`CustomerId`), auth email+mdp (`/api/portal/auth/*`), policies `StaffOnly`/`CustomerOnly`, endpoints `/api/portal/me` + `/api/portal/vehicles`, dashboard (profil + véhicules + échéances), **saisie kilométrage**, **bannière d'alerte dépassement plafond km leasing**.
 
 ## Comment lancer
-1. Docker Desktop lancé, puis `./start-dev.ps1` (Postgres + API :5080 + portal :3000).
-2. Portail client : `cd apps/client && npm install && npm run dev` → http://localhost:3001.
-3. Comptes de test : **staff** `demo@carhorizontal.fr` / `DemoUser!2026` ; **client** `alice@example.com` / `ClientPass!2026`.
+1. Docker Desktop lancé, puis `./start-dev.ps1` (Postgres + API :5080 + portal :3000 + client :3001).
+2. Le premier lancement de `apps/client` demande un `npm install`.
+3. Comptes de test (créés par le `DevSeeder`) : **staff** `demo@carhorizontal.fr` / `DemoUser!2026` ; **client** `alice@example.com` / `ClientPass!2026`.
 - API Swagger : http://localhost:5080/swagger · Jobs : /hangfire.
 
 ---
