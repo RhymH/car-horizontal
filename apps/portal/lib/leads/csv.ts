@@ -10,6 +10,30 @@ export interface ParsedCsv {
   delimiter: string;
 }
 
+/**
+ * Read a CSV File as text, tolerant of the encodings garages actually export.
+ * Browsers' File.text() assumes UTF-8, so a Windows-1252 file (French Excel's
+ * default « CSV ») turns accents into  replacement characters. We honour a
+ * UTF-16/UTF-8 BOM, try a strict UTF-8 decode, and fall back to Windows-1252
+ * only when the bytes are not valid UTF-8 (i.e. a legacy single-byte export).
+ */
+export async function readCsvText(file: File): Promise<string> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+
+  if (bytes[0] === 0xff && bytes[1] === 0xfe)
+    return new TextDecoder("utf-16le").decode(bytes);
+  if (bytes[0] === 0xfe && bytes[1] === 0xff)
+    return new TextDecoder("utf-16be").decode(bytes);
+
+  try {
+    // Strict UTF-8: throws on invalid sequences (a Windows-1252 accent byte).
+    // A leading UTF-8 BOM is stripped here and again by parseCsv.
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return new TextDecoder("windows-1252").decode(bytes);
+  }
+}
+
 export function detectDelimiter(headerLine: string): string {
   const candidates = [";", ",", "\t"];
   let best = ";";

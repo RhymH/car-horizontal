@@ -53,6 +53,7 @@ import {
   IMPORT_FIELD_LABELS,
   IMPORT_FIELDS,
   parseCsv,
+  readCsvText,
   type ImportField,
   type ParsedCsv,
 } from "@/lib/leads/csv";
@@ -95,7 +96,7 @@ export function LeadImportView() {
 
   const readFile = async (file: File) => {
     try {
-      const text = await file.text();
+      const text = await readCsvText(file);
       const parsed = parseCsv(text);
       if (parsed.headers.length === 0 || parsed.rows.length === 0) {
         toast.error("Fichier vide ou illisible.");
