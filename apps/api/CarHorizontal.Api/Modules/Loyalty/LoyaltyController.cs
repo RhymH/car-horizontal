@@ -24,6 +24,13 @@ public class LoyaltyController : ControllerBase
     public async Task<ActionResult<LoyaltyCohortsResponseDto>> Cohorts(CancellationToken ct)
         => Ok(await _service.GetCohortsAsync(ct));
 
+    [HttpGet("retention-curve")]
+    public async Task<ActionResult<LoyaltyRetentionCurveResponseDto>> RetentionCurve(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken ct)
+        => Ok(await _service.GetRetentionCurveAsync(from, to, ct));
+
     [HttpGet("at-risk-customers")]
     public async Task<ActionResult<LoyaltyCustomerListResponseDto>> AtRisk(
         [FromQuery] int? limit,

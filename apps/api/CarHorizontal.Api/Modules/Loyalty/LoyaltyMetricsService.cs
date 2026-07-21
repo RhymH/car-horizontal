@@ -247,6 +247,135 @@ public class LoyaltyMetricsService : ILoyaltyMetricsService
         };
     }
 
+    public async Task<LoyaltyRetentionCurveResponseDto> GetRetentionCurveAsync(
+        DateTime? fromParam,
+        DateTime? toParam,
+        CancellationToken ct = default)
+    {
+        RequireOrganizationId();
+        var now = DateTime.UtcNow;
+
+        var to = (toParam?.ToUniversalTime() ?? now);
+        if (to > now) to = now;
+        var from = fromParam?.ToUniversalTime() ?? to.AddMonths(-12);
+        if (from >= to) from = to.AddMonths(-12);
+
+        // Short windows read best day-by-day; long ones by month.
+        var granularity = (to - from).TotalDays <= 62 ? "day" : "month";
+
+        var customers = await _db.Customers.AsNoTracking()
+            .Select(c => new { c.Id, c.AcquiredAt })
+            .ToListAsync(ct);
+
+        var contacts = await GetAllContactsAsync(ct);
+        var contactsByCustomer = contacts
+            .GroupBy(c => c.CustomerId)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.OccurredAt).OrderBy(x => x).ToList());
+
+        // Build the X axis. Each bucket is evaluated at its end instant (clamped to now).
+        var buckets = new List<(DateTime Start, DateTime Eval, string Label)>();
+        if (granularity == "day")
+        {
+            for (var d = from.Date; d <= to.Date; d = d.AddDays(1))
+            {
+                var eval = d.AddDays(1).AddTicks(-1);
+                if (eval > now) eval = now;
+                buckets.Add((
+                    DateTime.SpecifyKind(d, DateTimeKind.Utc),
+                    DateTime.SpecifyKind(eval, DateTimeKind.Utc),
+                    d.ToString("d MMM", FrenchCulture)));
+            }
+        }
+        else
+        {
+            var first = new DateTime(from.Year, from.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var last = new DateTime(to.Year, to.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            for (var m = first; m <= last; m = m.AddMonths(1))
+            {
+                var eval = m.AddMonths(1).AddTicks(-1);
+                if (eval > now) eval = now;
+                buckets.Add((m, DateTime.SpecifyKind(eval, DateTimeKind.Utc), m.ToString("MMM yy", FrenchCulture)));
+            }
+        }
+
+        if (buckets.Count == 0)
+        {
+            return new LoyaltyRetentionCurveResponseDto
+            {
+                From = from, To = to, Granularity = granularity, ChurnHorizonDays = LostThresholdDays
+            };
+        }
+
+        // Clients acquired before the window collapse into a single "earlier" base band.
+        var firstBucketMonth = new DateTime(
+            buckets[0].Start.Year, buckets[0].Start.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        string CohortKeyOf(DateTime acquired)
+        {
+            var m = new DateTime(acquired.Year, acquired.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            return m < firstBucketMonth ? "earlier" : m.ToString("yyyy-MM", CultureInfo.InvariantCulture);
+        }
+
+        var cohortRows = new List<LoyaltyRetentionCohortDto>();
+        foreach (var group in customers.GroupBy(c => CohortKeyOf(c.AcquiredAt)))
+        {
+            var members = group.ToList();
+            var values = new int[buckets.Count];
+            for (var bi = 0; bi < buckets.Count; bi++)
+            {
+                var eval = buckets[bi].Eval;
+                var active = 0;
+                foreach (var c in members)
+                {
+                    if (c.AcquiredAt > eval) continue; // not a client yet
+                    var lastSignal = c.AcquiredAt;
+                    if (contactsByCustomer.TryGetValue(c.Id, out var ts))
+                    {
+                        for (var k = ts.Count - 1; k >= 0; k--)
+                        {
+                            if (ts[k] > eval) continue;
+                            if (ts[k] > lastSignal) lastSignal = ts[k];
+                            break;
+                        }
+                    }
+                    if ((eval - lastSignal).TotalDays <= LostThresholdDays) active++;
+                }
+                values[bi] = active;
+            }
+
+            var isEarlier = group.Key == "earlier";
+            cohortRows.Add(new LoyaltyRetentionCohortDto
+            {
+                Key = group.Key,
+                IsEarlier = isEarlier,
+                Label = isEarlier
+                    ? "Clients antérieurs"
+                    : DateTime.ParseExact(group.Key, "yyyy-MM", CultureInfo.InvariantCulture)
+                        .ToString("MMM yyyy", FrenchCulture),
+                CohortSize = members.Count,
+                Values = values.ToList()
+            });
+        }
+
+        // Bottom → top: established base first, then cohorts oldest → newest.
+        cohortRows = cohortRows
+            .OrderBy(r => r.IsEarlier ? 0 : 1)
+            .ThenBy(r => r.Key, StringComparer.Ordinal)
+            .ToList();
+
+        return new LoyaltyRetentionCurveResponseDto
+        {
+            From = from,
+            To = to,
+            Granularity = granularity,
+            ChurnHorizonDays = LostThresholdDays,
+            Buckets = buckets
+                .Select(b => new LoyaltyRetentionBucketDto { Period = b.Start, Label = b.Label })
+                .ToList(),
+            Cohorts = cohortRows
+        };
+    }
+
     private record CustomerRow(
         Guid Id,
         string FullName,
