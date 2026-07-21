@@ -28,5 +28,8 @@ public enum NotificationKind
     LeaseEnding = 6,
 
     /// <summary>Projected mileage will exceed the leasing contractual cap.</summary>
-    MileageCapRisk = 7
+    MileageCapRisk = 7,
+
+    /// <summary>A scheduled lead follow-up (relance prospect) is overdue.</summary>
+    LeadFollowUpOverdue = 8
 }

@@ -1,6 +1,7 @@
 using System.Globalization;
 using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Customers;
+using CarHorizontal.Domain.Entities.Leads;
 using CarHorizontal.Domain.Entities.Notifications;
 using CarHorizontal.Domain.Entities.Timeline;
 using CarHorizontal.Domain.Notifications;
@@ -49,6 +50,7 @@ public class NotificationGenerator : INotificationGenerator
 
         created += await GenerateFromTimelineAsync(organizationId, now, existingKeys, ct);
         created += await GenerateInactiveCustomersAsync(organizationId, now, existingKeys, ct);
+        created += await GenerateOverdueLeadFollowUpsAsync(organizationId, now, existingKeys, ct);
 
         if (created > 0) await _db.SaveChangesAsync(ct);
         return created;
@@ -209,6 +211,77 @@ public class NotificationGenerator : INotificationGenerator
                 Message = $"{c.FullName} n'a plus eu d'activité depuis environ {months} mois. " +
                           "Un petit message de prise de nouvelles peut le faire revenir à l'atelier.",
                 DueAt = null,
+                DedupKey = key,
+                Status = NotificationStatus.New
+            });
+            created++;
+        }
+
+        return created;
+    }
+
+    private async Task<int> GenerateOverdueLeadFollowUpsAsync(
+        Guid? organizationId,
+        DateTime now,
+        HashSet<string> existingKeys,
+        CancellationToken ct)
+    {
+        var query = _db.LeadFollowUps
+            .IgnoreQueryFilters()
+            .Where(f => f.DeletedAt == null
+                && f.Status == LeadFollowUpStatus.Pending
+                && f.DueAt < now);
+
+        if (organizationId is { } org)
+            query = query.Where(f => f.OrganizationId == org);
+
+        var followUps = await query
+            .Select(f => new
+            {
+                f.Id,
+                f.OrganizationId,
+                f.CustomerId,
+                f.DueAt,
+                f.Channel,
+                f.Note,
+                CustomerName = _db.Customers.IgnoreQueryFilters()
+                    .Where(c => c.Id == f.CustomerId && c.DeletedAt == null)
+                    .Select(c => c.FullName).FirstOrDefault()
+            })
+            .ToListAsync(ct);
+
+        var created = 0;
+        foreach (var f in followUps)
+        {
+            // The customer may have been merged/deleted since the follow-up was planned.
+            if (f.CustomerName is null) continue;
+
+            var key = $"lead-followup:{f.Id}";
+            if (!existingKeys.Add(key)) continue;
+
+            var channel = f.Channel switch
+            {
+                CustomerInteractionType.Call => "un appel",
+                CustomerInteractionType.Sms => "un SMS",
+                CustomerInteractionType.Email => "un email",
+                CustomerInteractionType.Visit => "une visite",
+                _ => "une relance"
+            };
+            var note = string.IsNullOrWhiteSpace(f.Note) ? "" : $" — « {f.Note} »";
+
+            _db.Notifications.Add(new Notification
+            {
+                OrganizationId = f.OrganizationId,
+                CustomerId = f.CustomerId,
+                VehicleId = null,
+                TimelineEventId = null,
+                Kind = NotificationKind.LeadFollowUpOverdue,
+                Severity = NotificationSeverity.Warning,
+                Action = NotificationAction.ViewCustomer,
+                Title = "Relance prospect en retard",
+                Message = $"{f.CustomerName} attendait {channel} depuis le {f.DueAt.ToString("d MMMM yyyy", Fr)}{note}. " +
+                          "Un prospect relancé tard est un prospect perdu.",
+                DueAt = f.DueAt,
                 DedupKey = key,
                 Status = NotificationStatus.New
             });
