@@ -130,7 +130,7 @@ export function FunnelChart({ funnel }: { funnel: LeadStatsFunnelStep[] }) {
           )} de la cohorte${stepRate}`;
         },
       },
-      grid: { left: 8, right: 56, top: 8, bottom: 8, containLabel: true },
+      grid: { left: 8, right: 76, top: 8, bottom: 8, containLabel: true },
       xAxis: {
         type: "value",
         minInterval: 1,
