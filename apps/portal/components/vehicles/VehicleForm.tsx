@@ -73,10 +73,31 @@ export function VehicleForm({
         toast.error("VIN non reconnu", { description: r.error ?? undefined });
         return;
       }
+
+      // make/model are catalog-controlled — only touch them in free-entry mode.
       if (r.make && makeEditable) setValue("make", r.make, { shouldDirty: true });
+      if (r.model && makeEditable) setValue("model", r.model, { shouldDirty: true });
       if (r.modelYear) setValue("year", r.modelYear, { shouldDirty: true });
-      const summary = [r.make, r.modelYear, r.country].filter(Boolean).join(" · ");
-      toast.success("VIN décodé", { description: summary || undefined });
+
+      // Motorisation: only fill empty fields, never clobber a catalog/user value.
+      const engine = mapFuelToEngineType(r.fuelType);
+      if (engine && !watch("engineType"))
+        setValue("engineType", engine, { shouldDirty: true });
+      const transmission = mapTransmission(r.transmissionStyle);
+      if (transmission && !watch("transmissionType"))
+        setValue("transmissionType", transmission, { shouldDirty: true });
+
+      const displacement = formatDisplacement(r.engineDisplacementL);
+      const engineLabel = [displacement && `${displacement} L`, r.fuelType]
+        .filter(Boolean)
+        .join(" ");
+      const summary = [r.make, r.model, r.modelYear, engineLabel || r.country]
+        .filter(Boolean)
+        .join(" · ");
+      toast.success(
+        r.source === "nhtsa" ? "VIN décodé (NHTSA)" : "VIN décodé",
+        { description: summary || undefined },
+      );
     } catch {
       toast.error("Décodage impossible pour le moment.");
     } finally {
@@ -222,7 +243,7 @@ export function VehicleForm({
       <Field
         label="VIN"
         error={errors.vin?.message}
-        hint="Décodez le VIN pour pré-remplir la marque et l'année."
+        hint="Décodez le VIN pour pré-remplir marque, modèle, année et motorisation."
       >
         <div className="flex gap-2">
           <Input {...register("vin")} placeholder="VF1..." className="uppercase" />
@@ -312,6 +333,38 @@ export function VehicleForm({
       </Field>
     </div>
   );
+}
+
+/** NHTSA reports displacement with excessive precision ("2.998832712") — round to 1 dp. */
+function formatDisplacement(value: string | null): string | null {
+  if (!value) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n.toFixed(1) : value;
+}
+
+/** Maps an NHTSA primary fuel type to our engine-type enum (null when unsure). */
+function mapFuelToEngineType(fuel: string | null): EngineType | null {
+  if (!fuel) return null;
+  const f = fuel.toLowerCase();
+  if (f.includes("diesel")) return "Diesel";
+  if (f.includes("electric")) return "Electric";
+  if (f.includes("lpg") || f.includes("propane") || f.includes("liquefied petroleum"))
+    return "LPG";
+  if (f.includes("gasoline") || f.includes("petrol")) return "Gasoline";
+  return null;
+}
+
+/** Maps an NHTSA transmission style to our transmission enum (null when unsure). */
+function mapTransmission(style: string | null): Transmission | null {
+  if (!style) return null;
+  const s = style.toLowerCase();
+  // Order matters: "Automated Manual" / dual-clutch read as semi-auto, not manual.
+  if (s.includes("automated") || s.includes("dual-clutch") || s.includes("dct") || s.includes("amt"))
+    return "Semi-Auto";
+  if (s.includes("manual")) return "Manual";
+  if (s.includes("automatic") || s.includes("continuously variable") || s.includes("cvt"))
+    return "Automatic";
+  return null;
 }
 
 function Field({

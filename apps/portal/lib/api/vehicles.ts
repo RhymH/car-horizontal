@@ -279,5 +279,18 @@ export interface VinDecodeResult {
   country: string | null;
   modelYear: number | null;
   wmi: string | null;
+  model: string | null;
+  fuelType: string | null;
+  bodyClass: string | null;
+  vehicleType: string | null;
+  engineDisplacementL: string | null;
+  engineCylinders: string | null;
+  transmissionStyle: string | null;
+  manufacturer: string | null;
+  plantCountry: string | null;
+  series: string | null;
+  trim: string | null;
+  /** Which decoder produced this result: "offline" or "nhtsa". */
+  source: string;
   error: string | null;
 }
