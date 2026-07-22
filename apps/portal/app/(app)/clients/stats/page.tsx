@@ -1,5 +1,7 @@
-import { LeadStatsView } from "@/components/leads/stats/LeadStatsView";
+import { redirect } from "next/navigation";
 
-export default function LeadStatsPage() {
-  return <LeadStatsView />;
+// Les statistiques prospects ont leur propre section : /prospects.
+// On garde cette route en redirection pour les anciens liens/marque-pages.
+export default function LeadStatsRedirect() {
+  redirect("/prospects");
 }

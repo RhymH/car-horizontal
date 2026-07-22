@@ -1,12 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   AlarmClock,
   ArrowDownRight,
-  ArrowLeft,
   ArrowUpRight,
   BarChart3,
   Minus,
@@ -126,15 +124,6 @@ export function LeadStatsView() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <div>
-        <Link
-          href="/clients"
-          className="-ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <ArrowLeft className="size-3.5" />
-          Retour aux clients
-        </Link>
-      </div>
       <PageHeader
         title="Statistiques prospects"
         description="Conversion, performance des campagnes et activité commerciale — comparées à la période précédente."

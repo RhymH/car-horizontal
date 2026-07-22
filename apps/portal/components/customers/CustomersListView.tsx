@@ -56,7 +56,7 @@ import { CustomerFormDialog } from "@/components/customers/CustomerFormDialog";
 import { LeadsTable } from "@/components/leads/LeadsTable";
 import { FollowUpDialog } from "@/components/leads/FollowUpDialog";
 
-type ViewTab = "all" | "clients" | "prospects";
+export type ViewTab = "all" | "clients" | "prospects";
 type StatusFilter = CustomerStatusApi | "All";
 type StageFilter = LeadStageApi | "Open";
 
@@ -81,10 +81,14 @@ const SOURCE_FILTER_ITEMS: Record<string, string> = {
   ...leadSourceLabels,
 };
 
-export function CustomersListView() {
+export function CustomersListView({
+  initialView = "all",
+}: {
+  initialView?: ViewTab;
+} = {}) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [view, setView] = useState<ViewTab>("all");
+  const [view, setView] = useState<ViewTab>(initialView);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
   const [stageFilter, setStageFilter] = useState<StageFilter>("Open");
@@ -293,7 +297,7 @@ export function CustomersListView() {
               variant="outline"
               size="sm"
               nativeButton={false}
-              render={<Link href="/clients/stats" />}
+              render={<Link href="/prospects" />}
             >
               <BarChart3 />
               Statistiques
