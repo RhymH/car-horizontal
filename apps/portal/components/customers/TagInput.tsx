@@ -44,7 +44,7 @@ export function TagInput({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-1.5 rounded-md border border-input bg-transparent px-2 py-1.5",
+        "flex flex-wrap items-center gap-1.5 rounded-md border border-input bg-field px-2 py-1.5",
         className,
       )}
     >
