@@ -59,6 +59,7 @@ export function VehicleForm({
   const [decoding, setDecoding] = useState(false);
 
   const makeEditable = !vehicleModelId || legacyMode;
+  const plateField = register("licensePlate");
 
   const handleDecodeVin = async () => {
     const vin = (watch("vin") ?? "").trim();
@@ -232,9 +233,22 @@ export function VehicleForm({
         />
       </Field>
 
-      <Field label="Immatriculation" error={errors.licensePlate?.message}>
+      <Field
+        label="Immatriculation"
+        error={errors.licensePlate?.message}
+        hint="Format français ajouté automatiquement (AB-123-CD)."
+      >
         <Input
-          {...register("licensePlate")}
+          {...plateField}
+          onBlur={(e) => {
+            plateField.onBlur(e);
+            const formatted = formatFrenchPlate(e.target.value);
+            if (formatted !== e.target.value)
+              setValue("licensePlate", formatted, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+          }}
           className="uppercase"
           placeholder="AB-123-CD"
         />
@@ -333,6 +347,19 @@ export function VehicleForm({
       </Field>
     </div>
   );
+}
+
+/**
+ * Formats a French SIV plate (2 letters, 3 digits, 2 letters) as AB-123-CD.
+ * Registration country — not the VIN's manufacture country — drives the format,
+ * and the MVP target is French garages, so we only normalise the French shape.
+ * Old-format (123 ABC 45), foreign, or partial plates are left untouched.
+ */
+function formatFrenchPlate(value: string): string {
+  const raw = value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  if (/^[A-Z]{2}[0-9]{3}[A-Z]{2}$/.test(raw))
+    return `${raw.slice(0, 2)}-${raw.slice(2, 5)}-${raw.slice(5, 7)}`;
+  return value;
 }
 
 /** NHTSA reports displacement with excessive precision ("2.998832712") — round to 1 dp. */
