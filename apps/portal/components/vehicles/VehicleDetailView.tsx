@@ -8,6 +8,15 @@ import { Loader2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import {
+  Tabs,
+  TabsBadge,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { useCapability } from "@/lib/hooks/useCapabilities";
+import { CAPABILITY_LEASING } from "@/lib/api/capabilities";
+import {
   vehiclesApi,
   type VehicleMaintenance,
   type VehicleTimelineEvent,
@@ -27,6 +36,8 @@ import { VehicleSummaryCard } from "@/components/vehicles/VehicleSummaryCard";
 import { MileageEstimateCard } from "@/components/vehicles/MileageEstimateCard";
 import { VehicleTimelineSection } from "@/components/vehicles/VehicleTimelineSection";
 import { VehicleMaintenanceSection } from "@/components/vehicles/VehicleMaintenanceSection";
+import { VehicleNotesSection } from "@/components/vehicles/VehicleNotesSection";
+import { AddVehicleNoteDialog } from "@/components/vehicles/AddVehicleNoteDialog";
 import { MaintenanceProgramSection } from "@/components/vehicles/MaintenanceProgramSection";
 import { LeasingSection } from "@/components/leasing/LeasingSection";
 import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
@@ -39,6 +50,7 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [mileageOpen, setMileageOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
   const [maintenanceDialog, setMaintenanceDialog] = useState<
     | { kind: "create" }
     | { kind: "edit"; record: MaintenanceRecord }
@@ -49,6 +61,9 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
   const [snoozeTarget, setSnoozeTarget] = useState<VehicleTimelineEvent | null>(
     null,
   );
+  const [tab, setTab] = useState("programme");
+
+  const { enabled: leasingEnabled } = useCapability(CAPABILITY_LEASING);
 
   const detail = useQuery({
     queryKey: queryKeys.vehicles.detail(vehicleId),
@@ -163,35 +178,77 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList>
+              <TabsTrigger value="programme">Programme</TabsTrigger>
+              <TabsTrigger value="timeline">
+                Timeline
+                <TabsBadge>{vehicle.timelineEvents.length}</TabsBadge>
+              </TabsTrigger>
+              <TabsTrigger value="historique">
+                Historique
+                <TabsBadge>{vehicle.maintenanceRecords.length}</TabsBadge>
+              </TabsTrigger>
+              <TabsTrigger value="notes">
+                Notes
+                <TabsBadge>{vehicle.notes.length}</TabsBadge>
+              </TabsTrigger>
+              {leasingEnabled && (
+                <TabsTrigger value="leasing">Leasing</TabsTrigger>
+              )}
+            </TabsList>
+
+            <TabsContent value="programme">
+              <MaintenanceProgramSection
+                vehicle={vehicle}
+                onMarkDone={() => setMaintenanceDialog({ kind: "create" })}
+              />
+            </TabsContent>
+
+            <TabsContent value="timeline">
+              <VehicleTimelineSection
+                events={vehicle.timelineEvents}
+                onMarkDone={(e) => completeTimelineMutation.mutate(e.id)}
+                onSnooze={(e) => setSnoozeTarget(e)}
+                onSendReminder={(e) => sendReminderMutation.mutate(e.id)}
+              />
+            </TabsContent>
+
+            <TabsContent value="historique">
+              <VehicleMaintenanceSection
+                records={vehicle.maintenanceRecords}
+                onAdd={() => setMaintenanceDialog({ kind: "create" })}
+                onEdit={(r) =>
+                  setMaintenanceDialog({
+                    kind: "edit",
+                    record: toMaintenanceRecord(r),
+                  })
+                }
+                onDelete={(r) => setMaintenanceToDelete(toMaintenanceRecord(r))}
+              />
+            </TabsContent>
+
+            <TabsContent value="notes">
+              <VehicleNotesSection
+                notes={vehicle.notes}
+                onAdd={() => setNoteOpen(true)}
+              />
+            </TabsContent>
+
+            {leasingEnabled && (
+              <TabsContent value="leasing">
+                <LeasingSection vehicleId={vehicle.id} />
+              </TabsContent>
+            )}
+          </Tabs>
+        </div>
+
         <div className="lg:col-span-1 space-y-4">
           <VehicleSummaryCard vehicle={vehicle} />
           <MileageEstimateCard
             vehicle={vehicle}
             onUpdateMileage={() => setMileageOpen(true)}
-          />
-        </div>
-        <div className="lg:col-span-2 space-y-4">
-          <MaintenanceProgramSection
-            vehicle={vehicle}
-            onMarkDone={() => setMaintenanceDialog({ kind: "create" })}
-          />
-          <VehicleTimelineSection
-            events={vehicle.timelineEvents}
-            onMarkDone={(e) => completeTimelineMutation.mutate(e.id)}
-            onSnooze={(e) => setSnoozeTarget(e)}
-            onSendReminder={(e) => sendReminderMutation.mutate(e.id)}
-          />
-          <LeasingSection vehicleId={vehicle.id} />
-          <VehicleMaintenanceSection
-            records={vehicle.maintenanceRecords}
-            onAdd={() => setMaintenanceDialog({ kind: "create" })}
-            onEdit={(r) =>
-              setMaintenanceDialog({
-                kind: "edit",
-                record: toMaintenanceRecord(r),
-              })
-            }
-            onDelete={(r) => setMaintenanceToDelete(toMaintenanceRecord(r))}
           />
         </div>
       </div>
@@ -206,6 +263,12 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
         open={mileageOpen}
         onOpenChange={setMileageOpen}
         vehicle={vehicle}
+      />
+
+      <AddVehicleNoteDialog
+        open={noteOpen}
+        onOpenChange={setNoteOpen}
+        vehicleId={vehicle.id}
       />
 
       <ConfirmDialog

@@ -62,6 +62,19 @@ export interface VehicleTimelineEvent {
   generatedFromRule: string | null;
 }
 
+export interface VehicleNote {
+  id: string;
+  vehicleId: string;
+  occurredAt: string;
+  body: string;
+  authorUserId: string;
+}
+
+export interface AddVehicleNotePayload {
+  occurredAt: string;
+  body: string;
+}
+
 export interface VehicleDetail {
   id: string;
   customerId: string;
@@ -86,6 +99,7 @@ export interface VehicleDetail {
   updatedAt: string;
   maintenanceRecords: VehicleMaintenance[];
   timelineEvents: VehicleTimelineEvent[];
+  notes: VehicleNote[];
 }
 
 export type VehicleProgramItemStatus =
@@ -229,6 +243,17 @@ export const vehiclesApi = {
   ): Promise<VehicleDetail> {
     const { data } = await apiClient.post<VehicleDetail>(
       `/api/vehicles/${id}/mileage`,
+      payload,
+    );
+    return data;
+  },
+
+  async addNote(
+    id: string,
+    payload: AddVehicleNotePayload,
+  ): Promise<VehicleDetail> {
+    const { data } = await apiClient.post<VehicleDetail>(
+      `/api/vehicles/${id}/notes`,
       payload,
     );
     return data;
