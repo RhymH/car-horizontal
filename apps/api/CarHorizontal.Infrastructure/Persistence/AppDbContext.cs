@@ -41,6 +41,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<LeadFollowUp> LeadFollowUps => Set<LeadFollowUp>();
     public DbSet<LeadImportBatch> LeadImportBatches => Set<LeadImportBatch>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<VehicleNote> VehicleNotes => Set<VehicleNote>();
     public DbSet<VehicleMileageReading> VehicleMileageReadings => Set<VehicleMileageReading>();
     public DbSet<VehicleProgramOverride> VehicleProgramOverrides => Set<VehicleProgramOverride>();
     public DbSet<VehicleModel> VehicleModels => Set<VehicleModel>();
