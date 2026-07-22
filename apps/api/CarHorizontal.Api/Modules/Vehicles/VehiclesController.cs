@@ -32,13 +32,17 @@ public class VehiclesController : ControllerBase
     }
 
     /// <summary>
-    /// Decodes a VIN locally to help pre-fill a vehicle form (make, year, country).
-    /// Returns IsValid=false with a reason when the VIN is malformed.
+    /// Decodes a VIN to help pre-fill a vehicle form. The configured provider
+    /// enriches make/model/year/fuel/engine/transmission (NHTSA), degrading to a
+    /// local structural decode when offline. Returns IsValid=false with a reason
+    /// when the VIN is malformed.
     /// </summary>
     [HttpPost("decode-vin")]
-    public ActionResult<VinDecodeResponseDto> DecodeVin([FromBody] DecodeVinRequestDto request)
+    public async Task<ActionResult<VinDecodeResponseDto>> DecodeVin(
+        [FromBody] DecodeVinRequestDto request,
+        CancellationToken ct)
     {
-        var r = _vinDecoder.Decode(request.Vin);
+        var r = await _vinDecoder.DecodeAsync(request.Vin, ct);
         return Ok(new VinDecodeResponseDto
         {
             Vin = r.Vin,
@@ -47,6 +51,18 @@ public class VehiclesController : ControllerBase
             Country = r.Country,
             ModelYear = r.ModelYear,
             Wmi = r.Wmi,
+            Model = r.Model,
+            FuelType = r.FuelType,
+            BodyClass = r.BodyClass,
+            VehicleType = r.VehicleType,
+            EngineDisplacementL = r.EngineDisplacementL,
+            EngineCylinders = r.EngineCylinders,
+            TransmissionStyle = r.TransmissionStyle,
+            Manufacturer = r.Manufacturer,
+            PlantCountry = r.PlantCountry,
+            Series = r.Series,
+            Trim = r.Trim,
+            Source = r.Source,
             Error = r.Error
         });
     }

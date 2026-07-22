@@ -51,7 +51,7 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddScoped<IMileageEstimationService, MileageEstimationService>();
 
-        services.AddSingleton<IVinDecoder, VinDecoder>();
+        AddVinDecoding(services, configuration);
 
         services.AddScoped<INotificationGenerator, NotificationGenerator>();
 
@@ -60,6 +60,48 @@ public static class InfrastructureServiceCollectionExtensions
         AddMessaging(services, configuration);
 
         return services;
+    }
+
+    /// <summary>
+    /// Registers the VIN decoder. The provider is chosen via configuration
+    /// (<c>VinDecoder:Provider</c>): "nhtsa" (default) enriches over the network
+    /// and falls back to the offline decoder on any failure; "offline" is fully
+    /// local (no network dependency). An unknown provider fails fast — same idiom
+    /// as messaging. The offline decoder is always registered because the online
+    /// provider composes it for structural validation and fallback.
+    /// </summary>
+    private static void AddVinDecoding(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton<OfflineVinDecoder>();
+
+        var provider = (configuration["VinDecoder:Provider"] ?? "nhtsa").Trim().ToLowerInvariant();
+        switch (provider)
+        {
+            case "offline":
+                services.AddSingleton<IVinDecoder>(sp => sp.GetRequiredService<OfflineVinDecoder>());
+                break;
+
+            case "nhtsa":
+                // A single long-lived HttpClient is the correct lifetime here (one
+                // stable host); Timeout bounds the graceful-degradation window.
+                var baseUrl = configuration["VinDecoder:Nhtsa:BaseUrl"]
+                    ?? "https://vpic.nhtsa.dot.gov/api/vehicles/";
+                var http = new HttpClient
+                {
+                    BaseAddress = new Uri(baseUrl),
+                    Timeout = TimeSpan.FromSeconds(5)
+                };
+                services.AddSingleton<IVinDecoder>(sp => new NhtsaVinDecoder(
+                    http,
+                    sp.GetRequiredService<OfflineVinDecoder>(),
+                    sp.GetRequiredService<ILogger<NhtsaVinDecoder>>()));
+                break;
+
+            default:
+                throw new NotSupportedException(
+                    $"VIN decoder provider '{provider}' is not implemented. " +
+                    "Use 'offline' or 'nhtsa'.");
+        }
     }
 
     /// <summary>

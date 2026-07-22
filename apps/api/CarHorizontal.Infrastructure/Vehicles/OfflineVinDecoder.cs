@@ -9,8 +9,12 @@ namespace CarHorizontal.Infrastructure.Vehicles;
 /// enforcing it would reject most French/German VINs. Make comes from a
 /// World-Manufacturer-Identifier table focused on the FR/EU market; the model
 /// year from position 10, disambiguated by position 7.
+///
+/// This decoder is also the structural gate and the graceful-degradation
+/// fallback for online providers (see <see cref="NhtsaVinDecoder"/>), which is
+/// why <see cref="Decode"/> stays synchronous and is exposed on the concrete type.
 /// </summary>
-public class VinDecoder : IVinDecoder
+public class OfflineVinDecoder : IVinDecoder
 {
     // Codes I, O, Q are never used in a VIN.
     private const string AllowedChars = "ABCDEFGHJKLMNPRSTUVWXYZ0123456789";
@@ -20,8 +24,15 @@ public class VinDecoder : IVinDecoder
 
     private readonly TimeProvider _clock;
 
-    public VinDecoder(TimeProvider? clock = null) => _clock = clock ?? TimeProvider.System;
+    public OfflineVinDecoder(TimeProvider? clock = null) => _clock = clock ?? TimeProvider.System;
 
+    public Task<VinDecodeResult> DecodeAsync(string? vin, CancellationToken ct = default) =>
+        Task.FromResult(Decode(vin));
+
+    /// <summary>
+    /// Structural decode, synchronous and network-free. Used directly by the
+    /// offline provider and as the validation gate / fallback by online providers.
+    /// </summary>
     public VinDecodeResult Decode(string? vin)
     {
         var raw = (vin ?? string.Empty).Trim().ToUpperInvariant().Replace(" ", "");
@@ -47,7 +58,8 @@ public class VinDecoder : IVinDecoder
             Wmi = wmi,
             Make = make,
             Country = country,
-            ModelYear = year
+            ModelYear = year,
+            Source = "offline"
         };
     }
 

@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-07-22 — Décodage VIN enrichi via NHTSA vPIC (en ligne + repli hors-ligne)
+
+**Fonctionnalité**
+Le décodeur VIN ne sortait que **marque + année + pays** (table WMI hors-ligne). Ajout d'un provider **NHTSA vPIC** (API publique, gratuite, sans clé) qui décode en plus **modèle, motorisation (carburant), cylindrée, nb de cylindres, type de boîte, carrosserie, usine…**. Le bouton « Décoder » pré-remplit désormais aussi **modèle**, **type de moteur** et **boîte de vitesses** (mapping carburant→enum, style de boîte→enum ; ne remplit un champ moteur/boîte que s'il est vide, n'écrase jamais une valeur catalogue/utilisateur).
+
+**Architecture**
+- `IVinDecoder` devient **async** (`DecodeAsync`). `VinDecoder` renommé `OfflineVinDecoder` (garde un `Decode` synchrone = validation structurelle + repli).
+- `NhtsaVinDecoder` : valide d'abord **hors-ligne** (un VIN malformé ne part jamais sur le réseau), appelle vPIC, et **dégrade gracieusement** vers le résultat hors-ligne sur tout échec (timeout 5 s, statut non-200, JSON illisible). Marque/pays gardent les libellés FR curés ; vPIC comble le reste.
+- Provider choisi par config `VinDecoder:Provider` (`nhtsa` par défaut, `offline` pour couper le réseau), même idiome que le messaging. `HttpClient` singleton (hôte stable).
+- `VinDecodeResult`/DTO élargis + champ `Source` (`offline`/`nhtsa`).
+
+**Comment y accéder / tester**
+- Portal : Véhicules → « Nouveau véhicule » → VIN → **« Décoder »** → marque/modèle/année/motorisation se remplissent (toast « VIN décodé (NHTSA) » avec récap). VIN inconnu de vPIC ou hors-ligne → repli hors-ligne (marque + année).
+- API : `POST /api/vehicles/decode-vin` `{ "vin": "1HGCM82633A004352" }` → renvoie `make, model, modelYear, fuelType, engineDisplacementL, transmissionStyle, bodyClass, source, …`.
+- Couper le réseau : mettre `VinDecoder:Provider = "offline"` (ou laisser le repli automatique jouer).
+
+---
+
 ## 2026-06-13 — Saisie kilométrage par le client (portail)
 
 **Fonctionnalité**
