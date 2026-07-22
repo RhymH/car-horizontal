@@ -199,7 +199,7 @@ export function NotificationsView() {
                 className={cn(
                   "rounded-lg border border-l-4 border-border bg-card p-4 shadow-sm transition-colors",
                   SEVERITY_STYLES[n.severity],
-                  n.status === "New" && "bg-accent/30",
+                  n.status === "New" && "bg-muted/50",
                 )}
               >
                 <div className="flex flex-wrap items-center gap-2">
