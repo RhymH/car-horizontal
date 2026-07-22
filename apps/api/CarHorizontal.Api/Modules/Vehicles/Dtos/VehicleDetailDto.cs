@@ -25,6 +25,16 @@ public class VehicleDetailDto
     public DateTime UpdatedAt { get; set; }
     public IReadOnlyList<VehicleMaintenanceDto> MaintenanceRecords { get; set; } = Array.Empty<VehicleMaintenanceDto>();
     public IReadOnlyList<VehicleTimelineEventDto> TimelineEvents { get; set; } = Array.Empty<VehicleTimelineEventDto>();
+    public IReadOnlyList<VehicleNoteDto> Notes { get; set; } = Array.Empty<VehicleNoteDto>();
+}
+
+public class VehicleNoteDto
+{
+    public Guid Id { get; set; }
+    public Guid VehicleId { get; set; }
+    public DateTime OccurredAt { get; set; }
+    public string Body { get; set; } = string.Empty;
+    public Guid AuthorUserId { get; set; }
 }
 
 public class VehicleMaintenanceDto

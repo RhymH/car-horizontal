@@ -16,19 +16,22 @@ public class VehiclesController : ControllerBase
     private readonly IValidator<CreateVehicleRequestDto> _createValidator;
     private readonly IValidator<UpdateVehicleRequestDto> _updateValidator;
     private readonly IValidator<UpdateMileageRequestDto> _mileageValidator;
+    private readonly IValidator<AddVehicleNoteRequestDto> _noteValidator;
 
     public VehiclesController(
         IVehicleService vehicles,
         IVinDecoder vinDecoder,
         IValidator<CreateVehicleRequestDto> createValidator,
         IValidator<UpdateVehicleRequestDto> updateValidator,
-        IValidator<UpdateMileageRequestDto> mileageValidator)
+        IValidator<UpdateMileageRequestDto> mileageValidator,
+        IValidator<AddVehicleNoteRequestDto> noteValidator)
     {
         _vehicles = vehicles;
         _vinDecoder = vinDecoder;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
         _mileageValidator = mileageValidator;
+        _noteValidator = noteValidator;
     }
 
     /// <summary>
@@ -119,6 +122,17 @@ public class VehiclesController : ControllerBase
     {
         await _mileageValidator.ValidateAndThrowAsync(request, ct);
         var result = await _vehicles.UpdateMileageAsync(id, request, ct);
+        return Ok(result);
+    }
+
+    [HttpPost("{id:guid}/notes")]
+    public async Task<ActionResult<VehicleDetailDto>> AddNote(
+        Guid id,
+        [FromBody] AddVehicleNoteRequestDto request,
+        CancellationToken ct)
+    {
+        await _noteValidator.ValidateAndThrowAsync(request, ct);
+        var result = await _vehicles.AddNoteAsync(id, request, ct);
         return Ok(result);
     }
 

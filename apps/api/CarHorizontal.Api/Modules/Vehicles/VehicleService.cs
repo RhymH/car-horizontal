@@ -192,6 +192,20 @@ public class VehicleService : IVehicleService
             })
             .ToListAsync(ct);
 
+        var notes = await _db.VehicleNotes
+            .AsNoTracking()
+            .Where(n => n.VehicleId == id)
+            .OrderByDescending(n => n.OccurredAt)
+            .Select(n => new VehicleNoteDto
+            {
+                Id = n.Id,
+                VehicleId = n.VehicleId,
+                OccurredAt = n.OccurredAt,
+                Body = n.Body,
+                AuthorUserId = n.AuthorUserId
+            })
+            .ToListAsync(ct);
+
         return new VehicleDetailDto
         {
             Id = vehicle.Id,
@@ -216,8 +230,32 @@ public class VehicleService : IVehicleService
             CreatedAt = vehicle.CreatedAt,
             UpdatedAt = vehicle.UpdatedAt,
             MaintenanceRecords = maintenance,
-            TimelineEvents = timeline
+            TimelineEvents = timeline,
+            Notes = notes
         };
+    }
+
+    public async Task<VehicleDetailDto> AddNoteAsync(Guid id, AddVehicleNoteRequestDto request, CancellationToken ct = default)
+    {
+        var orgId = _currentUser.OrganizationId
+            ?? throw new UnauthorizedAccessException("Active organization is required.");
+        var userId = _currentUser.UserId
+            ?? throw new UnauthorizedAccessException("Active user is required.");
+
+        var exists = await _db.Vehicles.AnyAsync(v => v.Id == id, ct);
+        if (!exists) throw new KeyNotFoundException($"Vehicle {id} not found.");
+
+        _db.VehicleNotes.Add(new VehicleNote
+        {
+            OrganizationId = orgId,
+            VehicleId = id,
+            OccurredAt = request.OccurredAt == default ? DateTime.UtcNow : request.OccurredAt,
+            Body = request.Body.Trim(),
+            AuthorUserId = userId
+        });
+
+        await _db.SaveChangesAsync(ct);
+        return await GetAsync(id, ct);
     }
 
     public async Task<VehicleDetailDto> CreateAsync(CreateVehicleRequestDto request, CancellationToken ct = default)

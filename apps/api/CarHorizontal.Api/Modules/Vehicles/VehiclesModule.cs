@@ -12,6 +12,7 @@ public static class VehiclesModule
         services.AddScoped<IValidator<CreateVehicleRequestDto>, CreateVehicleRequestValidator>();
         services.AddScoped<IValidator<UpdateVehicleRequestDto>, UpdateVehicleRequestValidator>();
         services.AddScoped<IValidator<UpdateMileageRequestDto>, UpdateMileageRequestValidator>();
+        services.AddScoped<IValidator<AddVehicleNoteRequestDto>, AddVehicleNoteRequestValidator>();
         return services;
     }
 }
