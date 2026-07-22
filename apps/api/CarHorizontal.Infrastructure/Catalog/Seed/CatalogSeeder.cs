@@ -64,6 +64,7 @@ public class CatalogSeeder : ICatalogSeeder
             .Where(m => slugs.Contains(m.Slug))
             .Include(m => m.Programs)
                 .ThenInclude(p => p.Items)
+            .AsSplitQuery()
             .ToDictionaryAsync(m => m.Slug, ct);
 
         var models = 0;

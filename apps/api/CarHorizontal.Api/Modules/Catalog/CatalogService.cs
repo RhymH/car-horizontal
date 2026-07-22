@@ -63,10 +63,12 @@ public class CatalogService : ICatalogService
             .OrderBy(m => m.Make)
             .ThenBy(m => m.Model)
             .ThenBy(m => m.ProductionStartYear)
+            .ThenBy(m => m.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Include(m => m.Programs)
                 .ThenInclude(p => p.Items)
+            .AsSplitQuery()
             .ToListAsync(ct);
 
         return new VehicleModelListResponseDto
@@ -85,6 +87,7 @@ public class CatalogService : ICatalogService
             .Where(m => m.Id == id && m.DeletedAt == null)
             .Include(m => m.Programs.Where(p => p.DeletedAt == null))
                 .ThenInclude(p => p.Items)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(ct);
 
         if (model is null) return null;
