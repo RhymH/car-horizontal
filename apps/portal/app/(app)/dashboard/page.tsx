@@ -56,7 +56,7 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader
-        title={`Bonjour ${greeting} 👋`}
+        title={`Bonjour ${greeting}`}
         description={today.charAt(0).toUpperCase() + today.slice(1)}
         actions={
           <div className="flex items-center gap-2">
@@ -125,7 +125,9 @@ export default function DashboardPage() {
           label="Taux de retour atelier"
           hint="12 derniers mois"
           value={
-            loading ? "—" : `${(data?.kpis.workshopReturnRate ?? 0).toFixed(1)}%`
+            loading
+              ? "—"
+              : `${(data?.kpis.workshopReturnRate ?? 0).toFixed(1)}%`
           }
           href="/loyalty"
           tone="success"

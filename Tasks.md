@@ -1254,7 +1254,7 @@ Avant d'investir Phase 8 trop loin : **Phase 7.5 doit avoir livré au moins T7.5
 ### T111 — Page Dashboard
 - **Files** : `app/(app)/dashboard/page.tsx`, `components/dashboard/KpiCard.tsx`, `components/dashboard/UpcomingRemindersWidget.tsx`, `components/dashboard/OverdueTimelineWidget.tsx`, `components/dashboard/RemindersChart.tsx`, `components/dashboard/LoyaltyChart.tsx`, `components/dashboard/QuickActions.tsx`.
 - **UI explicite** :
-  - **PageHeader** : "Bonjour <Prénom> 👋", date du jour, bouton **QuickActions** dropdown (+ Client, + Véhicule, + Rappel manuel, + Rendez-vous).
+  - **PageHeader** : "Bonjour <Prénom>", date du jour, bouton **QuickActions** dropdown (+ Client, + Véhicule, + Rappel manuel, + Rendez-vous).
   - **Ligne 1 (KPIs)** : 4 KpiCard (gros chiffre, label, mini-trend ▲▼, lien "voir tous").
   - **Ligne 2** :
     - Carte "Rappels à venir" (UpcomingRemindersWidget) : liste 5 items, bouton "Voir tous" + actions inline "Envoyer maintenant".
