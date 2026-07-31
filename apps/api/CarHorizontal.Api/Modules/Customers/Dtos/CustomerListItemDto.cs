@@ -11,6 +11,8 @@ public class CustomerListItemDto
     public string Status { get; set; } = string.Empty;
     public DateTime AcquiredAt { get; set; }
     public string[] Tags { get; set; } = Array.Empty<string>();
+    public Guid? SalespersonUserId { get; set; }
+    public string? SalespersonName { get; set; }
 }
 
 public class CustomersListResponseDto

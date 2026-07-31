@@ -79,6 +79,10 @@ public class CustomerService : ICustomerService
                 c.Status,
                 c.AcquiredAt,
                 c.Tags,
+                c.SalespersonUserId,
+                SalespersonName = c.SalespersonUserId == null
+                    ? null
+                    : _db.Users.Where(u => u.Id == c.SalespersonUserId).Select(u => u.FullName).FirstOrDefault(),
                 VehicleCount = _db.Vehicles.Count(v => v.CustomerId == c.Id)
             })
             .ToListAsync(ct);
@@ -98,6 +102,8 @@ public class CustomerService : ICustomerService
                 Status = x.Status.ToString(),
                 AcquiredAt = x.AcquiredAt,
                 Tags = x.Tags,
+                SalespersonUserId = x.SalespersonUserId,
+                SalespersonName = x.SalespersonName,
                 VehicleCount = x.VehicleCount
             }).ToList()
         };
@@ -109,6 +115,14 @@ public class CustomerService : ICustomerService
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id, ct)
             ?? throw new KeyNotFoundException($"Customer {id} not found.");
+
+        var salespersonName = customer.SalespersonUserId is null
+            ? null
+            : await _db.Users
+                .AsNoTracking()
+                .Where(u => u.Id == customer.SalespersonUserId)
+                .Select(u => u.FullName)
+                .FirstOrDefaultAsync(ct);
 
         var vehicles = await _db.Vehicles
             .AsNoTracking()
@@ -156,6 +170,8 @@ public class CustomerService : ICustomerService
             AcquiredAt = customer.AcquiredAt,
             Status = customer.Status.ToString(),
             Tags = customer.Tags,
+            SalespersonUserId = customer.SalespersonUserId,
+            SalespersonName = salespersonName,
             CreatedAt = customer.CreatedAt,
             UpdatedAt = customer.UpdatedAt,
             Vehicles = vehicles,
@@ -170,6 +186,11 @@ public class CustomerService : ICustomerService
 
         var orgCountryCode = await GetOrgPhoneCountryCodeAsync(orgId, ct);
 
+        if (request.SalespersonUserId.HasValue)
+        {
+            await EnsureSalespersonAsync(orgId, request.SalespersonUserId.Value, ct);
+        }
+
         var customer = new Customer
         {
             OrganizationId = orgId,
@@ -182,7 +203,8 @@ public class CustomerService : ICustomerService
             Notes = NormalizeOptional(request.Notes),
             AcquiredAt = request.AcquiredAt == default ? DateTime.UtcNow : request.AcquiredAt,
             Status = ParseStatus(request.Status),
-            Tags = request.Tags ?? Array.Empty<string>()
+            Tags = request.Tags ?? Array.Empty<string>(),
+            SalespersonUserId = request.SalespersonUserId
         };
 
         _db.Customers.Add(customer);
@@ -210,6 +232,17 @@ public class CustomerService : ICustomerService
         if (request.AcquiredAt.HasValue) customer.AcquiredAt = request.AcquiredAt.Value;
         if (request.Status is not null) customer.Status = ParseStatus(request.Status);
         if (request.Tags is not null) customer.Tags = request.Tags;
+
+        if (request.ClearSalesperson)
+        {
+            customer.SalespersonUserId = null;
+        }
+        else if (request.SalespersonUserId.HasValue
+                 && request.SalespersonUserId.Value != customer.SalespersonUserId)
+        {
+            await EnsureSalespersonAsync(customer.OrganizationId, request.SalespersonUserId.Value, ct);
+            customer.SalespersonUserId = request.SalespersonUserId.Value;
+        }
 
         await _db.SaveChangesAsync(ct);
         return await GetAsync(customer.Id, ct);
@@ -258,6 +291,22 @@ public class CustomerService : ICustomerService
             Summary = interaction.Summary,
             AuthorUserId = interaction.AuthorUserId
         };
+    }
+
+    /// <summary>
+    /// A salesperson must be a member of the customer's organization — the
+    /// caller-supplied id is never trusted on its own.
+    /// </summary>
+    private async Task EnsureSalespersonAsync(Guid orgId, Guid userId, CancellationToken ct)
+    {
+        var isMember = await _db.UserOrganizations
+            .AsNoTracking()
+            .AnyAsync(uo => uo.OrganizationId == orgId && uo.UserId == userId, ct);
+
+        if (!isMember)
+        {
+            throw new KeyNotFoundException($"User {userId} is not a member of this organization.");
+        }
     }
 
     private static string? NormalizeOptional(string? value)

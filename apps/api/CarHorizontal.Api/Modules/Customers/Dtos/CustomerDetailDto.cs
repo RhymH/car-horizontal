@@ -13,6 +13,8 @@ public class CustomerDetailDto
     public DateTime AcquiredAt { get; set; }
     public string Status { get; set; } = string.Empty;
     public string[] Tags { get; set; } = Array.Empty<string>();
+    public Guid? SalespersonUserId { get; set; }
+    public string? SalespersonName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public IReadOnlyList<CustomerVehicleDto> Vehicles { get; set; } = Array.Empty<CustomerVehicleDto>();

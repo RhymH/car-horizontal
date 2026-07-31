@@ -12,4 +12,7 @@ public class CreateCustomerRequestDto
     public DateTime AcquiredAt { get; set; } = DateTime.UtcNow;
     public string Status { get; set; } = "Active";
     public string[] Tags { get; set; } = Array.Empty<string>();
+
+    /// <summary>Optional staff account following this customer commercially.</summary>
+    public Guid? SalespersonUserId { get; set; }
 }
