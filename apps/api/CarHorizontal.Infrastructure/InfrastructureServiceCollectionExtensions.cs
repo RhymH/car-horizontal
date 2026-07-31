@@ -1,8 +1,10 @@
+using CarHorizontal.Domain.Files;
 using CarHorizontal.Domain.Messaging;
 using CarHorizontal.Domain.Notifications;
 using CarHorizontal.Domain.Timeline.Rules;
 using CarHorizontal.Domain.Vehicles;
 using CarHorizontal.Infrastructure.Catalog.Seed;
+using CarHorizontal.Infrastructure.Files;
 using CarHorizontal.Infrastructure.Messaging;
 using CarHorizontal.Infrastructure.Notifications;
 using CarHorizontal.Infrastructure.Persistence;
@@ -56,6 +58,11 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<INotificationGenerator, NotificationGenerator>();
 
         services.AddScoped<ICatalogSeeder, CatalogSeeder>();
+
+        // Stockage des binaires en base pour le MVP ; le traitement d'images est
+        // sans état, donc partageable en singleton.
+        services.AddScoped<IFileStorage, DbFileStorage>();
+        services.AddSingleton<IImageProcessor, SkiaImageProcessor>();
 
         AddMessaging(services, configuration);
 
