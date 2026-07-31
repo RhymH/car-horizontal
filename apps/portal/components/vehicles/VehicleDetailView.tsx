@@ -15,7 +15,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { useCapability } from "@/lib/hooks/useCapabilities";
-import { CAPABILITY_LEASING } from "@/lib/api/capabilities";
+import { CAPABILITY_LEASING, CAPABILITY_SALES } from "@/lib/api/capabilities";
 import {
   vehiclesApi,
   type VehicleMaintenance,
@@ -40,6 +40,7 @@ import { VehicleNotesSection } from "@/components/vehicles/VehicleNotesSection";
 import { AddVehicleNoteDialog } from "@/components/vehicles/AddVehicleNoteDialog";
 import { MaintenanceProgramSection } from "@/components/vehicles/MaintenanceProgramSection";
 import { LeasingSection } from "@/components/leasing/LeasingSection";
+import { SaleSection } from "@/components/sales/SaleSection";
 import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
 import { UpdateMileageDialog } from "@/components/vehicles/UpdateMileageDialog";
 import { MaintenanceFormDialog } from "@/components/maintenance/MaintenanceFormDialog";
@@ -64,6 +65,7 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
   const [tab, setTab] = useState("programme");
 
   const { enabled: leasingEnabled } = useCapability(CAPABILITY_LEASING);
+  const { enabled: salesEnabled } = useCapability(CAPABILITY_SALES);
 
   const detail = useQuery({
     queryKey: queryKeys.vehicles.detail(vehicleId),
@@ -194,6 +196,7 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
                 Notes
                 <TabsBadge>{vehicle.notes.length}</TabsBadge>
               </TabsTrigger>
+              {salesEnabled && <TabsTrigger value="vente">Vente</TabsTrigger>}
               {leasingEnabled && (
                 <TabsTrigger value="leasing">Leasing</TabsTrigger>
               )}
@@ -235,6 +238,15 @@ export function VehicleDetailView({ vehicleId }: { vehicleId: string }) {
                 onAdd={() => setNoteOpen(true)}
               />
             </TabsContent>
+
+            {salesEnabled && (
+              <TabsContent value="vente">
+                <SaleSection
+                  vehicleId={vehicle.id}
+                  onEditVehicle={() => setEditOpen(true)}
+                />
+              </TabsContent>
+            )}
 
             {leasingEnabled && (
               <TabsContent value="leasing">

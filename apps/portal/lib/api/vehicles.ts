@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import type { SaleStatusApi } from "@/lib/api/sales";
 
 export type EngineTypeApi = "Gasoline" | "Diesel" | "Hybrid" | "Electric" | "LPG";
 
@@ -22,6 +23,9 @@ export interface VehicleListItem {
   mileageUpdatedAt: string;
   engineType: EngineTypeApi | null;
   photoFileId: string | null;
+  /** Statut du dossier de vente, null si le véhicule n'est pas commercialisé. */
+  saleStatus: SaleStatusApi | null;
+  askingPrice: number | null;
 }
 
 export interface VehiclesListResponse {
@@ -140,6 +144,8 @@ export interface VehiclesListParams {
   search?: string;
   customerId?: string;
   engineType?: EngineTypeApi | "All";
+  /** Un statut de vente, ou "Any" pour tous les véhicules ayant un dossier. */
+  saleStatus?: SaleStatusApi | "Any";
   yearFrom?: number;
   yearTo?: number;
   page?: number;

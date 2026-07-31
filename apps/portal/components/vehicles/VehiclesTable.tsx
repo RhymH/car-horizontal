@@ -21,6 +21,8 @@ import {
   type EngineTypeApi,
   type VehicleListItem,
 } from "@/lib/api/vehicles";
+import { saleStatusLabels } from "@/lib/api/sales";
+import { SALE_STATUS_TONE, currencyFmt } from "@/components/sales/saleFormat";
 
 const ENGINE_TONE: Record<EngineTypeApi, "success" | "neutral" | "info" | "warning"> = {
   Gasoline: "neutral",
@@ -44,6 +46,8 @@ export interface VehiclesTableProps {
   onView: (row: VehicleListItem) => void;
   onEdit: (row: VehicleListItem) => void;
   onDelete: (row: VehicleListItem) => void;
+  /** Affiche la colonne commerciale — seulement quand le module Vente est activé. */
+  showSale?: boolean;
 }
 
 export function VehiclesTable({
@@ -58,10 +62,12 @@ export function VehiclesTable({
   onView,
   onEdit,
   onDelete,
+  showSale = false,
 }: VehiclesTableProps) {
   const allChecked = rows.length > 0 && rows.every((r) => selection.has(r.id));
   const someChecked = !allChecked && rows.some((r) => selection.has(r.id));
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const columnCount = showSale ? 10 : 9;
 
   const toggleAll = () => {
     const next = new Set(selection);
@@ -102,6 +108,7 @@ export function VehiclesTable({
                 Km
               </TableHead>
               <TableHead className="hidden xl:table-cell">Énergie</TableHead>
+              {showSale && <TableHead className="text-right">Vente</TableHead>}
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
@@ -117,7 +124,7 @@ export function VehiclesTable({
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={9}
+                  colSpan={columnCount}
                   className="h-24 text-center text-sm text-muted-foreground"
                 >
                   Aucun résultat.
@@ -183,6 +190,24 @@ export function VehiclesTable({
                         </span>
                       )}
                     </TableCell>
+                    {showSale && (
+                      <TableCell className="text-right">
+                        {row.saleStatus ? (
+                          <div className="flex flex-col items-end gap-0.5">
+                            <StatusBadge tone={SALE_STATUS_TONE[row.saleStatus]}>
+                              {saleStatusLabels[row.saleStatus]}
+                            </StatusBadge>
+                            {row.askingPrice != null && (
+                              <span className="text-xs tabular-nums text-muted-foreground">
+                                {currencyFmt.format(row.askingPrice)}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs italic text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <RowActions
                         actions={[

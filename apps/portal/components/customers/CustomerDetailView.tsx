@@ -26,6 +26,7 @@ import { AddInteractionDialog } from "@/components/customers/AddInteractionDialo
 import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
 import { CustomerTimelineTab } from "@/components/customers/CustomerTimelineTab";
 import { CustomerLeadTab } from "@/components/leads/CustomerLeadTab";
+import { CustomerSaleInquiriesSection } from "@/components/sales/CustomerSaleInquiriesSection";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "2-digit",
@@ -180,6 +181,7 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
                 vehicles={customer.vehicles}
                 onAddVehicle={() => setAddVehicleOpen(true)}
               />
+              <CustomerSaleInquiriesSection customerId={customer.id} />
               <CustomerInteractionsSection
                 interactions={customer.recentInteractions}
                 onAdd={() => setInteractionOpen(true)}

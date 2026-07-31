@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { SectionCard } from "@/components/ui/SectionCard";
+import { CustomerSaleInquiriesSection } from "@/components/sales/CustomerSaleInquiriesSection";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -230,6 +231,10 @@ export function CustomerLeadTab({
         </div>
 
         <div className="space-y-4 lg:col-span-2">
+          {/* Ce sur quoi le prospect s'est positionné : c'est le contexte qui
+              manque au commercial au moment de relancer. */}
+          <CustomerSaleInquiriesSection customerId={customerId} />
+
           <SectionCard
             title="Relances planifiées"
             description={

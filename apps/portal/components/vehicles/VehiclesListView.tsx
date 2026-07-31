@@ -24,13 +24,27 @@ import {
   type VehicleDetail,
   type VehicleListItem,
 } from "@/lib/api/vehicles";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { engineTypes } from "@/lib/schemas/vehicle";
+import { useCapability } from "@/lib/hooks/useCapabilities";
+import { CAPABILITY_SALES } from "@/lib/api/capabilities";
 import { queryKeys } from "@/lib/query/keys";
 import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 import { VehiclesTable } from "@/components/vehicles/VehiclesTable";
 import { VehicleFormDialog } from "@/components/vehicles/VehicleFormDialog";
 
 type EngineFilter = EngineTypeApi | "All";
+
+/** Filtre commercial : "Any" = tous les véhicules ayant un dossier de vente. */
+type SaleFilter = "All" | "Any" | "ForSale" | "Reserved" | "Sold";
+
+const SALE_FILTERS: { value: SaleFilter; label: string }[] = [
+  { value: "All", label: "Tous" },
+  { value: "ForSale", label: "En vente" },
+  { value: "Reserved", label: "Réservés" },
+  { value: "Sold", label: "Vendus" },
+  { value: "Any", label: "Tout le stock" },
+];
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
 const PAGE_SIZE_ITEMS = Object.fromEntries(
@@ -57,12 +71,14 @@ export function VehiclesListView() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [engineFilter, setEngineFilter] = useState<EngineFilter>("All");
+  const [saleFilter, setSaleFilter] = useState<SaleFilter>("All");
   const [yearFrom, setYearFrom] = useState<string>("All");
   const [yearTo, setYearTo] = useState<string>("All");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(25);
   const [selection, setSelection] = useState<Set<string>>(new Set());
   const debouncedSearch = useDebouncedValue(search, 300);
+  const { enabled: salesEnabled } = useCapability(CAPABILITY_SALES);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<VehicleDetail | null>(null);
@@ -83,6 +99,7 @@ export function VehiclesListView() {
     () => ({
       search: debouncedSearch || undefined,
       engineType: engineFilter,
+      saleStatus: saleFilter === "All" ? undefined : saleFilter,
       yearFrom: yearFrom === "All" ? undefined : Number(yearFrom),
       yearTo: yearTo === "All" ? undefined : Number(yearTo),
       page,
@@ -90,7 +107,7 @@ export function VehiclesListView() {
       sortBy: "licensePlate" as const,
       sortDir: "asc" as const,
     }),
-    [debouncedSearch, engineFilter, yearFrom, yearTo, page, pageSize],
+    [debouncedSearch, engineFilter, saleFilter, yearFrom, yearTo, page, pageSize],
   );
 
   const list = useQuery({
@@ -123,6 +140,7 @@ export function VehiclesListView() {
   const reset = () => {
     setSearch("");
     setEngineFilter("All");
+    setSaleFilter("All");
     setYearFrom("All");
     setYearTo("All");
     setPage(1);
@@ -151,6 +169,7 @@ export function VehiclesListView() {
   const hasFilters =
     !!debouncedSearch ||
     engineFilter !== "All" ||
+    saleFilter !== "All" ||
     yearFrom !== "All" ||
     yearTo !== "All";
 
@@ -166,6 +185,24 @@ export function VehiclesListView() {
           </Button>
         }
       />
+
+      {salesEnabled && (
+        <Tabs
+          value={saleFilter}
+          onValueChange={(v) => {
+            setSaleFilter(v as SaleFilter);
+            resetPagination();
+          }}
+        >
+          <TabsList size="sm">
+            {SALE_FILTERS.map((f) => (
+              <TabsTrigger key={f.value} value={f.value}>
+                {f.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <Input
@@ -300,6 +337,7 @@ export function VehiclesListView() {
           onView={onView}
           onEdit={onEdit}
           onDelete={(row) => setDeleteTarget(row)}
+          showSale={salesEnabled}
         />
       )}
 

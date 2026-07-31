@@ -94,4 +94,14 @@ export const queryKeys = {
     all: () => ["leasing"] as const,
     byVehicle: (vehicleId: string) => ["leasing", "by-vehicle", vehicleId] as const,
   },
+  sales: {
+    all: () => ["sales"] as const,
+    listings: (filters?: Record<string, unknown>) =>
+      ["sales", "listings", filters ?? {}] as const,
+    dossier: (vehicleId: string) => ["sales", "dossier", vehicleId] as const,
+    photo: (photoId: string, thumbnail: boolean) =>
+      ["sales", "photo", photoId, thumbnail] as const,
+    customerInquiries: (customerId: string) =>
+      ["sales", "customer-inquiries", customerId] as const,
+  },
 } as const;
