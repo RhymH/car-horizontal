@@ -47,10 +47,10 @@ export function OrgSwitcher() {
     <Popover>
       <PopoverTrigger
         render={
-          <Button variant="outline" size="sm" className="gap-2">
-            <Building2 className="size-3.5" />
+          <Button variant="outline" className="gap-2 px-3">
+            <Building2 className="size-4 text-muted-foreground" />
             <span className="max-w-[160px] truncate">{active.name}</span>
-            <ChevronsUpDown className="size-3.5 text-muted-foreground" />
+            <ChevronsUpDown className="size-4 text-muted-foreground" />
           </Button>
         }
       />

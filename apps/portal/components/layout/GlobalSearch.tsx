@@ -121,13 +121,13 @@ export function GlobalSearch() {
     <>
       <Button
         variant="outline"
-        size="sm"
         onClick={openSearch}
-        className="gap-2 text-muted-foreground"
+        aria-label="Rechercher"
+        className="gap-2 px-3 text-muted-foreground sm:w-60 sm:justify-start"
       >
-        <Search className="size-3.5" />
+        <Search className="size-4" />
         <span className="hidden sm:inline">Rechercher…</span>
-        <kbd className="ml-2 hidden items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-flex">
+        <kbd className="ml-auto hidden items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground sm:inline-flex">
           ⌘K
         </kbd>
       </Button>

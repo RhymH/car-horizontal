@@ -35,11 +35,11 @@ export function UserMenu() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-9 rounded-full"
+            className="rounded-full p-0"
             aria-label="Menu utilisateur"
           >
-            <Avatar className="size-8">
-              <AvatarFallback className="text-xs">
+            <Avatar className="size-9">
+              <AvatarFallback className="text-xs font-medium">
                 {initials(me.fullName || me.email)}
               </AvatarFallback>
             </Avatar>

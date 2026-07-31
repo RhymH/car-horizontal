@@ -13,6 +13,7 @@ export function Topbar() {
       <div className="ml-auto flex items-center gap-2">
         <GlobalSearch />
         <NotificationBell />
+        <div aria-hidden className="mx-1 h-5 w-px bg-border" />
         <OrgSwitcher />
         <UserMenu />
       </div>

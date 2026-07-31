@@ -19,7 +19,7 @@ export function MobileNav() {
         render={
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             className="lg:hidden"
             aria-label="Ouvrir la navigation"
           >
