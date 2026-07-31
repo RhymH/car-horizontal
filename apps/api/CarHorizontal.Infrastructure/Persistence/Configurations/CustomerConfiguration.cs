@@ -26,5 +26,6 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
             .HasFilter("\"ExternalRef\" IS NOT NULL AND \"DeletedAt\" IS NULL");
         builder.HasIndex(c => new { c.OrganizationId, c.Phone });
         builder.HasIndex(c => new { c.OrganizationId, c.Email });
+        builder.HasIndex(c => new { c.OrganizationId, c.SalespersonUserId });
     }
 }

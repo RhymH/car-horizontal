@@ -16,6 +16,12 @@ public class Customer : OrganizationEntityBase
     public string[] Tags { get; set; } = Array.Empty<string>();
 
     /// <summary>
+    /// Staff account following this customer/prospect commercially. Optional:
+    /// null means nobody is assigned. Must be a member of the same organization.
+    /// </summary>
+    public Guid? SalespersonUserId { get; set; }
+
+    /// <summary>
     /// Identity key of this record in an external source (bulk import). Unique
     /// per organization when set — re-importing the same file updates instead
     /// of duplicating.
