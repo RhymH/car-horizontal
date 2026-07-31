@@ -1,9 +1,11 @@
 "use client"; // Les error boundaries doivent être des Client Components.
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
+import { Activity, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConnectionIssueScreen } from "@/components/system/ConnectionIssueScreen";
+import { isNetworkError } from "@/lib/diagnostics/outage";
 
 export default function AppError({
   error,
@@ -12,9 +14,27 @@ export default function AppError({
   error: Error & { digest?: string };
   unstable_retry: () => void;
 }) {
+  // Une erreur réseau part directement sur le diagnostic : inutile de faire
+  // deviner à l'utilisateur si c'est sa connexion ou nos serveurs.
+  const [showDiagnostics, setShowDiagnostics] = useState(() =>
+    isNetworkError(error),
+  );
+
   useEffect(() => {
     console.error(error);
   }, [error]);
+
+  if (showDiagnostics) {
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <ConnectionIssueScreen
+          onRetry={() => unstable_retry()}
+          onDismiss={() => setShowDiagnostics(false)}
+          dismissLabel="Voir l'erreur technique"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-svh items-center justify-center px-6">
@@ -30,12 +50,25 @@ export default function AppError({
             Réf. {error.digest}
           </p>
         )}
-        <div className="mt-5 flex justify-center gap-2">
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Button onClick={() => unstable_retry()}>Réessayer</Button>
-          <Button variant="outline" render={<Link href="/dashboard" />}>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link href="/dashboard" />}
+          >
             Tableau de bord
           </Button>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-3"
+          onClick={() => setShowDiagnostics(true)}
+        >
+          <Activity className="size-4" />
+          Diagnostiquer la connexion
+        </Button>
       </div>
     </div>
   );

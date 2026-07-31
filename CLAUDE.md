@@ -153,6 +153,16 @@ Hangfire + `Hangfire.PostgreSql`. Dashboard sur `/hangfire` (auth requise).
 Workers : envoi de SMS/emails, génération de rappels depuis les règles,
 purges.
 
+### Sondes de santé
+
+`Modules/Health` — anonymes, sans effet de bord, consommées par l'écran de
+diagnostic du portail (et utilisables par un load balancer) :
+
+| Route               | Rôle                                                        |
+|---------------------|-------------------------------------------------------------|
+| `GET /api/health`       | Liveness. Aucune dépendance touchée, toujours 200.      |
+| `GET /api/health/ready` | Readiness. Teste la base (3 s max) ; 503 si injoignable. |
+
 ---
 
 ## 🎨 Architecture portal (Next.js 16, App Router)
@@ -183,6 +193,15 @@ purges.
   mais pas de bascule de langue MVP.
 - Graphiques : Chart.js pour le simple, ECharts pour les time series
   complexes.
+- **Panne réseau = écran de diagnostic**, jamais une erreur muette.
+  `lib/diagnostics/connectivity.ts` sonde, dans l'ordre, l'accès internet de
+  l'utilisateur (site externe en `no-cors`), le serveur Next
+  (`/api/diagnostics`) et l'API (depuis le navigateur *et* depuis le serveur
+  Next), puis conclut de quel côté est le problème. `lib/diagnostics/outage.ts`
+  décide de l'ouverture : deux échecs réseau consécutifs signalés par
+  l'intercepteur axios, ou un évènement `offline`. Points d'entrée :
+  `<ConnectionOutageOverlay>` (monté dans les providers), `app/error.tsx`,
+  `app/global-error.tsx` et la page publique `/diagnostic`.
 
 > ⚠️ Next.js 16 : conventions, APIs et structure peuvent différer des
 > connaissances de ton entraînement. Avant d'écrire du Next, consulte
@@ -213,6 +232,7 @@ purges.
 | Clé                                | Description                                    |
 |------------------------------------|------------------------------------------------|
 | `NEXT_PUBLIC_API_URL`              | URL absolue de l'API (`http://localhost:5080`) |
+| `NEXT_PUBLIC_CONNECTIVITY_PROBES`  | Optionnel. URLs externes (séparées par des virgules) utilisées par l'écran de diagnostic pour tester l'accès internet. Défaut : gstatic / cloudflare / bing. |
 
 ---
 

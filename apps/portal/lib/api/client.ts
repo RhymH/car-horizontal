@@ -6,6 +6,11 @@ import axios, {
 import { apiBaseUrl } from "@/lib/env";
 import { tokenStore } from "@/lib/auth/tokens";
 import { refreshTokens } from "@/lib/auth/refresh-flow";
+import {
+  isNetworkError,
+  reportNetworkFailure,
+  reportNetworkSuccess,
+} from "@/lib/diagnostics/outage";
 
 type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 
@@ -29,8 +34,18 @@ apiClient.interceptors.request.use((config) => {
 });
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Le serveur a répondu : toute panne réseau en cours est terminée.
+    reportNetworkSuccess();
+    return response;
+  },
   async (error: AxiosError) => {
+    // Aucune réponse HTTP = panne réseau potentielle (API tombée, wifi coupé,
+    // proxy bloquant). Alimente l'écran de diagnostic.
+    if (isNetworkError(error)) {
+      reportNetworkFailure();
+    }
+
     const original = error.config as RetriableConfig | undefined;
     if (
       error.response?.status === 401 &&
