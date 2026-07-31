@@ -11,6 +11,7 @@ using CarHorizontal.Domain.Entities.Messaging;
 using CarHorizontal.Domain.Entities.Notifications;
 using CarHorizontal.Domain.Entities.Organizations;
 using CarHorizontal.Domain.Entities.Reminders;
+using CarHorizontal.Domain.Entities.Sales;
 using CarHorizontal.Domain.Entities.Timeline;
 using CarHorizontal.Domain.Entities.Vehicles;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +45,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<VehicleNote> VehicleNotes => Set<VehicleNote>();
     public DbSet<VehicleMileageReading> VehicleMileageReadings => Set<VehicleMileageReading>();
     public DbSet<VehicleProgramOverride> VehicleProgramOverrides => Set<VehicleProgramOverride>();
+    public DbSet<VehicleRegistrationDetail> VehicleRegistrationDetails => Set<VehicleRegistrationDetail>();
     public DbSet<VehicleModel> VehicleModels => Set<VehicleModel>();
     public DbSet<MaintenanceProgram> MaintenancePrograms => Set<MaintenanceProgram>();
     public DbSet<MaintenanceProgramItem> MaintenanceProgramItems => Set<MaintenanceProgramItem>();
@@ -59,6 +61,12 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<LeasingContract> LeasingContracts => Set<LeasingContract>();
+
+    public DbSet<VehicleSaleListing> VehicleSaleListings => Set<VehicleSaleListing>();
+    public DbSet<VehicleSalePriceChange> VehicleSalePriceChanges => Set<VehicleSalePriceChange>();
+    public DbSet<VehicleSaleChannelPost> VehicleSaleChannelPosts => Set<VehicleSaleChannelPost>();
+    public DbSet<VehicleSalePhoto> VehicleSalePhotos => Set<VehicleSalePhoto>();
+    public DbSet<VehicleSaleInquiry> VehicleSaleInquiries => Set<VehicleSaleInquiry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
