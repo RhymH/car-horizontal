@@ -3,6 +3,7 @@ using CarHorizontal.Api.Common;
 using CarHorizontal.Api.Modules.Vehicles.Dtos;
 using CarHorizontal.Domain.Entities.Catalog;
 using CarHorizontal.Domain.Entities.Customers;
+using CarHorizontal.Domain.Entities.Sales;
 using CarHorizontal.Domain.Entities.Vehicles;
 using CarHorizontal.Domain.Vehicles;
 using CarHorizontal.Infrastructure.Persistence;
@@ -65,6 +66,21 @@ public class VehicleService : IVehicleService
             query = query.Where(v => v.EngineType == engineEnum);
         }
 
+        // Filtre commercial : on passe par une sous-requête sur les dossiers de vente
+        // plutôt que par une jointure, pour laisser la pagination sur les véhicules.
+        if (!string.IsNullOrWhiteSpace(request.SaleStatus))
+        {
+            if (string.Equals(request.SaleStatus, "Any", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(v => _db.VehicleSaleListings.Any(l => l.VehicleId == v.Id));
+            }
+            else if (Enum.TryParse<VehicleSaleStatus>(request.SaleStatus, ignoreCase: true, out var saleStatus))
+            {
+                query = query.Where(v => _db.VehicleSaleListings
+                    .Any(l => l.VehicleId == v.Id && l.Status == saleStatus));
+            }
+        }
+
         if (request.YearFrom.HasValue) query = query.Where(v => v.Year >= request.YearFrom.Value);
         if (request.YearTo.HasValue) query = query.Where(v => v.Year <= request.YearTo.Value);
 
@@ -95,7 +111,11 @@ public class VehicleService : IVehicleService
                 v.CurrentMileage,
                 v.MileageUpdatedAt,
                 v.EngineType,
-                v.PhotoFileId
+                v.PhotoFileId,
+                Sale = _db.VehicleSaleListings
+                    .Where(l => l.VehicleId == v.Id)
+                    .Select(l => new { l.Status, l.AskingPrice })
+                    .FirstOrDefault()
             })
             .ToListAsync(ct);
 
@@ -116,7 +136,9 @@ public class VehicleService : IVehicleService
                 CurrentMileage = x.CurrentMileage,
                 MileageUpdatedAt = x.MileageUpdatedAt,
                 EngineType = x.EngineType?.ToString(),
-                PhotoFileId = x.PhotoFileId
+                PhotoFileId = x.PhotoFileId,
+                SaleStatus = x.Sale?.Status.ToString(),
+                AskingPrice = x.Sale?.AskingPrice
             }).ToList()
         };
     }

@@ -5,6 +5,13 @@ public class VehiclesListRequestDto
     public string? Search { get; set; }
     public Guid? CustomerId { get; set; }
     public string? EngineType { get; set; }
+
+    /// <summary>
+    /// Filtre commercial : un statut de <c>VehicleSaleStatus</c>, « Any » pour tous
+    /// les véhicules ayant un dossier de vente, ou null pour ne pas filtrer.
+    /// </summary>
+    public string? SaleStatus { get; set; }
+
     public int? YearFrom { get; set; }
     public int? YearTo { get; set; }
     public int Page { get; set; } = 1;

@@ -16,6 +16,7 @@ using CarHorizontal.Api.Modules.Notifications;
 using CarHorizontal.Api.Modules.Organizations;
 using CarHorizontal.Api.Modules.Portal;
 using CarHorizontal.Api.Modules.Reminders;
+using CarHorizontal.Api.Modules.Sales;
 using CarHorizontal.Api.Modules.Timeline;
 using CarHorizontal.Api.Modules.Vehicles;
 using CarHorizontal.Infrastructure;
@@ -94,6 +95,7 @@ builder.Services.AddCarHorizontalLoyalty();
 builder.Services.AddCarHorizontalNotifications();
 builder.Services.AddCarHorizontalCapabilities();
 builder.Services.AddCarHorizontalLeasing();
+builder.Services.AddCarHorizontalSales();
 builder.Services.AddCarHorizontalOrganizations();
 builder.Services.AddCarHorizontalPortal();
 

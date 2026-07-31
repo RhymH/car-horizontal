@@ -21,4 +21,10 @@ public class VehicleListItemDto
     public DateTime MileageUpdatedAt { get; set; }
     public string? EngineType { get; set; }
     public Guid? PhotoFileId { get; set; }
+
+    /// <summary>Statut du dossier de vente, null quand le véhicule n'est pas commercialisé.</summary>
+    public string? SaleStatus { get; set; }
+
+    /// <summary>Prix affiché du dossier de vente, le cas échéant.</summary>
+    public decimal? AskingPrice { get; set; }
 }
