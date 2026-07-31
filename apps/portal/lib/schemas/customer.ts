@@ -46,6 +46,8 @@ export const customerFormSchema = z.object({
     .min(1, { error: "Date d'acquisition requise." }),
   status: z.enum(customerStatuses),
   tags: z.array(z.string().min(1).max(40)),
+  // "" = aucun commercial assigné (le Select ne peut pas porter null).
+  salespersonUserId: z.string().optional(),
 });
 
 export type CustomerFormValues = z.infer<typeof customerFormSchema>;

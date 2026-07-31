@@ -5,6 +5,7 @@ import {
   type UseFormRegister,
   type FieldErrors,
 } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,8 +23,13 @@ import {
   type CustomerFormValues,
   type CustomerStatus,
 } from "@/lib/schemas/customer";
+import { leadsApi } from "@/lib/api/leads";
+import { queryKeys } from "@/lib/query/keys";
 import { Controller } from "react-hook-form";
 import { cn } from "@/lib/utils";
+
+/** Le Select ne peut pas porter "" : sentinelle pour « aucun commercial ». */
+export const NO_SALESPERSON = "none";
 
 export interface CustomerFormProps {
   register: UseFormRegister<CustomerFormValues>;
@@ -32,6 +38,13 @@ export interface CustomerFormProps {
 }
 
 export function CustomerForm({ register, control, errors }: CustomerFormProps) {
+  const team = useQuery({
+    queryKey: queryKeys.leads.team(),
+    queryFn: ({ signal }) => leadsApi.team(signal),
+    staleTime: 5 * 60 * 1000,
+  });
+  const members = team.data ?? [];
+
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <Field label="Nom complet *" error={errors.fullName?.message} span={2}>
@@ -67,6 +80,41 @@ export function CustomerForm({ register, control, errors }: CustomerFormProps) {
                 {customerStatuses.map((s) => (
                   <SelectItem key={s} value={s}>
                     {customerStatusLabels[s]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </Field>
+
+      <Field
+        label="Commercial"
+        span={2}
+        hint="Optionnel — le membre de l'équipe qui suit ce client."
+      >
+        <Controller
+          control={control}
+          name="salespersonUserId"
+          render={({ field }) => (
+            <Select
+              items={{
+                [NO_SALESPERSON]: "Non assigné",
+                ...Object.fromEntries(
+                  members.map((m) => [m.userId, m.fullName]),
+                ),
+              }}
+              value={field.value || NO_SALESPERSON}
+              onValueChange={(v) => field.onChange(v ?? NO_SALESPERSON)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_SALESPERSON}>Non assigné</SelectItem>
+                {members.map((m) => (
+                  <SelectItem key={m.userId} value={m.userId}>
+                    {m.fullName}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -13,6 +13,8 @@ export interface CustomerListItem {
   status: CustomerStatusApi;
   acquiredAt: string;
   tags: string[];
+  salespersonUserId: string | null;
+  salespersonName: string | null;
 }
 
 export interface CustomersListResponse {
@@ -54,6 +56,8 @@ export interface CustomerDetail {
   acquiredAt: string;
   status: CustomerStatusApi;
   tags: string[];
+  salespersonUserId: string | null;
+  salespersonName: string | null;
   createdAt: string;
   updatedAt: string;
   vehicles: CustomerVehicle[];
@@ -81,9 +85,13 @@ export interface CreateCustomerPayload {
   acquiredAt: string;
   status: CustomerStatusApi;
   tags: string[];
+  salespersonUserId?: string;
 }
 
-export type UpdateCustomerPayload = Partial<CreateCustomerPayload>;
+export type UpdateCustomerPayload = Partial<CreateCustomerPayload> & {
+  /** Unassign the salesperson — an omitted `salespersonUserId` leaves it unchanged. */
+  clearSalesperson?: boolean;
+};
 
 export interface AddInteractionPayload {
   type: InteractionTypeApi;

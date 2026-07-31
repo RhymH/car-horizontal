@@ -107,6 +107,7 @@ export function CustomersTable({
               <TableHead className="hidden sm:table-cell text-center">
                 Véhicules
               </TableHead>
+              <TableHead className="hidden lg:table-cell">Commercial</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="hidden xl:table-cell">Acquis le</TableHead>
               <TableHead className="w-12"></TableHead>
@@ -116,7 +117,7 @@ export function CustomersTable({
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={`s-${i}`}>
-                  <TableCell colSpan={8}>
+                  <TableCell colSpan={9}>
                     <Skeleton className="h-6 w-full" />
                   </TableCell>
                 </TableRow>
@@ -124,7 +125,7 @@ export function CustomersTable({
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={8}
+                  colSpan={9}
                   className="h-24 text-center text-sm text-muted-foreground"
                 >
                   Aucun résultat.
@@ -155,6 +156,9 @@ export function CustomersTable({
                     </TableCell>
                     <TableCell className="hidden sm:table-cell text-center tabular-nums">
                       {row.vehicleCount}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell text-muted-foreground">
+                      {row.salespersonName ?? "—"}
                     </TableCell>
                     <TableCell>
                       <StatusBadge tone={STATUS_TONE[row.status]}>

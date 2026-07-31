@@ -26,7 +26,10 @@ import {
   type CustomerFormValues,
 } from "@/lib/schemas/customer";
 import { queryKeys } from "@/lib/query/keys";
-import { CustomerForm } from "@/components/customers/CustomerForm";
+import {
+  CustomerForm,
+  NO_SALESPERSON,
+} from "@/components/customers/CustomerForm";
 import { extractApiErrorMessage } from "@/lib/api/errors";
 
 type Mode =
@@ -52,6 +55,7 @@ function buildDefaults(status: CustomerStatusApi = "Active"): CustomerFormValues
     acquiredAt: new Date().toISOString().slice(0, 10),
     status,
     tags: [],
+    salespersonUserId: NO_SALESPERSON,
   };
 }
 
@@ -67,6 +71,7 @@ function toFormValues(customer: CustomerDetail): CustomerFormValues {
     acquiredAt: customer.acquiredAt.slice(0, 10),
     status: customer.status,
     tags: customer.tags,
+    salespersonUserId: customer.salespersonUserId ?? NO_SALESPERSON,
   };
 }
 
@@ -95,6 +100,10 @@ export function CustomerFormDialog({
 
   const mutation = useMutation({
     mutationFn: async (values: CustomerFormValues) => {
+      const salespersonUserId =
+        values.salespersonUserId && values.salespersonUserId !== NO_SALESPERSON
+          ? values.salespersonUserId
+          : undefined;
       const payload = {
         fullName: values.fullName.trim(),
         email: emptyToUndefined(values.email),
@@ -106,9 +115,13 @@ export function CustomerFormDialog({
         acquiredAt: new Date(values.acquiredAt).toISOString(),
         status: values.status,
         tags: values.tags,
+        salespersonUserId,
       };
       if (isEdit) {
-        return customersApi.update(mode.customer.id, payload);
+        return customersApi.update(mode.customer.id, {
+          ...payload,
+          clearSalesperson: salespersonUserId === undefined,
+        });
       }
       return customersApi.create(payload);
     },

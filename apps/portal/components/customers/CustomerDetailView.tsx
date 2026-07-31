@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Copy, Loader2, Mail, MapPin, Phone } from "lucide-react";
+import { Copy, Loader2, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import { SectionCard } from "@/components/ui/SectionCard";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Button } from "@/components/ui/button";
@@ -133,6 +133,12 @@ export function CustomerDetailView({ customerId }: { customerId: string }) {
                     .join(", ") || null}
                   icon={<MapPin className="size-3.5" />}
                 />
+                <InfoRow
+                  label="Commercial"
+                  value={customer.salespersonName}
+                  icon={<UserRound className="size-3.5" />}
+                  emptyLabel="Non assigné"
+                />
                 <div>
                   <dt className="text-xs uppercase tracking-wide text-muted-foreground">
                     Acquis le
@@ -239,11 +245,13 @@ function InfoRow({
   value,
   icon,
   onCopy,
+  emptyLabel = "Non renseigné",
 }: {
   label: string;
   value: string | null;
   icon?: React.ReactNode;
   onCopy?: () => void;
+  emptyLabel?: string;
 }) {
   return (
     <div>
@@ -253,7 +261,7 @@ function InfoRow({
       <dd className="flex items-center gap-2">
         {icon && <span className="text-muted-foreground">{icon}</span>}
         <span className={value ? "" : "text-muted-foreground"}>
-          {value ?? "Non renseigné"}
+          {value ?? emptyLabel}
         </span>
         {value && onCopy && (
           <Button
